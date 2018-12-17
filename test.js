@@ -1,5 +1,7 @@
+const { join } = require( "path" );
 const assert = require( "assert" );
-const { items, buckets, bucket, item } = require( "./storage" );
+const data = join( __dirname, "test-data" );
+const { items, buckets, bucket, item } = require( "./storage" )( data );
 
 function runTests( fixtureName, fixture ) {
 

@@ -8,8 +8,6 @@ const readFile = util.promisify( fs.readFile );
 const unlink = util.promisify( fs.unlink );
 const { rmDirForce } = require( "./storage-lib" );
 
-const data = join( __dirname, "data" );
-
 class Thing {
 
     constructor( path, props ) {
@@ -63,12 +61,6 @@ class Item extends Thing {
 
 class Bucket extends Thing {
 
-    constructor( path ) {
-
-        super( path || data );
-
-    }
-
     async items() {
 
         const items = await readdir( this.path, { withFileTypes: true } );
@@ -117,13 +109,16 @@ class Bucket extends Thing {
 
 }
 
-const root = new Bucket( "" );
+module.exports = rootPath => {
 
-module.exports = {
+    const root = new Bucket( rootPath );
+    return {
 
-    items: root.items.bind( root ),
-    item: root.item.bind( root ),
-    buckets: root.buckets.bind( root ),
-    bucket: root.bucket.bind( root )
+        items: root.items.bind( root ),
+        item: root.item.bind( root ),
+        buckets: root.buckets.bind( root ),
+        bucket: root.bucket.bind( root )
+
+    };
 
 };
