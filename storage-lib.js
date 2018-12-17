@@ -12,23 +12,15 @@ async function rmDirForce( dir ) {
     const files = await readdir( dir );
     await Promise.all( files.map( async file => {
 
-        try {
+        const p = path.join( dir, file );
+        const stat = await lstat( p );
+        if ( stat.isDirectory() ) {
 
-            const p = path.join( dir, file );
-            const stat = await lstat( p );
-            if ( stat.isDirectory() ) {
+            await rmDirForce( p );
 
-                await rmDirForce( p );
+        } else {
 
-            } else {
-
-                await unlink(p);
-
-            }
-
-        } catch (err) {
-
-            console.error(err);
+            await unlink(p);
 
         }
 
