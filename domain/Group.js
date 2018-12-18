@@ -1,5 +1,4 @@
 const Command = require( "./Command" );
-const Member = require( "./Member" );
 const dateid = require( "./dateid" );
 
 const groupDetailsSymbol = Symbol( "Group details" );
@@ -15,15 +14,17 @@ module.exports = class Group {
 
     }
 
-    createMember( options ) {
+    createMember( details ) {
 
-        const { name } = options;
+        const { name } = details;
         if ( !name ) throw new Error( "No name specified" );
-        const id = dateid();
-        const { members = {} } = ( this[ groupDetailsSymbol ] );
+        const id = details.id || dateid();
+        const member = { ...details };
+        delete member.id;
+        const { members = {} } = this[ groupDetailsSymbol ];
         this[ groupDetailsSymbol ].members = members;
-        const member = new Member( id, options );
-        members[ id ] = member.toJSON();
+        if ( id in members ) throw new Error( "Member already exists" );
+        members[ id ] = member;
         return member;
 
     }

@@ -12,8 +12,7 @@ async function run() {
     try {
 
         const andrew = await cteam.createMember( { name: "Andrew" } );
-        console.log( andrew );
-        console.log( andrew.id, andrew.name, andrew.details );
+        andrew.logo = "http://whatever.com/thing.jpg";
         const members = cteam.members;
         console.log( members );
         await cteam.saveCommand.invoke();
