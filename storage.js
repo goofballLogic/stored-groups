@@ -13,7 +13,7 @@ class Thing {
     constructor( path, props ) {
 
         this.path = path;
-        this.name = basename( path, extname( path ) );
+        this.name = decodeURIComponent( basename( path, extname( path ) ) );
         Object.assign( this, props );
         Object.freeze( this );
 
@@ -77,13 +77,13 @@ class Bucket extends Thing {
 
     async bucket( name ) {
 
-        return new Bucket( join( this.path, name ) );
+        return new Bucket( join( this.path, encodeURIComponent( name ) ) );
 
     }
 
     async item( name ) {
 
-        return new Item( join( this.path, `${name}.json` ), this );
+        return new Item( join( this.path, `${encodeURIComponent( name )}.json` ), this );
 
     }
 
