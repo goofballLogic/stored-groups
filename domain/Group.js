@@ -2,30 +2,56 @@ const Command = require( "./Command" );
 const dateid = require( "./dateid" );
 
 const groupDetailsSymbol = Symbol( "Group details" );
+const persistedGroupDetailsSymbol = Symbol( "Group details persisted" );
 
 const clone = x => JSON.parse( JSON.stringify( x ) );
 
+function createNamedMapItem( site, mapName, details ) {
+
+    const { name } = details;
+    if ( !name ) throw new Error( "No name specified" );
+    const id = details.id || dateid();
+    const item = { ...details };
+    delete item.id;
+    const map = site[ mapName ] || {};
+    site[ mapName ] = map;
+    if ( id in map ) throw new Error( "Item already exists" );
+    map[ id ] = item;
+    return { ...item, id };
+
+}
+
 module.exports = class Group {
 
-    constructor( bucket, details ) {
+    constructor( bucket, details, isPersisted = false ) {
 
         this.bucket = bucket;
         this[ groupDetailsSymbol ] = details || {};
+        this[ persistedGroupDetailsSymbol ] = isPersisted ? clone( details ) : {};
+
+    }
+
+    createSeries( details ) {
+
+        return createNamedMapItem( this[ groupDetailsSymbol ], "series", details );
 
     }
 
     createMember( details ) {
 
-        const { name } = details;
-        if ( !name ) throw new Error( "No name specified" );
-        const id = details.id || dateid();
-        const member = { ...details };
-        delete member.id;
-        const { members = {} } = this[ groupDetailsSymbol ];
-        this[ groupDetailsSymbol ].members = members;
-        if ( id in members ) throw new Error( "Member already exists" );
-        members[ id ] = member;
-        return member;
+        return createNamedMapItem( this[ groupDetailsSymbol ], "members", details );
+
+    }
+
+    async updateTimeSeries( series, when, details ) {
+
+        const { id } = series;
+        const { series: seriesMap } = this[ persistedGroupDetailsSymbol ];
+        if ( !( seriesMap && id in seriesMap ) )
+            throw new Error( "Series doesn't exist. Did you forget to save the Group first?" )
+        const item = await this.bucket.item( id );
+        await item.replacePropertyValue( when, details );
+        return await item.content();
 
     }
 
@@ -60,6 +86,7 @@ module.exports = class Group {
             const details = await this.bucket.item( "details" );
             await details.content( this[ groupDetailsSymbol ] );
             this[ groupDetailsSymbol ] = await details.content();
+            this[ persistedGroupDetailsSymbol ] = clone( this[ groupDetailsSymbol ] );
 
         } );
 
@@ -79,7 +106,7 @@ module.exports = class Group {
             content = {};
 
         }
-        return new Group( bucket, content );
+        return new Group( bucket, content, true );
 
     }
 

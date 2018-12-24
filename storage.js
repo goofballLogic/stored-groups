@@ -46,14 +46,32 @@ class Item extends Thing {
 
     async content( data ) {
 
-        if ( !data )
-            return JSON.parse( await readFile( this.path ) );
-        else {
+        if ( !data ) {
+
+            try {
+
+                return JSON.parse( await readFile( this.path ) );
+
+            } catch( err ) {
+
+                if ( err.code === "ENOENT" ) return undefined;
+
+            }
+
+        } else {
 
             await this.bucket.ensureExists();
             await writeFile( this.path, JSON.stringify( data ) );
 
         }
+
+    }
+
+    async replacePropertyValue( propName, value ) {
+
+        const data = await this.content() || {};
+        data[ propName ] = value;
+        await this.content( data );
 
     }
 

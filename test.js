@@ -3,27 +3,6 @@ const data = join( __dirname, "test-data" );
 const assert = require( "assert" );
 const { items, buckets, bucket, item } = require( "./storage" )( data );
 
-function runTests( fixtureName, fixture ) {
-
-    console.log( fixtureName, "\n" );
-    Object.keys( fixture )
-        .filter( x => typeof fixture[ x ] === "function" )
-        .forEach( async key => {
-
-            try {
-
-                await fixture[ key ]();
-                console.log( `OK ${key}` );
-
-            } catch( err ) {
-
-                console.error( `ERROR ${key}\n${err.stack}` );
-
-            }
-
-        });
-}
-
 runTests( "Storage tests", {
 
     async listItems() {
@@ -94,6 +73,20 @@ runTests( "Storage tests", {
 
     },
 
+    async replaceItemPropertyValue() {
+
+        const bucketJ = await bucket( "j" );
+        const itemK = await bucketJ.item( "k" );
+        await itemK.replacePropertyValue( "thing1", [ 1, 2, 3 ] );
+        await itemK.replacePropertyValue( "thing2", [ 2, 3, 4 ] );
+        await itemK.replacePropertyValue( "thing3", [ 3, 4, 5, ] );
+        await itemK.replacePropertyValue( "thing1", undefined );
+        const result = await itemK.content();
+        assert.deepStrictEqual( result, { "thing2": [ 2, 3, 4 ], "thing3": [ 3, 4, 5 ] } );
+        await bucketJ.delete();
+
+    },
+
     async deleteItem() {
 
         const itemI = await item( "i" );
@@ -107,3 +100,25 @@ runTests( "Storage tests", {
     }
 
 } );
+
+function runTests( fixtureName, fixture ) {
+
+    console.log( fixtureName, "\n" );
+    Object.keys( fixture )
+        .filter( x => typeof fixture[ x ] === "function" )
+        .forEach( async key => {
+
+            try {
+
+                await fixture[ key ]();
+                console.log( `OK ${key}` );
+
+            } catch( err ) {
+
+                console.error( `ERROR ${key}\n${err.stack}` );
+
+            }
+
+        });
+
+}

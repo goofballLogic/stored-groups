@@ -15,7 +15,23 @@ async function run() {
         andrew.logo = "http://whatever.com/thing.jpg";
         const members = cteam.members;
         console.log( members );
-        await cteam.saveCommand.invoke();
+        console.log( "Andrew created" );
+
+        const scores = cteam.createSeries( { name: "scores" } );
+        console.log( "Series created:" );
+        console.log( scores );
+
+        console.log( await cteam.saveCommand.invoke() );
+
+        const when = Date.UTC( 2018, 03, 27 );
+        const seriesData = await cteam.updateTimeSeries( scores, when, [
+
+            { member: { id: andrew.id }, tag: "age", value: 27 },
+            { member: { id: andrew.id }, tag: "colour", value: "#77BBFF" }
+
+        ] );
+        console.log( "Time series updated with data points:" );
+        console.log( JSON.stringify( seriesData, null, 3 ) );
 
     } catch( err ) {
 
