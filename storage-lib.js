@@ -1,10 +1,10 @@
-const util = require( "util" );
+const { promisify } = require( "util" );
 const path = require( "path" );
 const fs = require( "fs" );
-const readdir = util.promisify( fs.readdir );
-const lstat = util.promisify( fs.lstat );
-const unlink = util.promisify( fs.unlink );
-const rmdir = util.promisify( fs.rmdir );
+const readdir = promisify( fs.readdir );
+const lstat = promisify( fs.lstat );
+const unlink = promisify( fs.unlink );
+const rmdir = promisify( fs.rmdir );
 
 async function rmDirForce( dir ) {
 

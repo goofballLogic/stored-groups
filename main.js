@@ -21,6 +21,9 @@ async function run() {
         console.log( "Series created:" );
         console.log( scores );
 
+        cteam.setValue( "logo", "http://www.stuff.com/img.png" );
+        console.log( cteam );
+
         console.log( await cteam.saveCommand.invoke() );
 
         const when = Date.UTC( 2018, 03, 27 );

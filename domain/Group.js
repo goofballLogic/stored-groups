@@ -67,6 +67,20 @@ module.exports = class Group {
 
     }
 
+    setValue( key, value ) {
+
+        const details = this[ groupDetailsSymbol ];
+        details.values = { ...details.values, [ key ]: value };
+
+    }
+
+    getValue( key ) {
+
+        const details = this[ groupDetailsSymbol ];
+        return details.values && details.values[ key ];
+
+    }
+
     get members() {
 
         return clone( this[ groupDetailsSymbol ].members || {} );

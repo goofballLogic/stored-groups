@@ -30,6 +30,7 @@ class Item extends Thing {
 
     }
 
+    // delete this item
     async delete() {
 
         try {
@@ -44,9 +45,10 @@ class Item extends Thing {
 
     }
 
+    // retrieve or store content
     async content( data ) {
 
-        if ( !data ) {
+        if ( typeof data === "undefined" ) {
 
             try {
 
@@ -67,6 +69,7 @@ class Item extends Thing {
 
     }
 
+    // retrieve update a property and store content
     async replacePropertyValue( propName, value ) {
 
         const data = await this.content() || {};
@@ -79,6 +82,7 @@ class Item extends Thing {
 
 class Bucket extends Thing {
 
+    // list of Items in this bucket (but not buckets contained within this bucket)
     async items() {
 
         const items = await readdir( this.path, { withFileTypes: true } );
@@ -86,6 +90,7 @@ class Bucket extends Thing {
 
     }
 
+    // list of Buckets in this bucket
     async buckets() {
 
         const items = await readdir( this.path, { withFileTypes: true } );
@@ -93,24 +98,28 @@ class Bucket extends Thing {
 
     }
 
+    // create a named bucket within this bucket
     async bucket( name ) {
 
         return new Bucket( join( this.path, encodeURIComponent( name ) ) );
 
     }
 
+    // create a named item within this bucket
     async item( name ) {
 
         return new Item( join( this.path, `${encodeURIComponent( name )}.json` ), this );
 
     }
 
+    // ensure that this bucket exists
     async ensureExists() {
 
         await mkdir( this.path, { recursive: true } );
 
     }
 
+    // delete this bucket
     async delete() {
 
         try {
@@ -127,6 +136,7 @@ class Bucket extends Thing {
 
 }
 
+// the module exposts a bucket representing the root of the storage container
 module.exports = rootPath => {
 
     const root = new Bucket( rootPath );
