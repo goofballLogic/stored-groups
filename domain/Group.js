@@ -75,7 +75,11 @@ module.exports = class Group {
 
     get deleteCommand() {
 
-        return new Command( "DELETE_TEAM", `Delete team: ${this.name}`, () => this.bucket.delete() );
+        return new Command( "DELETE_TEAM", `Delete team: ${this.name}`, async () => {
+
+            this.bucket.delete();
+
+        } );
 
     }
 
