@@ -45,13 +45,48 @@ module.exports = class Group {
 
     async updateTimeSeries( series, when, details ) {
 
+        when = Number( when );
         const { id } = series;
         const { series: seriesMap } = this[ persistedGroupDetailsSymbol ];
         if ( !( seriesMap && id in seriesMap ) )
-            throw new Error( "Series doesn't exist. Did you forget to save the Group first?" )
-        const item = await this.bucket.item( id );
+            throw new Error( "Series doesn't exist. Did you forget to save the Group first?" );
+        const year = ( new Date( when ) ).getUTCFullYear();
+        const item = await this.bucket.item( `${id}_${year}` );
         await item.replacePropertyValue( when, details );
-        return await item.content();
+        return ( await item.content() )[ when ];
+
+    }
+
+    async queryTimeSeries( series, min, max ) {
+
+        const { id } = series;
+        const { series: seriesMap } = this[ persistedGroupDetailsSymbol ];
+        if ( !( seriesMap && id in seriesMap ) )
+            return undefined;
+        const minYear = ( new Date( min ) ).getUTCFullYear();
+        const maxYear = ( new Date( max ) ).getUTCFullYear();
+        const items = [];
+        for( var year = minYear; year <= maxYear; year++ ) {
+
+            items.push( this.bucket.item( `${id}_${year}` ) );
+
+        }
+        const yearItems = await Promise.all( items );
+        const yearData = await Promise.all( yearItems.map( item => item.content() ) );
+        const results = {};
+        for( var year of yearData ) {
+
+            for( var when in year ) {
+
+                when = Number( when );
+                if ( when < min ) continue;
+                if ( when > max ) continue;
+                results[ when ] = year[ when ];
+
+            }
+
+        }
+        return results;
 
     }
 
