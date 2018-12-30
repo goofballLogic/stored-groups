@@ -1,27 +1,38 @@
 const { join } = require( "path" );
+const assert = require( "assert" );
 const data = join( __dirname, "data" );
-const storage = require( "./storage" )( data );
+const storage = require( "./storage/file/storage" )( data );
 const { listGroups, createGroup } = require( "./domain" )( storage );
 
 async function run() {
 
     // list available groups
     const groups = await listGroups();
-    console.log( groups.map( g => `${g.name} (${g.id})` ) );
+    assert.deepStrictEqual(
+        [ 'The B sides (1234_asdf)', 'The A team! (2345_qwer)' ],
+        groups.map( g => `${g.name} (${g.id})` )
+    );
+    console.log( "OK list teams using listGroups" );
 
     // create a new group
     const cteam = await createGroup( { name: "It's the C team but we're lovely people!" } );
-    console.log( cteam.id, cteam.name );
 
     try {
 
+        assert.strictEqual( "It's the C team but we're lovely people!", cteam.name );
+        assert( /^\d{13}_.{9}$/.test( cteam.id ), `Unexpected id format: ${cteam.id}` );
+        console.log( "OK create team using createGroup" );
+
         // create team member andrew
         const andrew = await cteam.createMember( { name: "Andrew" } );
-        console.log( "Andrew created" );
+        console.log( "OK create team member using createMember" );
 
         // add a logo property
         andrew.logo = "http://whatever.com/thing.jpg";
 
+console.log( JSON.stringify( andrew ) );
+console.log( JSON.stringify( cteam.members ) );
+throw new Error();
         // list team members
         const members = cteam.members;
         console.log( members );
