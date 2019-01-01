@@ -43,6 +43,23 @@ module.exports = class Group {
 
     }
 
+    updateMember( { id }, details ) {
+
+        if ( !id ) throw new Error( "No member id specified" );
+        const members = this[ groupDetailsSymbol ].members;
+        if ( !( members && members[ id ] ) ) throw new Error( `Not found ${id}` );
+        const member = members[ id ];
+        for( const prop in details ) {
+
+            if ( typeof details[ prop ] === "undefined" )
+                delete member[ prop ];
+            else
+                member[ prop ] = clone( details[ prop ] );
+
+        }
+        return clone( member );
+    }
+
     async updateTimeSeries( series, when, details ) {
 
         when = Number( when );
@@ -119,6 +136,18 @@ module.exports = class Group {
     get members() {
 
         return clone( this[ groupDetailsSymbol ].members || {} );
+
+    }
+
+    get series() {
+
+        return clone( this[ groupDetailsSymbol ].series || {} );
+
+    }
+
+    get values() {
+
+        return clone( this[ groupDetailsSymbol ].values || {} );
 
     }
 
