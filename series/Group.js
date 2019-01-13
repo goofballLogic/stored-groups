@@ -4,6 +4,7 @@ const ID = Symbol( "id" );
 const DETAILS = Symbol( "details" );
 const ITEMS = Symbol( "items" );
 const GROUP = Symbol( "group" );
+const PARTITION_SIZE = Symbol( "partition-size" );
 
 const clone = x => x && JSON.parse( JSON.stringify( x ) );
 
@@ -84,6 +85,26 @@ module.exports = storage => {
 
     }
 
+    class IndexedSeries extends Series {
+
+        constructor( group, id, partitionSize, items = [] ) {
+
+            super( group, id, items );
+            this[ PARTITION_SIZE ] = partitionSize;
+
+        }
+
+        async addAt( indexPoint, value ) {
+
+            const existing = ( await this.get( indexPoint ) ) || [];
+            const updated = [].concat( existing, value );
+            updated.id = indexPoint;
+            await this.set( updated );
+
+        }
+
+    }
+
     class Group {
 
         constructor( details ) {
@@ -129,6 +150,12 @@ module.exports = storage => {
         async loadSeries( seriesId ) {
 
             return await Series.load( this, seriesId );
+
+        }
+
+        async createIndexedSeries( seriesId, partitionSize ) {
+
+            return new IndexedSeries( this, seriesId );
 
         }
 
