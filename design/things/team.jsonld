@@ -1,0 +1,17 @@
+{
+  "@context": "https://raw.githubusercontent.com/goofballLogic/OpenTeamSpace/master/public/context.jsonld?2",
+  "@type": "Team",
+  "logo": "http://app.openteamspace.com/img/triangular.png",
+  "members": [
+    {
+      "1547415662840_p5dfxwnsz": {
+        "@type": "Person",
+        "familyName": "Gibson",
+        "givenName": "Andrew",
+        "jobTitle": "Principal Engineer"
+      }
+    }
+  ],
+  "color": "#FF0044",
+  "name": "The Pretenders"
+}
