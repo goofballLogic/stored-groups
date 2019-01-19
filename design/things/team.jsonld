@@ -1,6 +1,6 @@
 {
   "@context": [
-    "https://raw.githubusercontent.com/goofballLogic/OpenTeamSpace/master/public/context.jsonld",
+    "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
     {
       "@base": "https://app.openteamspace.com/team/",
       "members": {
