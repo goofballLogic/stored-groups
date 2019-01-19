@@ -1,0 +1,13 @@
+{
+    "@context": {
+        "@version": 1.1,
+        "@vocab": "https://taxonomy.openteamspace.com#",
+        "ots": "https://taxonomy.openteamspace.com#",
+        "so": "http://schema.org/",
+        "color": "ots:color",
+        "Person": "so:Person",
+        "familyName": "so:familyName",
+        "givenName": "so:givenName",
+        "jobTitle": "so:jobTitle"
+    }
+}
