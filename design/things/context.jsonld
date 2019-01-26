@@ -37,6 +37,9 @@
         },
         "failScore": {
             "@type": "xs:int"
+        },
+        "score": {
+            "@type": "xs:int"
         }
     }
 }
