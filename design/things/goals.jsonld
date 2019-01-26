@@ -1,0 +1,35 @@
+{
+    "@context": [
+        "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
+        {
+            "@base": "https://app.openteamspace.com/teams/1547415662840_p5dfso3nsz/",
+            "goals": {
+                "@container": "@index"
+            }
+        }
+    ],
+    "@id": "goals",
+    "@type": "Goals",
+    "goals": {
+        "2018-01-02T15:32:11Z": {
+            "@type": "Goal",
+            "@id": "goals/1547415662840_k39sjd2k5",
+            "description": "This week we want to focus on build quality",
+            "priorities": [
+                {
+                    "@type": "Priority",
+                    "@id": "priorities/1547415662840_329dhf2ld",
+                    "measurement": "measurements/1547415662840_d92jdlskf",
+                    "passScore": 3,
+                    "failScore": -5
+                },
+                {
+                    "@type": "Priority",
+                    "@id": "priorities/1547415662840_39sldh1jd",
+                    "measurement": "measurements/1547415662840_39sj1kdj4",
+                    "pass": 2
+                }
+            ]
+        }
+    }
+}

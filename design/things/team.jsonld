@@ -18,6 +18,12 @@
       "familyName": "Gibson",
       "givenName": "Andrew",
       "jobTitle": "Principal Engineer"
+    },
+    "people/1547415662840_d82jdkf92": {
+      "@type": "Person",
+      "familyName": "McStravog",
+      "givenName": "Steven",
+      "jobTitle": "Senior Developer"
     }
   },
   "name": "The Pretenders"

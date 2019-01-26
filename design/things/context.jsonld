@@ -23,6 +23,15 @@
         "measurement": {
             "@type": "@id"
         },
+        "person": {
+            "@type": "@id"
+        },
+        "goal": {
+            "@type": "@id"
+        },
+        "priority": {
+            "@type": "@id"
+        },
         "passScore": {
             "@type": "xs:int"
         },

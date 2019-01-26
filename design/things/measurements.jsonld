@@ -30,7 +30,7 @@
       "@type": "Measurement",
       "name": "Keep the build green",
       "description": "The build pipeline should be fixed as soon as any failures occur and should not be allowed to remain broken with nobody fixing it.",
-      "specificMeasurement": "The pipeline must be green at least in any given four hour period.",
+      "specificMeasurement": "The pipeline must be green at least once in any given four hour period.",
       "dateCreated": "2018-01-02T15:25:39Z",
       "replacee": "measurements/1547415662840_dk38s9fj3"
     }
