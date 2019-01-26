@@ -10,6 +10,7 @@
         "givenName": "so:givenName",
         "jobTitle": "so:jobTitle",
         "name": "so:name",
-        "description": "so:description"
+        "description": "so:description",
+        "dateCreated": "so:dateCreated"
     }
 }
