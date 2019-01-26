@@ -1,10 +1,10 @@
 {
     "@context": {
         "@version": 1.1,
-        "@vocab": "https://taxonomy.openteamspace.com#",
-        "ots": "https://taxonomy.openteamspace.com#",
+        "@vocab": "https://vocab.openteamspace.com#",
+        "ots": "https://vocab.openteamspace.com#",
         "so": "http://schema.org/",
-        "xs": "http://www.w3.org/2001/XMLSchema",
+        "xs": "http://www.w3.org/2001/XMLSchema/",
         "Person": "so:Person",
         "familyName": "so:familyName",
         "givenName": "so:givenName",
