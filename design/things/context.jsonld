@@ -11,6 +11,14 @@
         "jobTitle": "so:jobTitle",
         "name": "so:name",
         "description": "so:description",
-        "dateCreated": "so:dateCreated"
+        "dateCreated": "so:dateCreated",
+        "replacee": {
+            "@id": "so:replacee",
+            "@type": "@id"
+        },
+        "replacer": {
+            "@id": "so:replacer",
+            "@type": "@id"
+        }
     }
 }
