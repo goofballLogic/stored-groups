@@ -4,7 +4,7 @@
         "@vocab": "https://taxonomy.openteamspace.com#",
         "ots": "https://taxonomy.openteamspace.com#",
         "so": "http://schema.org/",
-        "color": "ots:color",
+        "xs": "http://www.w3.org/2001/XMLSchema",
         "Person": "so:Person",
         "familyName": "so:familyName",
         "givenName": "so:givenName",
@@ -19,6 +19,15 @@
         "replacer": {
             "@id": "so:replacer",
             "@type": "@id"
+        },
+        "measurement": {
+            "@type": "@id"
+        },
+        "passScore": {
+            "@type": "xs:int"
+        },
+        "failScore": {
+            "@type": "xs:int"
         }
     }
 }
