@@ -8,6 +8,8 @@
         "Person": "so:Person",
         "familyName": "so:familyName",
         "givenName": "so:givenName",
-        "jobTitle": "so:jobTitle"
+        "jobTitle": "so:jobTitle",
+        "name": "so:name",
+        "description": "so:description"
     }
 }

@@ -1,0 +1,21 @@
+{
+  "@context": [
+    "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
+    {
+      "@base": "https://app.openteamspace.com/teams/1547415662840_p5dfso3nsz/",
+      "measurements": {
+        "@container": "@id"
+      }
+    }
+  ],
+  "@id": "measurements",
+  "@type": "Measurements",
+  "measurements": {
+    "measurements/1547415662840_dk38s9fj3": {
+      "@type": "Measurement",
+      "name": "Keep the build green",
+      "description": "The build pipeline should be fixed as soon as any failures occur and should not be allowed to remain broken with nobody fixing it.",
+      "specificMeasurement": "The pipeline must be green at least once a day."
+    }
+  }
+}
