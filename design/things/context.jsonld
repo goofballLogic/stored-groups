@@ -40,6 +40,9 @@
         },
         "score": {
             "@type": "xs:int"
+        },
+        "index": {
+            "@container": "@id"
         }
     }
 }

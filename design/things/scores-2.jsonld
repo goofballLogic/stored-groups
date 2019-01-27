@@ -1,0 +1,33 @@
+{
+    "@context": [
+        "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
+        {
+            "@base": "https://app.openteamspace.com/teams/1547415662840_p5dfso3nsz/"
+        }
+    ],
+    "@id": "scores",
+    "@type": [
+        "Scores",
+        "Series"
+    ],
+    "index": {
+        "2018-01-02T15:33:11Z": {
+            "@type": "ScoreSet",
+            "@id": "scoreSets/1547415662840_k39sjd2k5",
+            "description": "The team did ok this week. Nice work!",
+            "dateCreated": "2018-01-02T15:33:11Z",
+            "scores": [
+                {
+                    "@type": "Score",
+                    "@id": "score/1547415662840_58d92jdk5",
+                    "goal": "goals/1547415662840_k39sjd2k5",
+                    "priority": "priorities/1547415662840_329dhf2ld",
+                    "measurement": "measurements/1547415662840_d92jdlskf",
+                    "person": "people/1547415662840_p5dfxwnsz",
+                    "score": 5,
+                    "description": "Finally looked after the pipeline!"
+                }
+            ]
+        }
+    }
+}

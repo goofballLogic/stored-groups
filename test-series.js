@@ -7,9 +7,10 @@ const { Group } = require( "./series/Group" )( storage );
 async function run() {
 
     // create team with details
-    const details = { name: "The non starters" };
-    const team = new Group( details );
-    assert.deepStrictEqual( details.name, team.get( "name" ) );
+    const name = "The non starters";
+    const team = new Group();
+    team.set( "name", name );
+    assert.deepStrictEqual( [ name ], team.get( "name" ) );
     await team.save();
 
     try {

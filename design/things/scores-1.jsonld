@@ -2,15 +2,15 @@
     "@context": [
         "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
         {
-            "@base": "https://app.openteamspace.com/teams/1547415662840_p5dfso3nsz/",
-            "scoreSets": {
-                "@container": "@index"
-            }
+            "@base": "https://app.openteamspace.com/teams/1547415662840_p5dfso3nsz/"
         }
     ],
     "@id": "scores",
-    "@type": "Scores",
-    "scoreSets": {
+    "@type": [
+        "Scores",
+        "Series"
+    ],
+    "index": {
         "2018-01-02T15:33:11Z": {
             "@type": "ScoreSet",
             "@id": "scoreSets/1547415662840_k39sjd2k5",

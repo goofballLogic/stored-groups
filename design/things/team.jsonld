@@ -2,17 +2,17 @@
   "@context": [
     "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
     {
-      "@base": "https://app.openteamspace.com/",
-      "members": {
-        "@container": "@id"
-      }
+      "@base": "https://app.openteamspace.com/"
     }
   ],
   "@id": "teams/1547415662840_p5dfso3nsz",
-  "@type": "Team",
+  "@type": [
+    "Team",
+    "Series"
+  ],
   "color": "#FF0044",
   "logo": "http://app.openteamspace.com/img/triangular.png",
-  "members": {
+  "index": {
     "people/1547415662840_p5dfxwnsz": {
       "@type": "Person",
       "familyName": "Gibson",
