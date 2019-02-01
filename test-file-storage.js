@@ -135,6 +135,10 @@ function runTests( fixtureName, fixture ) {
 
         });
 
-    if ( !success ) process.exit( 1 );
+    if ( !success ) {
+
+        throw new Error( "Failed" );
+
+    }
 
 }
