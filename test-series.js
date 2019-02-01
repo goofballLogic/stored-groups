@@ -17,6 +17,8 @@ const {
 
 async function run() {
 
+    console.log( "\nSeries tests\n" );
+
     // create team with details
     const name = "The non starters";
     const team = createSeries( {
