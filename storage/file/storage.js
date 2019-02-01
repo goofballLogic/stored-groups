@@ -6,6 +6,7 @@ const mkdir = util.promisify( fs.mkdir );
 const readdir = util.promisify( fs.readdir );
 const readFile = util.promisify( fs.readFile );
 const unlink = util.promisify( fs.unlink );
+const access = util.promisify( fs.access )
 const { rmDirForce } = require( "./storage-lib" );
 
 class Thing {
@@ -16,6 +17,22 @@ class Thing {
         this.name = decodeURIComponent( basename( path, extname( path ) ) );
         Object.assign( this, props );
         Object.freeze( this );
+
+    }
+
+    async exists() {
+
+        try {
+
+            await access( this.path, fs.constants.F_OK );
+            return true;
+
+        } catch( err ) {
+
+            if ( err.code === "ENOENT" ) return false;
+            throw err;
+
+        }
 
     }
 

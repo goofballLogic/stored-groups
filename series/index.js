@@ -142,9 +142,18 @@ class Series {
 
         if ( !options.id ) throw new Error( "No id specified" );
         const bucket = await options.storage.bucket( options.id );
+        if ( !( await bucket.exists() ) ) return undefined;
         const detailsItem = await bucket.item( "details" );
         const details = await detailsItem.content();
         return new Series( { ...options, details } );
+
+    }
+
+    static async delete( options ) {
+
+        if ( !options.id ) throw new Error( "No id specified" );
+        const bucket = await options.storage.bucket( options.id );
+        await bucket.delete();
 
     }
 
@@ -157,7 +166,8 @@ module.exports = function( options ) {
     return {
 
         createSeries: seriesOptions => new Series( { ...seriesOptions, ...options } ),
-        loadSeries: id => Series.load( { id, ...options } )
+        loadSeries: id => Series.load( { id, ...options } ),
+        deleteSeries: id => Series.delete( { id, ...options } )
 
     };
 

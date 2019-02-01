@@ -10,7 +10,13 @@ const context = [
     { "@base": "https://app.openteamspace.com/teams/" }
 
 ];
-const { createSeries, loadSeries } = require( "./series" )( { storage, context } );
+const {
+
+    createSeries,
+    loadSeries,
+    deleteSeries
+
+} = require( "./series" )( { storage, context } );
 
 async function run() {
 
@@ -72,24 +78,26 @@ async function run() {
 
         console.log( "OK remove item from series" );
 
-return;
-
         // update the content of an item, set it back to the series and save
-        alsoAndrew.name = "Roofus";
-        await alsoMembers.set( alsoAndrew );
-        await alsoMembers.save();
+        alsoAndrew.givenName = "Roofus";
+        team4.data( alsoAndrew );
+        await team4.save();
 
         // reload the series again and compare the before and after versions of the changed item
-        const newMembers = await team.loadSeries( "members" );
-        const newAndrew = await newMembers.get( andrew.id );
-        assert.deepStrictEqual( [ newAndrew.name, newAndrew.age ], [ alsoAndrew.name, alsoAndrew.age ] );
+        const team5 = await loadSeries( team.id );
+        const newAndrew = team5.data( andrew.id );
+        assert.deepStrictEqual( [ newAndrew.givenName, newAndrew.familyName ], [ alsoAndrew.givenName, alsoAndrew.familyName ] );
+
+        console.log( "OK update an item and save in series" );
 
         // delete the series and attempt to load it
-        await alsoMembers.delete();
-        const notMembers = await team.loadSeries( "members" );
-        assert( !notMembers );
+        await deleteSeries( team5.id );
+        const notMembers = await loadSeries( team5.id );
+        assert.strictEqual( notMembers, null );
 
-        console.log( "OK create, save, load series, delete items" );
+        console.log( "OK delete series" );
+
+        return;
 
         // create scores menu
         const measurements = await team.createSeries( "measurements" );

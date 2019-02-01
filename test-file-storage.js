@@ -73,6 +73,18 @@ runTests( "Storage tests", {
 
     },
 
+    async testExistance() {
+
+        const helloBucket = await bucket( "hello" );
+        await helloBucket.delete();
+        const helloItem = await helloBucket.item( "stuff" );
+        assert( !( await helloBucket.exists() ) );
+        await helloItem.content( "hello" );
+        assert( await helloBucket.exists() );
+        await helloBucket.delete();
+
+    },
+
     async replaceItemPropertyValue() {
 
         const bucketJ = await bucket( "j" );
