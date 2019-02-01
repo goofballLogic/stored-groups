@@ -1,57 +1,78 @@
-const { join } = require( "path" );
 const assert = require( "assert" );
+
+const { join } = require( "path" );
 const data = join( __dirname, "data" );
 const storage = require( "./storage/file/storage" )( data );
-const { Group } = require( "./series/Group" )( storage );
+
+const context = [
+
+    "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
+    { "@base": "https://app.openteamspace.com/teams/" }
+
+];
+const { createSeries, loadSeries } = require( "./series" )( { storage, context } );
 
 async function run() {
 
     // create team with details
     const name = "The non starters";
-    const team = new Group();
+    const team = createSeries( { type: [ "Team" ] } );
     team.set( "name", name );
-    assert.deepStrictEqual( [ name ], team.get( "name" ) );
-    await team.save();
+    assert.deepStrictEqual( team.get( "name" ), name );
+    assert.deepStrictEqual( team.type, [ "Series", "Team" ] );
+    assert.deepStrictEqual(
+
+        ( await team.export() )[ "@type" ],
+        [ "https://vocab.openteamspace.com#Series", "https://vocab.openteamspace.com#Team" ]
+
+    )
 
     try {
 
         // load team
-        const team2 = await Group.load( team.id );
+        await team.save();
+        const team2 = await loadSeries( team.id );
         assert.deepStrictEqual( team2.get( "name" ), team.get( "name" ) );
-        console.log( "OK create and save grouping with details" );
+        console.log( "OK create and save series with details" );
 
-        // create a members series in the team and add some members
-        const members = await team.createSeries( "members" );
-        const andrew = await members.create( { "name": "Andrew", "age": 42 } );
-        const sj = await members.create( { "name": "Sarah-Jane", "age": 40 } );
-        const ruby = await members.create( { "name": "Ruby" } );
+        // add members to the team
+        const pattern = { "ns": "members", type: "Pesron" };
+        const andrew = team.data( { ...pattern, "givenName": "Andrew", "familyName": "Gibson", "jobTitle": "Principal Engineer" } );
+        const sj = team.data( { ...pattern, "givenName": "Sarah-Jane", "familyName": "Gibson", "jobTitle": "Ethnomusicologist" } );
+        const ruby = team.data( { ...pattern, "givenName": "Ruby", "familyName": "Tuesday" } );
 
         // save the series
-        await members.save();
+        await team.save();
 
         // reload the created series and check the data is there
-        const alsoMembers = await team.loadSeries( "members" );
-        const alsoAndrew = await alsoMembers.get( andrew.id );
-        assert.deepStrictEqual( [ alsoAndrew.name, alsoAndrew.age ], [ andrew.name, andrew.age ] );
+        const team3 = await loadSeries( team.id );
+        const alsoAndrew = team3.data( andrew.id );
+        assert.deepStrictEqual( [ alsoAndrew.givenName, alsoAndrew.firstName ], [ andrew.givenName, andrew.firstName ] );
+
+        console.log( "OK add, save and reload series data items" );
 
         // retrieve an item from the reloaded series
-        const alsoRuby = await alsoMembers.get( ruby.id );
+        const alsoRuby = team3.data( ruby.id );
         assert( alsoRuby );
 
         // remove it from the first series and save
-        await members.remove( ruby );
-        await members.save();
+        await team.removeData( ruby );
+        await team.save();
 
         // reload the series without the removed item
-        const withoutRuby = await team.loadSeries( "members" );
+        const team4 = await loadSeries( team.id );
 
-        // check data survived to this third version of the series
-        const alsoSJ = await withoutRuby.get( sj.id );
-        assert.deepStrictEqual( [ alsoSJ.name, alsoSJ.age ], [ sj.name, sj.age ] );
+        // check data survived to this fourth version of the series
+        const alsoSJ = team4.data( sj.id );
+        assert.deepStrictEqual( [ alsoSJ.givenName, alsoSJ.jobTitle ], [ sj.givenName, sj.jobTitle ] );
 
         // check the removed item stayed removed
-        const notRuby = await withoutRuby.get( ruby.id );
+        const notRuby = team4.data( ruby.id );
         assert( !notRuby );
+
+        console.log( "OK remove item from series" );
+
+return;
 
         // update the content of an item, set it back to the series and save
         alsoAndrew.name = "Roofus";
@@ -126,6 +147,7 @@ async function run() {
 
     } finally {
 
+        //console.log( JSON.stringify( await team.export() ) );
         //await team.delete();
 
     }

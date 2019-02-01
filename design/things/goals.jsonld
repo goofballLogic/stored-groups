@@ -11,9 +11,10 @@
         "Series"
     ],
     "index": {
-        "2018-01-02T15:32:11Z": {
+        "goals/1547415662840_k39sjd2k5" : {
             "@type": "Goal",
             "@id": "goals/1547415662840_k39sjd2k5",
+            "dateCreated": "2018-01-02T15:32:11Z",
             "description": "This week we want to focus on build quality",
             "priorities": [
                 {

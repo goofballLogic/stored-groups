@@ -1,30 +1,30 @@
 {
-  "@context": [
-    "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
-    {
-      "@base": "https://app.openteamspace.com/"
-    }
-  ],
-  "@id": "teams/1547415662840_p5dfso3nsz",
-  "@type": [
-    "Team",
-    "Series"
-  ],
-  "color": "#FF0044",
-  "logo": "http://app.openteamspace.com/img/triangular.png",
-  "index": {
-    "people/1547415662840_p5dfxwnsz": {
-      "@type": "Person",
-      "familyName": "Gibson",
-      "givenName": "Andrew",
-      "jobTitle": "Principal Engineer"
+    "@context": [
+        "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
+        {
+            "@base": "https://app.openteamspace.com/"
+        }
+    ],
+    "@id": "teams/1547415662840_p5dfso3nsz",
+    "@type": [
+        "Team",
+        "Series"
+    ],
+    "color": "#FF0044",
+    "logo": "http://app.openteamspace.com/img/triangular.png",
+    "index": {
+        "people/1547415662840_p5dfxwnsz": {
+            "@type": "Person",
+            "familyName": "Gibson",
+            "givenName": "Andrew",
+            "jobTitle": "Principal Engineer"
+        },
+        "people/1547415662840_d82jdkf92": {
+            "@type": "Person",
+            "familyName": "McStravog",
+            "givenName": "Steven",
+            "jobTitle": "Senior Developer"
+        }
     },
-    "people/1547415662840_d82jdkf92": {
-      "@type": "Person",
-      "familyName": "McStravog",
-      "givenName": "Steven",
-      "jobTitle": "Senior Developer"
-    }
-  },
-  "name": "The Pretenders"
+    "name": "The Pretenders"
 }

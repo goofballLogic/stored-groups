@@ -1,8 +1,8 @@
 {
     "@context": {
         "@version": 1.1,
-        "@vocab": "https://vocab.openteamspace.com#",
-        "ots": "https://vocab.openteamspace.com#",
+        "@vocab": "https://vocab.openteamspace.com/",
+        "ots": "https://vocab.openteamspace.com/",
         "so": "http://schema.org/",
         "xs": "http://www.w3.org/2001/XMLSchema/",
         "Person": "so:Person",

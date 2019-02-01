@@ -4,6 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "jsonld": "^1.5.0",
     "webpack": "^4.28.2"
   },
   "devDependencies": {
