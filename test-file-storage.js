@@ -116,6 +116,7 @@ runTests( "Storage tests", {
 function runTests( fixtureName, fixture ) {
 
     console.log( fixtureName, "\n" );
+    let success = true;
     Object.keys( fixture )
         .filter( x => typeof fixture[ x ] === "function" )
         .forEach( async key => {
@@ -127,10 +128,13 @@ function runTests( fixtureName, fixture ) {
 
             } catch( err ) {
 
+                success = false;
                 console.error( `ERROR ${key}\n${err.stack}` );
 
             }
 
         });
+
+    if ( !success ) process.exit( 1 );
 
 }
