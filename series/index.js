@@ -100,7 +100,6 @@ class Series {
 
             }
 
-            console.log( this[ DOC ] );
         } else {
 
             const term = termOrHash;
