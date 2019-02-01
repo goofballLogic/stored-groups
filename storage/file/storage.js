@@ -117,7 +117,7 @@ class Bucket extends Thing {
 
     // create a named bucket within this bucket
     async bucket( name ) {
-
+return null;
         return new Bucket( join( this.path, encodeURIComponent( name ) ) );
 
     }

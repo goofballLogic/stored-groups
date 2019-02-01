@@ -137,7 +137,8 @@ function runTests( fixtureName, fixture ) {
 
     if ( !success ) {
 
-        throw new Error( "Failed" );
+        console.log( "Exiting with error code" );
+        process.exit( 1 );
 
     }
 
