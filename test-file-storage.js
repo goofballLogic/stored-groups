@@ -117,29 +117,25 @@ function runTests( fixtureName, fixture ) {
 
     console.log( fixtureName, "\n" );
     let success = true;
-    Object.keys( fixture )
+    const promisedTests = Object.keys( fixture )
         .filter( x => typeof fixture[ x ] === "function" )
-        .forEach( async key => {
+        .map( async key => {
 
             try {
 
                 await fixture[ key ]();
                 console.log( `OK ${key}` );
+                return true;
 
             } catch( err ) {
 
-                success = false;
                 console.error( `ERROR ${key}\n${err.stack}` );
 
             }
 
-        });
+        } );
 
-    if ( !success ) {
-
-        console.log( "Exiting with error code" );
+    if ( Promise.all( promisedTests ).some( ok => !ok ) )
         process.exit( 1 );
-
-    }
 
 }
