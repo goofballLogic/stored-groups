@@ -4,12 +4,9 @@ const { join } = require( "path" );
 const data = join( __dirname, "data" );
 const storage = require( "./storage/file/storage" )( data );
 
-const context = [
+const context = "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld";
+const baseNamespace = "https://app.openteamspace.com";
 
-    "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld",
-    { "@base": "https://app.openteamspace.com/teams/" }
-
-];
 const {
 
     createSeries,
@@ -22,16 +19,29 @@ async function run() {
 
     // create team with details
     const name = "The non starters";
-    const team = createSeries( { type: [ "Team" ] } );
+    const team = createSeries( {
+
+        type: "Team",
+        "ns": "teams",
+        "base": baseNamespace
+
+    } );
     team.set( "name", name );
     assert.deepStrictEqual( team.get( "name" ), name );
     assert.deepStrictEqual( team.type, [ "Series", "Team" ] );
+    const teamExport = await team.export();
     assert.deepStrictEqual(
 
-        ( await team.export() )[ "@type" ],
+        teamExport[ "@type" ],
         [ "https://vocab.openteamspace.com#Series", "https://vocab.openteamspace.com#Team" ]
 
     )
+    assert.deepStrictEqual(
+
+        teamExport[ "@id" ],
+        `${baseNamespace}/${team.id}`
+
+    );
 
     try {
 
@@ -42,7 +52,12 @@ async function run() {
         console.log( "OK create and save series with details" );
 
         // add members to the team
-        const pattern = { "ns": "members", type: "Pesron" };
+        const pattern = {
+
+            "ns": "people",
+            type: "Person"
+
+        };
         const andrew = team.data( { ...pattern, "givenName": "Andrew", "familyName": "Gibson", "jobTitle": "Principal Engineer" } );
         const sj = team.data( { ...pattern, "givenName": "Sarah-Jane", "familyName": "Gibson", "jobTitle": "Ethnomusicologist" } );
         const ruby = team.data( { ...pattern, "givenName": "Ruby", "familyName": "Tuesday" } );
@@ -91,26 +106,35 @@ async function run() {
         console.log( "OK update an item and save in series" );
 
         // delete the series and attempt to load it
-        await deleteSeries( team5.id );
-        const notMembers = await loadSeries( team5.id );
-        assert.strictEqual( notMembers, null );
+        // await deleteSeries( team5.id );
+        // const notMembers = await loadSeries( team5.id );
+        // assert.strictEqual( notMembers, undefined );
 
-        console.log( "OK delete series" );
-
-        return;
+        // console.log( "OK delete series" );
 
         // create scores menu
-        const measurements = await team.createSeries( "measurements" );
-        const positivity = await measurements.create( {
+        const measurements = await team.createSeries( {
 
+            type: "Measurements",
+            name: "measurements"
+
+        } );
+        const measurementsURI = ( await measurements.export() )[ "@id" ];
+        assert.strictEqual( measurementsURI,`${baseNamespace}/${team.id}/measurements` );
+        console.log( "OK created nested data series" );
+
+        const positivity = measurements.data( {
+
+            "ns": "mesurements",
             "name": "Positivity",
             "description": "Having a positive attitude",
             "measurement": "Did the person's attitude have a particularly positively affect on other team members?",
             "scores": [ 4, 0 ]
 
         } );
-        const timeliness = await measurements.create( {
+        const timeliness = measurements.data( {
 
+            "ns": "mesurements",
             "name": "Timelineness",
             "description": "Completing work on or close to the estimated time",
             "measurement": "Did the person complete their work within 1 day or 10% of the original estimate (whichever is greater)",
@@ -118,7 +142,9 @@ async function run() {
 
         } );
         await measurements.save();
-        console.log( "OK create series (scores)" );
+        console.log( "OK create series (measurements)" );
+
+return;
 
         // recreate the members series
         await members.save();
