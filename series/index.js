@@ -88,10 +88,26 @@ class Series {
     }
 
     // top level props
-    set( term, value ) {
+    set( termOrHash, value ) {
 
-        if ( term.startsWith( "@" ) ) throw new Error( "Terms must not start with @" );
-        this[ DOC ][ term ] = clone( value );
+        if ( !termOrHash ) return;
+        if ( typeof termOrHash === "object" ) {
+
+            const hash = termOrHash
+            for( const term in hash ) {
+
+                this.set( term, hash[ term ] );
+
+            }
+
+            console.log( this[ DOC ] );
+        } else {
+
+            const term = termOrHash;
+            if ( term.startsWith( "@" ) ) throw new Error( "Terms must not start with @" );
+            this[ DOC ][ term ] = clone( value );
+
+        }
 
     }
 

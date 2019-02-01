@@ -27,13 +27,20 @@ async function run() {
 
     } );
     team.set( "name", name );
+    team.set( {
+
+        "color": "#FF0044",
+        "logo": "http://app.openteamspace.com/img/triangular.png"
+
+    } );
     assert.deepStrictEqual( team.get( "name" ), name );
     assert.deepStrictEqual( team.type, [ "Series", "Team" ] );
+    assert.deepStrictEqual( team.get( "logo" ), "http://app.openteamspace.com/img/triangular.png" );
     const teamExport = await team.export();
     assert.deepStrictEqual(
 
         teamExport[ "@type" ],
-        [ "https://vocab.openteamspace.com#Series", "https://vocab.openteamspace.com#Team" ]
+        [ "https://vocab.openteamspace.com/Series", "https://vocab.openteamspace.com/Team" ]
 
     )
     assert.deepStrictEqual(
