@@ -116,7 +116,6 @@ runTests( "Storage tests", {
 function runTests( fixtureName, fixture ) {
 
     console.log( fixtureName, "\n" );
-    let success = true;
     Promise.all( Object.keys( fixture )
         .filter( x => typeof fixture[ x ] === "function" )
         .map( async key => {
