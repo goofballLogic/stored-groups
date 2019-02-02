@@ -2,7 +2,8 @@ const dateid = require( "./dateid" );
 const { isAbsoluteUri, pathOf } = require( "./uri" );
 const { expand, compact } = require( "jsonld" );
 const DOC = Symbol( "doc" );
-const OPTIONS = Symbol( "options" );
+//const OPTIONS = Symbol( "options" );
+const STORAGE = Symbol( "storage" );
 const BASE = Symbol( "base" );
 
 const clone = x => ( x && typeof x === "object" || typeof x === "function" ) ? JSON.parse( JSON.stringify( x ) ) : x;
@@ -28,6 +29,10 @@ function squash( node ) {
 
 }
 
+const endWithSlash = x => x && !x.endsWith( "/" )
+    ? x + "/"
+    : x;
+
 class Series {
 
     /*
@@ -38,35 +43,33 @@ class Series {
     */
     constructor( options ) {
 
-        if ( !options.storage ) throw new Error( "No storage provided" );
-        options = { ...options };
-        this[ OPTIONS ] = options;
+        const { storage } = options;
+        if ( !storage ) throw new Error( "No storage provided" );
+        this[ STORAGE ] = storage;
 
-        if ( options.base && !options.base.endsWith( "/" ) ) options.base = options.base + "/";
+        const base = endWithSlash( options.base );
+        this[ BASE ] = base;
 
-        const context = options.base
-            ? [].concat( options.context, { "@base": options.base } ).filter( x => x )
-            : options.context;
+        const context = [].concat(
 
-        let id = options.name || dateid();
-        if ( options.ns ) id = `${options.ns}/${id}`;
-        if ( !isAbsoluteUri( id ) ) id = `${options.base}/${id}`;
-        if ( options.base && id.startsWith( options.base ) ) id = id.substring( options.base.length + 1 );
+            options.context,
+            base && { "@base": base }
 
-        this[ BASE ] = options.base;
+        ).filter( x => x);
 
-        delete options.ns;
-        delete options.name;
-        delete options.base;
+        const name = options.name || dateid();
+        const ns = endWithSlash( options.ns );
+        const id = ns ? `${ns}${name}` : name;
+
+        const type = options.type;
 
         this[ DOC ] = options.details || {
 
             "@context": context,
             "@id": id,
-            "@type": options.type ? [ "Series" ].concat( options.type ) : [ "Series" ]
+            "@type": [ "Series", type ].filter( x => x )
 
         };
-        delete options.details;
 
     }
 
@@ -112,7 +115,7 @@ class Series {
 
     get( term ) {
 
-        return this[ DOC ][ term ];
+        return clone( this[ DOC ][ term ] );
 
     }
 
@@ -135,23 +138,21 @@ class Series {
 
         if ( typeof optionsOrId === "object" ) {
 
-            const options = optionsOrId;
-
-            const id = options.id || ( options.ns ? `${options.ns}/${dateid()}` : dateid() );
-            const node = {
-
-                ...( options.type ? { "@type": options.type } : {} ),
-                ...options
-
-            };
-
-            delete node.type;
-            delete node.ns;
+            const node = clone( optionsOrId );
+            const id = node.id || `${endWithSlash( node.ns )}${dateid()}`;
             delete node.id;
+            delete node.ns;
+
+            if ( node.type ) {
+
+                node[ "@type" ] = node.type;
+                delete node.type;
+
+            }
 
             const index = this[ DOC ].index || {};
-            this[ DOC ].index = index;
             index[ id ] = node;
+            this[ DOC ].index = index;
 
             return squash( { id, ...node } );
 
@@ -174,7 +175,7 @@ class Series {
     // operations
     async save() {
 
-        let bucket = this[ OPTIONS ].storage;
+        let bucket = this[ STORAGE ];
         const names = this.id.split( "/" );
         for( const name of names ) {
 
@@ -199,8 +200,8 @@ class Series {
 
     createSeries( options ) {
 
-        const hostOptions = this[ OPTIONS ];
-        options = { ...options };
+        const storage = this[ STORAGE ];
+
         if ( !( isAbsoluteUri( options.ns ) || options.base ) ) {
 
             const hostId = this.id;
@@ -218,7 +219,7 @@ class Series {
             }
 
         }
-        return new Series( { ...hostOptions, ...options } );
+        return new Series( { storage, ...options } );
 
     }
 

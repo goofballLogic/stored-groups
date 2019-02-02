@@ -115,11 +115,11 @@ async function run() {
         console.log( "OK update an item and save in series" );
 
         // delete the series and attempt to load it
-        // await deleteSeries( team5.id );
-        // const notMembers = await loadSeries( team5.id );
-        // assert.strictEqual( notMembers, undefined );
+        await deleteSeries( team5.id );
+        const notMembers = await loadSeries( team5.id );
+        assert.strictEqual( notMembers, undefined );
 
-        // console.log( "OK delete series" );
+        console.log( "OK delete series" );
 
         // create scores menu
         const measurements = await team.createSeries( {
@@ -153,36 +153,13 @@ async function run() {
         await measurements.save();
         console.log( "OK create series (measurements)" );
 
-return;
-
         // recreate the members series
-        await members.save();
+        await team.save();
         console.log( "OK recreate series (members)" );
 
-        // create metrics time series
-        const oneYear = ( Date.UTC( 2018, 1, 1 ) - Date.UTC( 2014, 1, 1 ) ) / 4;
-        const metrics = await team.createIndexedSeries( "metrics", oneYear );
-        const andrewSmiled = {
-
-            "score": 4,
-            "description": "Andrew smiled a lot",
-            "dimensions": [ {
-
-                "@type": "member",
-                ...andrew
-
-            }, {
-
-                "@type": "measurement",
-                ...positivity
-
-            } ]
-
-        };
-        await metrics.addAt( Date.UTC( 2018, 1, 6 ), andrewSmiled );
-        const alsoAndrewSmiled = await metrics.get( Date.UTC( 2018, 1, 6 ) );
-        assert.deepStrictEqual( alsoAndrewSmiled, [ andrewSmiled ] );
-        console.log( "OK add value(s) at index point (date value for time series)" );
+        // create goals series
+        const goals = team.createSeries( { name: "goals" } );
+        goals.save();
 
     } catch( err ) {
 
