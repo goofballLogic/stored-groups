@@ -111,7 +111,6 @@ class Bucket extends Thing {
     async buckets() {
 
         const items = await readdir( this.path, { withFileTypes: true } );
-console.log( this.path, items );
         return items.filter( item => item.isDirectory() ).map( item => new Bucket( join( this.path, item.name ) ) );
 
     }
