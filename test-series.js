@@ -138,7 +138,7 @@ async function run() {
             "name": "Positivity",
             "description": "Having a positive attitude",
             "measurement": "Did the person's attitude have a particularly positively affect on other team members?",
-            "scores": [ 4, 0 ]
+            "passScore": 4
 
         } );
         const timeliness = measurements.data( {
@@ -147,7 +147,8 @@ async function run() {
             "name": "Timelineness",
             "description": "Completing work on or close to the estimated time",
             "measurement": "Did the person complete their work within 1 day or 10% of the original estimate (whichever is greater)",
-            "scores": [ 1, -4 ]
+            "passScore": 1,
+            "failScore": -4
 
         } );
         await measurements.save();
@@ -158,8 +159,18 @@ async function run() {
         console.log( "OK recreate series (members)" );
 
         // create goals series
-        const goals = team.createSeries( { name: "goals" } );
+        const goals = team.createSeries( { name: "goals", type: "Goals" } );
+        const thisWeeksGoals = goals.data( {
+
+            "ns": "goals",
+            "type": "Goal",
+            "dateCreated": new Date().toISOString(),
+            "description": "This week we want to focus on professionalism",
+            "priorities": [ timeliness, positivity ]
+
+        } );
         goals.save();
+        console.log( "OK create series containing members of another series" );
 
     } catch( err ) {
 

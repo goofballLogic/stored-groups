@@ -28,7 +28,7 @@
                     "@type": "Priority",
                     "@id": "priorities/1547415662840_39sldh1jd",
                     "measurement": "measurements/1547415662840_39sj1kdj4",
-                    "pass": 2
+                    "passScore": 2
                 }
             ]
         }

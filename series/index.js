@@ -2,7 +2,6 @@ const dateid = require( "./dateid" );
 const { isAbsoluteUri, pathOf } = require( "./uri" );
 const { expand, compact } = require( "jsonld" );
 const DOC = Symbol( "doc" );
-//const OPTIONS = Symbol( "options" );
 const STORAGE = Symbol( "storage" );
 const BASE = Symbol( "base" );
 
