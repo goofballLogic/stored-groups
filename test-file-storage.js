@@ -5,27 +5,27 @@ const { items, buckets, bucket, item } = require( "./storage/file/storage" )( da
 
 runTests( "Storage tests", {
 
-    // async listItems() {
+    async listItems() {
 
-    //     const actual = ( await items() ).map( item => item.name );
-    //     assert.deepStrictEqual( actual, [ "names" ] );
+        const actual = ( await items() ).map( item => item.name );
+        assert.deepStrictEqual( actual, [ "names" ] );
 
-    // },
+    },
 
-    // async listBuckets() {
+    async listBuckets() {
 
-    //     const actual = ( await buckets() ).map( bucket => bucket.name ).filter( maybeF => maybeF !== "f" );
-    //     assert.deepStrictEqual( actual, [ "a" ] );
+        const actual = ( await buckets() ).map( bucket => bucket.name ).filter( maybeF => maybeF !== "f" );
+        assert.deepStrictEqual( actual, [ "a" ] );
 
-    // },
+    },
 
-    // async listItemsInBucket() {
+    async listItemsInBucket() {
 
-    //     const bucketA = ( await buckets() ).find( bucket => bucket.name === "a" );
-    //     const actual = await bucketA.items();
-    //     assert.deepStrictEqual( actual.map( item => item.name ), [ "b" ] );
+        const bucketA = ( await buckets() ).find( bucket => bucket.name === "a" );
+        const actual = await bucketA.items();
+        assert.deepStrictEqual( actual.map( item => item.name ), [ "b" ] );
 
-    // },
+    },
 
     async listBucketsInBucket() {
 
@@ -35,81 +35,81 @@ runTests( "Storage tests", {
 
     },
 
-    // async listItemsInBucketInBucket() {
+    async listItemsInBucketInBucket() {
 
-    //     const bucketA = ( await buckets() ).find( bucket => bucket.name === "a" );
-    //     const bucketB = ( await bucketA.buckets() ).find( bucket => bucket.name === "b" );
-    //     const actual = await bucketB.items();
-    //     assert.deepStrictEqual( actual.map( bucket => bucket.name ), [ "c", "d" ] );
+        const bucketA = ( await buckets() ).find( bucket => bucket.name === "a" );
+        const bucketB = ( await bucketA.buckets() ).find( bucket => bucket.name === "b" );
+        const actual = await bucketB.items();
+        assert.deepStrictEqual( actual.map( bucket => bucket.name ), [ "c", "d" ] );
 
-    // },
+    },
 
-    // async fetchContentInItemInBucket() {
+    async fetchContentInItemInBucket() {
 
-    //     const bucketA = ( await buckets() ).find( bucket => bucket.name === "a" );
-    //     const itemB = ( await bucketA.items() ).find( item => item.name === "b" );
-    //     const actual = await itemB.content();
-    //     assert.deepStrictEqual( actual, [ "I am b" ] );
+        const bucketA = ( await buckets() ).find( bucket => bucket.name === "a" );
+        const itemB = ( await bucketA.items() ).find( item => item.name === "b" );
+        const actual = await itemB.content();
+        assert.deepStrictEqual( actual, [ "I am b" ] );
 
-    // },
+    },
 
-    // async makeBucket() {
+    async makeBucket() {
 
-    //     const actual = await bucket( "f" );
-    //     assert.deepStrictEqual( actual.name, "f" );
+        const actual = await bucket( "f" );
+        assert.deepStrictEqual( actual.name, "f" );
 
-    // },
+    },
 
-    // async makeItemInBucketInBucket() {
+    async makeItemInBucketInBucket() {
 
-    //     const bucketF = await bucket( "f" );
-    //     await bucketF.delete();
-    //     const bucketG = await bucketF.bucket( "g" );
-    //     const itemH = await bucketG.item( "h" );
-    //     await itemH.content( { "hello": "world" } );
-    //     const actual = await itemH.content();
-    //     assert.deepStrictEqual( actual, { "hello": "world" } );
-    //     await bucketF.delete();
+        const bucketF = await bucket( "f" );
+        await bucketF.delete();
+        const bucketG = await bucketF.bucket( "g" );
+        const itemH = await bucketG.item( "h" );
+        await itemH.content( { "hello": "world" } );
+        const actual = await itemH.content();
+        assert.deepStrictEqual( actual, { "hello": "world" } );
+        await bucketF.delete();
 
-    // },
+    },
 
-    // async testExistance() {
+    async testExistance() {
 
-    //     const helloBucket = await bucket( "hello" );
-    //     await helloBucket.delete();
-    //     const helloItem = await helloBucket.item( "stuff" );
-    //     assert( !( await helloBucket.exists() ) );
-    //     await helloItem.content( "hello" );
-    //     assert( await helloBucket.exists() );
-    //     await helloBucket.delete();
+        const helloBucket = await bucket( "hello" );
+        await helloBucket.delete();
+        const helloItem = await helloBucket.item( "stuff" );
+        assert( !( await helloBucket.exists() ) );
+        await helloItem.content( "hello" );
+        assert( await helloBucket.exists() );
+        await helloBucket.delete();
 
-    // },
+    },
 
-    // async replaceItemPropertyValue() {
+    async replaceItemPropertyValue() {
 
-    //     const bucketJ = await bucket( "j" );
-    //     const itemK = await bucketJ.item( "k" );
-    //     await itemK.replacePropertyValue( "thing1", [ 1, 2, 3 ] );
-    //     await itemK.replacePropertyValue( "thing2", [ 2, 3, 4 ] );
-    //     await itemK.replacePropertyValue( "thing3", [ 3, 4, 5, ] );
-    //     await itemK.replacePropertyValue( "thing1", undefined );
-    //     const result = await itemK.content();
-    //     assert.deepStrictEqual( result, { "thing2": [ 2, 3, 4 ], "thing3": [ 3, 4, 5 ] } );
-    //     await bucketJ.delete();
+        const bucketJ = await bucket( "j" );
+        const itemK = await bucketJ.item( "k" );
+        await itemK.replacePropertyValue( "thing1", [ 1, 2, 3 ] );
+        await itemK.replacePropertyValue( "thing2", [ 2, 3, 4 ] );
+        await itemK.replacePropertyValue( "thing3", [ 3, 4, 5, ] );
+        await itemK.replacePropertyValue( "thing1", undefined );
+        const result = await itemK.content();
+        assert.deepStrictEqual( result, { "thing2": [ 2, 3, 4 ], "thing3": [ 3, 4, 5 ] } );
+        await bucketJ.delete();
 
-    // },
+    },
 
-    // async deleteItem() {
+    async deleteItem() {
 
-    //     const itemI = await item( "i" );
-    //     await itemI.content( "Hello from item i" );
-    //     const created = ( await items() ).map( item => item.name );
-    //     assert( created.includes( "i" ) );
-    //     await itemI.delete();
-    //     const deleted = ( await items() ).map( item => item.name );
-    //     assert( !deleted.includes( "i" ) );
+        const itemI = await item( "i" );
+        await itemI.content( "Hello from item i" );
+        const created = ( await items() ).map( item => item.name );
+        assert( created.includes( "i" ) );
+        await itemI.delete();
+        const deleted = ( await items() ).map( item => item.name );
+        assert( !deleted.includes( "i" ) );
 
-    // }
+    }
 
 } );
 
