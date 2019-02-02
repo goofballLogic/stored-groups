@@ -117,7 +117,7 @@ function runTests( fixtureName, fixture ) {
 
     console.log( fixtureName, "\n" );
     let success = true;
-    const promisedTests = Object.keys( fixture )
+    Promise.all( Object.keys( fixture )
         .filter( x => typeof fixture[ x ] === "function" )
         .map( async key => {
 
@@ -133,9 +133,10 @@ function runTests( fixtureName, fixture ) {
 
             }
 
-        } );
+        } ) ).then( results => {
 
-    if ( Promise.all( promisedTests ).some( ok => !ok ) )
-        process.exit( 1 );
+            if ( results.some( ok => !ok ) ) process.exit( 1 );
+
+        } );
 
 }
