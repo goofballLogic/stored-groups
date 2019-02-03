@@ -159,18 +159,34 @@ async function run() {
         console.log( "OK recreate series (members)" );
 
         // create goals series
+        const now = new Date().toISOString();
         const goals = team.createSeries( { name: "goals", type: "Goals" } );
+        goals.set( "dateCreated", now );
         const thisWeeksGoals = goals.data( {
 
             "ns": "goals",
             "type": "Goal",
-            "dateCreated": new Date().toISOString(),
+            "dateCreated": now,
             "description": "This week we want to focus on professionalism",
             "priorities": [ timeliness, positivity ]
 
         } );
-        goals.save();
+        await goals.save();
+
         console.log( "OK create series containing members of another series" );
+
+        const goalsById = await loadSeries( goals.id );
+        assert.strictEqual( goalsById.get( "dateCreated" ), now );
+
+        console.log( "OK load nested series from series id" );
+
+        const goalsByName = await team.loadSeries( { "name": "goals" } );
+        assert.strictEqual( goalsByName.get( "dateCreated" ), now );
+
+        console.log( "OK load nested series by name" );
+        // // create scores series
+        // const scores = team.createSeries( { name: "scores", type: "Scores" } );
+        // const scoreSet = goals.
 
     } catch( err ) {
 

@@ -197,34 +197,53 @@ class Series {
 
     }
 
+    ensureAbsoluteBaseOrNamespace( options ) {
+
+        // it's already absolute
+        if ( options.base || isAbsoluteUri( options.ns ) ) return options;
+
+        const hostId = this.id;
+        // use the host id as the base
+        if ( isAbsoluteUri( hostId ) ) return { ...options, base: hostId };
+
+
+        const hostContext = [].concat( this[ DOC ][ "@context" ] );
+        const hostBase = hostContext[ 1 ] && hostContext[ 1 ][ "@base" ];
+        if ( !hostBase ) throw new Error( `Malformed container - neither base nor id are absolute URIs. Base: ${hostBase}. Id: ${hostId}.` );
+
+        // use the host's base + id as the base
+        return { ...options, base: `${hostBase}${hostId}/` };
+
+    }
+
     createSeries( options ) {
 
         const storage = this[ STORAGE ];
-
-        if ( !( isAbsoluteUri( options.ns ) || options.base ) ) {
-
-            const hostId = this.id;
-            if ( isAbsoluteUri( hostId ) ) {
-
-                options.base = hostId;
-
-            } else {
-
-                const hostContext = [].concat( this[ DOC ][ "@context" ] );
-                const hostBase = hostContext[ 1 ] && hostContext[ 1 ][ "@base" ];
-                if ( !hostBase ) throw new Error( `Malformed container - neither base nor id are absolute URIs. Base: ${hostBase}. Id: ${hostId}.` );
-                options.base = `${hostBase}${hostId}`;
-
-            }
-
-        }
+        options = this.ensureAbsoluteBaseOrNamespace( options );
         return new Series( { storage, ...options } );
+
+    }
+
+    loadSeries( options ) {
+
+        if ( !options ) throw new Error( "No name provided" );
+        if ( options.id ) throw new Error( "Don't provide a series id to Series->loadSeries, use the top-level loadSeries instead. If you are trying to load a nested series by name, pass the name option instead" );
+
+        const storage = this[ STORAGE ];
+
+        const hostBase = this[ BASE ];
+        options = this.ensureAbsoluteBaseOrNamespace( options );
+        if ( !options.base.startsWith( hostBase ) ) throw new Error( "Not a nested series. Did you mean to call the top-level loadSeries?" );
+
+        options.id = `${options.base}${options.name}`.substring( hostBase.length );
+        return Series.load( { storage, ...options } );
 
     }
 
     static async resolveBucket( options ) {
 
         if ( !options.id ) throw new Error( "No id specified" );
+        if ( !options.storage ) throw new Error( "No storage provided" );
         let bucket = await options.storage;
         for( const name of options.id.split( "/" ) )
             bucket = await bucket.bucket( name );

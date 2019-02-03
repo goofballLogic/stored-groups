@@ -109,7 +109,7 @@ runTests( "Storage tests", {
         const deleted = ( await items() ).map( item => item.name );
         assert( !deleted.includes( "i" ) );
 
-    }
+    },
 
 } );
 
