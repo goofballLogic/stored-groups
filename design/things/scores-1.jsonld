@@ -13,13 +13,11 @@
     "index": {
         "2018-01-02T15:33:11Z": {
             "@type": "ScoreSet",
-            "@id": "scoreSets/1547415662840_k39sjd2k5",
             "description": "The team did ok this week. Nice work!",
             "dateCreated": "2018-01-02T15:33:11Z",
             "scores": [
                 {
                     "@type": "Score",
-                    "@id": "score/1547415662840_c9sldn2kd",
                     "goal": "goals/1547415662840_k39sjd2k5",
                     "priority": "priorities/1547415662840_329dhf2ld",
                     "measurement": "measurements/1547415662840_d92jdlskf",
@@ -29,7 +27,6 @@
                 },
                 {
                     "@type": "Score",
-                    "@id": "score/1547415662840_d9sjdk2lf",
                     "goal": "goals/1547415662840_k39sjd2k5",
                     "priority": "priorities/1547415662840_329dhf2ld",
                     "measurement": "measurements/1547415662840_d92jdlskf",
@@ -39,7 +36,6 @@
                 },
                 {
                     "@type": "Score",
-                    "@id": "score/1547415662840_38sjlwks8",
                     "goal": "goals/1547415662840_k39sjd2k5",
                     "priority": "priorities/1547415662840_39sldh1jd",
                     "measurement": "measurements/1547415662840_39sj1kdj4",

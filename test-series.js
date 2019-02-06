@@ -1,11 +1,14 @@
 const assert = require( "assert" );
 
 const { join } = require( "path" );
+const { readFileSync } = require( "fs" );
 const data = join( __dirname, "data" );
 const storage = require( "./storage/file/storage" )( data );
 
 const context = "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld";
 const baseNamespace = "https://app.openteamspace.com";
+
+const localContextMap = process.env.USE_LOCAL_CONTEXT && buildLocalContextMap();
 
 const {
 
@@ -13,7 +16,7 @@ const {
     loadSeries,
     deleteSeries
 
-} = require( "./series" )( { storage, context } );
+} = require( "./series" )( { storage, context, localContextMap } );
 
 async function run() {
 
@@ -164,8 +167,8 @@ async function run() {
         goals.set( "dateCreated", now );
         const thisWeeksGoals = goals.data( {
 
-            "ns": "goals",
-            "type": "Goal",
+            ns: "goals",
+            type: "Goal",
             "dateCreated": now,
             "description": "This week we want to focus on professionalism",
             "priorities": [ timeliness, positivity ]
@@ -184,9 +187,27 @@ async function run() {
         assert.strictEqual( goalsByName.get( "dateCreated" ), now );
 
         console.log( "OK load nested series by name" );
+
         // // create scores series
-        // const scores = team.createSeries( { name: "scores", type: "Scores" } );
-        // const scoreSet = goals.
+        const scores = team.createSeries( { name: "scores", type: "Scores" } );
+        const scoreSet = scores.data( {
+
+            id: now,
+            type: "ScoreSet",
+            "desription": "The team did ok this sprint. We were very professional",
+            "dateCreated": now,
+            "scores": [
+                {
+                    type: "Score",
+                    "goal": thisWeeksGoals.id,
+                    "priority": timeliness.id,
+                    "person": andrew.id
+
+                }
+            ]
+
+        } );
+        await scores.save();
 
     } catch( err ) {
 
@@ -202,3 +223,20 @@ async function run() {
 }
 
 run();
+
+
+function readJSON( relativePath ) {
+
+    return JSON.parse( readFileSync( join( __dirname, relativePath ) ) );
+
+}
+
+function buildLocalContextMap() {
+
+    return {
+
+        [ context ]: readJSON( "./design/things/context.jsonld" )
+
+    };
+
+}

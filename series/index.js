@@ -6,6 +6,7 @@ const STORAGE = Symbol( "storage" );
 const BASE = Symbol( "base" );
 
 const clone = x => ( x && typeof x === "object" || typeof x === "function" ) ? JSON.parse( JSON.stringify( x ) ) : x;
+let documentLoader = null;
 
 function squash( node ) {
 
@@ -188,9 +189,10 @@ class Series {
 
     async export() {
 
+        const options = documentLoader ? { documentLoader } : null;
         return await compact(
 
-            await expand( this[ DOC ] ),
+            await expand( this[ DOC ], options ),
             {}
 
         );
@@ -273,7 +275,26 @@ class Series {
 module.exports = function( options ) {
 
     if ( !( options && options.storage && options.context ) )
-        throw new Error( "Invalid options supplied. Expected storage, context (uri)" );
+    throw new Error( "Invalid options supplied. Expected storage, context (uri)" );
+    const { localContextMap } = options;
+    if ( localContextMap ) {
+
+        const keys = Object.keys( localContextMap );
+        documentLoader = function( url ) {
+
+            const matched = keys.find( key => url.endsWith( key ) );
+            if ( matched ) return { document: localContextMap[ matched ] };
+            else {
+
+                const err = new Error( `No local context mapping for ${url}` );
+                console.error( err );
+                throw err;
+
+            }
+
+        };
+
+    }
     return {
 
         createSeries: seriesOptions => new Series( { ...seriesOptions, ...options } ),
