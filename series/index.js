@@ -3,6 +3,7 @@ const { isAbsoluteUri, pathOf } = require( "./uri" );
 const { expand, compact } = require( "jsonld" );
 const DOC = Symbol( "doc" );
 const STORAGE = Symbol( "storage" );
+const CONTEXT = Symbol( "context" );
 const BASE = Symbol( "base" );
 
 const clone = x => ( x && typeof x === "object" || typeof x === "function" ) ? JSON.parse( JSON.stringify( x ) ) : x;
@@ -49,13 +50,26 @@ class Series {
 
         const base = endWithSlash( options.base );
         this[ BASE ] = base;
+        const context = [].concat( options.context || [] );
+        if ( base ) {
 
-        const context = [].concat(
+            const existingBase = [ ...context ].reverse().find(
 
-            options.context,
-            base && { "@base": base }
+                c => c && ( typeof c === "object" ) && ( "@base" in c )
 
-        ).filter( x => x);
+            );
+            if ( existingBase ) {
+
+                existingBase[ "@base" ] = base;
+
+            } else {
+
+                context.push( { "@base": base } );
+
+            }
+
+        }
+        this[ CONTEXT ] = context;
 
         const name = options.name || dateid();
         const ns = endWithSlash( options.ns );
@@ -208,7 +222,6 @@ class Series {
         // use the host id as the base
         if ( isAbsoluteUri( hostId ) ) return { ...options, base: hostId };
 
-
         const hostContext = [].concat( this[ DOC ][ "@context" ] );
         const hostBase = hostContext[ 1 ] && hostContext[ 1 ][ "@base" ];
         if ( !hostBase ) throw new Error( `Malformed container - neither base nor id are absolute URIs. Base: ${hostBase}. Id: ${hostId}.` );
@@ -221,8 +234,9 @@ class Series {
     createSeries( options ) {
 
         const storage = this[ STORAGE ];
+        const context = clone( this[ CONTEXT ] );
         options = this.ensureAbsoluteBaseOrNamespace( options );
-        return new Series( { storage, ...options } );
+        return new Series( { context, storage, ...options } );
 
     }
 
@@ -236,7 +250,6 @@ class Series {
         const hostBase = this[ BASE ];
         options = this.ensureAbsoluteBaseOrNamespace( options );
         if ( !options.base.startsWith( hostBase ) ) throw new Error( "Not a nested series. Did you mean to call the top-level loadSeries?" );
-
         options.id = `${options.base}${options.name}`.substring( hostBase.length );
         return Series.load( { storage, ...options } );
 

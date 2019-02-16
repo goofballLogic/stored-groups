@@ -54,7 +54,6 @@ async function run() {
         `${baseNamespace}/${team.id}`
 
     );
-
     try {
 
         // load team
@@ -163,7 +162,12 @@ async function run() {
 
         // create goals series
         const now = new Date().toISOString();
-        const goals = team.createSeries( { name: "goals", type: "Goals" } );
+        const goals = team.createSeries( {
+
+            name: "goals",
+            type: "Goals"
+
+        } );
         goals.set( "dateCreated", now );
         const thisWeeksGoals = goals.data( {
 
