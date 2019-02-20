@@ -1,0 +1,7 @@
+CQRS agent
+|
+Command receiver
+|
+Nested series (documents (of properties) with an items property)
+|
+Storage (containers and items)

@@ -219,8 +219,7 @@ async function run() {
 
     } finally {
 
-        //console.log( JSON.stringify( await team.export() ) );
-        //await team.delete();
+        await team.delete();
 
     }
 
