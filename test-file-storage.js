@@ -1,4 +1,5 @@
 const { join } = require( "path" );
+const { runTests } = require( "./test-utils.js" );
 const data = join( __dirname, "test-data" );
 const assert = require( "assert" );
 const { items, buckets, bucket, item } = require( "./storage/file/storage" )( data );
@@ -112,30 +113,3 @@ runTests( "Storage tests", {
     },
 
 } );
-
-function runTests( fixtureName, fixture ) {
-
-    console.log( fixtureName, "\n" );
-    Promise.all( Object.keys( fixture )
-        .filter( x => typeof fixture[ x ] === "function" )
-        .map( async key => {
-
-            try {
-
-                await fixture[ key ]();
-                console.log( `OK ${key}` );
-                return true;
-
-            } catch( err ) {
-
-                console.error( `ERROR ${key}\n${err.stack}` );
-
-            }
-
-        } ) ).then( results => {
-
-            if ( results.some( ok => !ok ) ) process.exit( 1 );
-
-        } );
-
-}
