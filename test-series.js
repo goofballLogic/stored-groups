@@ -219,7 +219,7 @@ async function run() {
 
     } finally {
 
-        await team.delete();
+        await deleteSeries( team.id );
 
     }
 

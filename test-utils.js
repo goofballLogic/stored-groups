@@ -7,12 +7,19 @@ module.exports = {
 
 const listTests = fixture => Object.keys( fixture ).filter( x => typeof fixture[ x ] === "function" );
 
+function emitTitle( title ) {
+
+    console.log( "" );
+    console.log( title, "\n" );
+
+}
+
 async function execute( fixture, key ) {
 
     try {
 
-        await fixture[ key ]();
-        console.log( `OK ${key}` );
+        const result = await fixture[ key ]();
+        console.log( `${result === "pending" ? "~~" : "OK"} ${key}` );
         return true;
 
     } catch( err ) {
@@ -25,7 +32,7 @@ async function execute( fixture, key ) {
 
 async function runTestsSequentially( fixtureName, fixture ) {
 
-    console.log( fixtureName, "\n" );
+    emitTitle( fixtureName );
     for( var key of listTests( fixture ) ) {
 
         await execute( fixture, key );
@@ -36,7 +43,7 @@ async function runTestsSequentially( fixtureName, fixture ) {
 
 function runTests( fixtureName, fixture ) {
 
-    console.log( fixtureName, "\n" );
+    emitTitle( fixtureName );
     Promise
         .all( listTests( fixture ).map( async key => execute( fixture, key ) ) )
         .then( results => {

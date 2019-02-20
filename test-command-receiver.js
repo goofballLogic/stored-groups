@@ -10,17 +10,55 @@ const series = require( "./series" )( { storage, context, localContextMap } );
 
 const baseNamespace = "https://app.openteamspace.com";
 
+// flush these?
+
 runTestsSequentially( "Command receiver tests", {
 
-    async test1() {
+    async CreateASeries() {
 
-        console.log( "test 1" );
+        return "pending";
 
     },
 
-    async test2() {
+    async SetAndGetAValue() {
 
-        console.log( "test 2" );
+        return "pending";
+
+    },
+
+    async SetAndResetAndGetAValue() {
+
+        return "pending";
+
+    },
+
+    async SetThenDeleteAndGetAValue() {
+
+        return "pending";
+
+    },
+
+    async ExportSeries() {
+
+        return "pending";
+
+    },
+
+    async CreateCollectionItem() {
+
+        return "pending";
+
+    },
+
+    async CreateThenUpdateACollectionItem() {
+
+        return "pending";
+
+    },
+
+    async CreateButDeleteThenTryToUpdateACollectionItem() {
+
+        return "pending";
 
     }
 
