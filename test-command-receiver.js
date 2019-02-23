@@ -1,5 +1,7 @@
 const { runTests } = require( "./test-utils.js" );
 const { join } = require( "path" );
+const { strictEqual } = require( "assert" );
+
 // file storage
 const data = join( __dirname, "data" );
 const storage = require( "./storage/file/storage" )( data );
@@ -23,7 +25,7 @@ const baseNamespace = "https://app.openteamspace.com";
 
 async function createSeries( options, props ) {
 
-    const result = await commandProcessor.process( [ {
+    const series = await commandProcessor.process( [ {
 
         "@context": context,
         "@type": commandTypes.create,
@@ -33,14 +35,14 @@ async function createSeries( options, props ) {
     } ] );
     return {
 
-        result,
+        series,
         dispose: async () => {
 
             await commandProcessor.process( [ {
 
                 "@context": context,
                 "@type": commandTypes.delete,
-                "series": { "@id": result[ "@id" ], base: options.base }
+                "series": { "@id": series[ "@id" ], base: options.base }
 
             } ] )
 
@@ -54,14 +56,24 @@ runTests( "Command receiver tests", {
 
     async CreateASeriesWithSomeProperties() {
 
-        const created = await createSeries(
+        const { series, dispose } = await createSeries(
 
             { type: "Team", ns: "teams", base: baseNamespace },
             { name: "Team Zero" }
 
         );
-        await created.dispose();
-        return "pending";
+
+        try {
+
+            const expected = "Team Zero";
+            const actual = series[ "http://schema.org/name" ];
+            strictEqual( actual, expected );
+
+        } finally {
+
+            await dispose();
+
+        }
 
     },
 
