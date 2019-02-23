@@ -278,7 +278,9 @@ class Series {
 
     static async delete( options ) {
 
+console.log( options );
         const bucket = await Series.resolveBucket( options );
+console.log( bucket );
         await bucket.delete();
 
     }
