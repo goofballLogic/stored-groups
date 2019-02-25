@@ -1,8 +1,5 @@
-module.exports = async ( series, command ) => {
+module.exports = async ( series, _, { seriesId } ) => {
 
-    if ( !command.series ) throw new Error( `Missing series property: ${JSON.stringify( command )}` );
-    let { "@id": id, base } = command.series;
-    if ( base && id.startsWith( base ) ) id = id.substring( base.length );
-    await series.deleteSeries( id );
+    await series.deleteSeries( seriesId );
 
 };

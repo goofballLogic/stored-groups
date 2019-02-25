@@ -1,6 +1,6 @@
 const { runTests } = require( "./test-utils.js" );
 const { join } = require( "path" );
-const { strictEqual } = require( "assert" );
+const assert = require( "assert" );
 
 // file storage
 const data = join( __dirname, "data" );
@@ -10,11 +10,18 @@ const context = "https://raw.githubusercontent.com/goofballLogic/stored-groups/m
 const localContextMap = process.env.USE_LOCAL_CONTEXT && buildLocalContextMap();
 const series = require( "./series" )( { storage, context, localContextMap } );
 const commandProcessor = require( "./command-processor" )( series );
-const { commandTypes } = require( "./command-processor" );
+const { commandTypes, batchKeys } = require( "./command-processor" );
 
 const baseNamespace = "https://app.openteamspace.com";
+const simpleTeamsContext = {
 
-// flush these?
+    commands: batchKeys.commands,
+    series: batchKeys.series,
+    props: batchKeys.props,
+    keys: batchKeys.keys,
+    values: batchKeys.values
+
+};
 
 /*
 
@@ -27,10 +34,14 @@ async function createSeries( options, props ) {
 
     const series = await commandProcessor.process( [ {
 
-        "@context": context,
-        "@type": commandTypes.create,
-        props,
-        options
+        "@context": [ context, simpleTeamsContext ],
+        commands: [ {
+
+            "@type": commandTypes.create,
+            props,
+            options
+
+        } ]
 
     } ] );
     return {
@@ -40,9 +51,9 @@ async function createSeries( options, props ) {
 
             await commandProcessor.process( [ {
 
-                "@context": context,
-                "@type": commandTypes.delete,
-                "series": { "@id": series[ "@id" ], base: options.base }
+                "@context": [ context, simpleTeamsContext ],
+                series: { "@id": series[ "@id" ], base: options.base },
+                commands: { "@type": commandTypes.delete }
 
             } ] )
 
@@ -52,34 +63,85 @@ async function createSeries( options, props ) {
 
 }
 
+async function withCreatedTeamSeries( name, wrapped ) {
+
+    const { series, dispose } = await createSeries(
+
+        { type: "Team", ns: "teams", base: baseNamespace },
+        { name }
+
+    );
+
+    try {
+
+        await wrapped( series );
+
+    } finally {
+
+        await dispose();
+
+    }
+
+}
+
 runTests( "Command receiver tests", {
 
     async CreateASeriesWithSomeProperties() {
 
-        const { series, dispose } = await createSeries(
+        await withCreatedTeamSeries( "Team Zero", async series => {
 
-            { type: "Team", ns: "teams", base: baseNamespace },
-            { name: "Team Zero" }
+            assert.strictEqual( series[ "http://schema.org/name" ], "Team Zero" );
 
-        );
-
-        try {
-
-            const expected = "Team Zero";
-            const actual = series[ "http://schema.org/name" ];
-            strictEqual( actual, expected );
-
-        } finally {
-
-            await dispose();
-
-        }
+        } );
 
     },
 
     async CreateASeriesThenAddUpdateAndRemoveSomeProperties() {
 
-        return "pending";
+        await withCreatedTeamSeries( "Team One", async series => {
+
+            const { "@id": teamId } = series;
+            const updated = await commandProcessor.process( {
+
+                "@context": [ context, simpleTeamsContext ],
+                series: {
+
+                    "@id": teamId,
+                    [ batchKeys.base ]: baseNamespace
+
+                },
+                commands: [ {
+
+                    "@type": commandTypes.setValues,
+                    values: {
+
+                        age: 41,
+                        sex: "Female",
+                        nationality: "DER"
+
+                    }
+
+                }, {
+
+                    "@type": commandTypes.deleteValues,
+                    keys: [ "nationality", "age" ]
+
+                }, {
+
+                    "@type": commandTypes.setValues,
+                    values: {
+
+                        name: "SJGR"
+
+                    }
+
+                } ]
+
+            } );
+            assert.strictEqual( updated[ "http://schema.org/name" ], "SJGR" );
+            assert.strictEqual( updated[ "https://vocab.openteamspace.com/sex" ], "Female" );
+
+        } );
 
     },
 

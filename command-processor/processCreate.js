@@ -1,8 +1,10 @@
+const { batchKeys } = require( "./vocab" );
+
 module.exports = async ( series, command ) => {
 
     const created = await series.createSeries( command.options );
-    if ( command.props )
-        created.set( command.props );
+    const props = command[ batchKeys.props ];
+    if ( props ) created.set( props );
     await created.save();
     return created;
 

@@ -105,7 +105,14 @@ class Series {
     }
 
     // top level props
-    set( termOrHash, value ) {
+    remove( term ) {
+
+        if ( !term ) return;
+        delete this[ DOC ][ term ];
+
+    }
+
+    set( termOrHash, maybeValue ) {
 
         if ( !termOrHash ) return;
         if ( typeof termOrHash === "object" ) {
@@ -121,7 +128,7 @@ class Series {
 
             const term = termOrHash;
             if ( term.startsWith( "@" ) ) throw new Error( "Terms must not start with @" );
-            this[ DOC ][ term ] = clone( value );
+            this[ DOC ][ term ] = clone( maybeValue );
 
         }
 
@@ -129,7 +136,7 @@ class Series {
 
     get( term ) {
 
-        return clone( this[ DOC ][ term ] );
+        return clone( this[ DOC ][ term ] ) || null;
 
     }
 
