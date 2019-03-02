@@ -1,0 +1,16 @@
+{
+    "fieldTypes": {
+
+        "text": "domain.known.fieldTypes.text"
+
+    },
+    "props": {
+        "name": {
+            "label": "Name"
+        },
+        "created": {
+            "label": "Created",
+            "edit": "domain.fieldTypes.date-time"
+        }
+    }
+}
