@@ -1,15 +1,17 @@
 const { runTests } = require( "./test-utils.js" );
 const { join } = require( "path" );
 const assert = require( "assert" );
+const { buildLocalContextMap, context } = require( "./test-utils" );
 
 // file storage
 const data = join( __dirname, "data" );
 const storage = require( "./storage/file/storage" )( data );
+
 // series
-const context = "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld";
 const localContextMap = process.env.USE_LOCAL_CONTEXT && buildLocalContextMap();
+
 const series = require( "./series" )( { storage, context, localContextMap } );
-const commandProcessor = require( "./command-processor" )( series );
+const commandProcessor = require( "./command-processor" )( { series, localContextMap } );
 const { commandTypes, batchKeys } = require( "./command-processor" );
 
 const baseNamespace = "https://app.openteamspace.com";
@@ -19,7 +21,12 @@ const simpleTeamsContext = {
     series: batchKeys.series,
     props: batchKeys.props,
     keys: batchKeys.keys,
-    values: batchKeys.values
+    values: batchKeys.values,
+    base: batchKeys.base,
+    items: batchKeys.items,
+    options: batchKeys.options,
+    type: batchKeys.type,
+    ns: batchKeys.ns
 
 };
 
@@ -27,10 +34,9 @@ const simpleTeamsContext = {
 
     The purpose of this command processor is to take batches of commands for a series containing specific mutations and to process them, returning the resulting series
 
-
 */
 
-async function createSeries( options, props ) {
+async function createSeries( options, props, items ) {
 
     const series = await commandProcessor.process( [ {
 
@@ -39,7 +45,8 @@ async function createSeries( options, props ) {
 
             "@type": commandTypes.create,
             props,
-            options
+            options,
+            items
 
         } ]
 
@@ -84,12 +91,32 @@ async function withCreatedTeamSeries( name, wrapped ) {
 
 }
 
+async function withCommandBatch( series, commands, wrapped ) {
+
+    const { "@id": seriesId } = series;
+    const updated = await commandProcessor.process( {
+
+        "@context": [ context, simpleTeamsContext ],
+        series: {
+
+            "@id": seriesId,
+            base: baseNamespace
+
+        },
+        commands
+
+    } );
+    await wrapped( updated );
+
+}
+
 runTests( "Command receiver tests", {
 
     async CreateASeriesWithSomeProperties() {
 
         await withCreatedTeamSeries( "Team Zero", async series => {
 
+            assert.strictEqual( series[ "@id" ].substring( 0, baseNamespace.length + 1 ), `${baseNamespace}/` );
             assert.strictEqual( series[ "http://schema.org/name" ], "Team Zero" );
 
         } );
@@ -100,46 +127,40 @@ runTests( "Command receiver tests", {
 
         await withCreatedTeamSeries( "Team One", async series => {
 
-            const { "@id": teamId } = series;
-            const updated = await commandProcessor.process( {
+            const commands = [ {
 
-                "@context": [ context, simpleTeamsContext ],
-                series: {
+                "@type": commandTypes.setValues,
+                values: {
 
-                    "@id": teamId,
-                    [ batchKeys.base ]: baseNamespace
+                    age: 41,
+                    sex: "Female",
+                    nationality: "DER"
 
-                },
-                commands: [ {
+                }
 
-                    "@type": commandTypes.setValues,
-                    values: {
+            }, {
 
-                        age: 41,
-                        sex: "Female",
-                        nationality: "DER"
+                "@type": commandTypes.deleteValues,
+                keys: [ "nationality", "age" ]
 
-                    }
+            }, {
 
-                }, {
+                "@type": commandTypes.setValues,
+                values: {
 
-                    "@type": commandTypes.deleteValues,
-                    keys: [ "nationality", "age" ]
+                    name: "SJGR"
 
-                }, {
+                }
 
-                    "@type": commandTypes.setValues,
-                    values: {
+            } ];
+            await withCommandBatch( series, commands, async updated => {
 
-                        name: "SJGR"
-
-                    }
-
-                } ]
+console.log( updated );
+                assert.strictEqual( updated[ "http://schema.org/name" ], "SJGR" );
+                assert.strictEqual( updated[ "https://vocab.openteamspace.com/age" ], undefined );
+                assert.strictEqual( updated[ "https://vocab.openteamspace.com/sex" ], "Female" );
 
             } );
-            assert.strictEqual( updated[ "http://schema.org/name" ], "SJGR" );
-            assert.strictEqual( updated[ "https://vocab.openteamspace.com/sex" ], "Female" );
 
         } );
 
@@ -147,7 +168,32 @@ runTests( "Command receiver tests", {
 
     async CreateASeriesWithSomeItems() {
 
-        return "pending";
+        await withCreatedTeamSeries( "Team Zero", async series => {
+
+            const commands = [ {
+
+                "@type": commandTypes.setItems,
+                items: [ {
+
+                    "name": "oranges",
+                    "count": 59
+
+                }, {
+
+                    "name": "apples",
+                    "count": 576
+
+                } ]
+
+            } ];
+            await withCommandBatch( series, commands, async updated => {
+
+//console.log( JSON.stringify( updated, null, 3 ) );
+                throw new Error( "Not yet implemented" );
+
+            } );
+
+        } );
 
     },
 

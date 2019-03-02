@@ -3,9 +3,10 @@ const processCreate = require( "./processCreate" );
 const processDelete = require( "./processDelete" );
 const processSetValues = require( "./processSetValues" );
 const processDeleteValues = require( "./processDeleteValues" );
-const { context, commandTypes, batchKeys, props } = require( "./vocab" );
-
+const processSetItems = require( "./processSetItems" );
+const { simpleTeamsVocab, context, commandTypes, batchKeys, props } = require( "./vocab" );
 const allCommandTypes = Object.values( commandTypes );
+let documentLoader = null;
 
 function determineCommandType( command ) {
 
@@ -26,9 +27,10 @@ function extractSeriesId( series ) {
 
 }
 
-async function preprocess( batch ) {
+async function preProcess( batch ) {
 
-    const expanded = await jsonld.expand( batch );
+    const options = documentLoader ? { documentLoader } : null;
+    const expanded = await jsonld.expand( batch, options );
     if ( expanded.length !== 1 ) throw new Error( `Expected to find exactly one batch, but found ${expanded.length}` );
     const [ expandedBatch ] = expanded;
     const series = expandedBatch[ batchKeys.series ];
@@ -41,7 +43,7 @@ async function preprocess( batch ) {
         commands: await Promise.all( commands.map( async command => ( {
 
             type: determineCommandType( command ),
-            raw: ( await jsonld.compact( command, context ) )
+            raw: ( await jsonld.compact( command, { "@vocab": simpleTeamsVocab }, options ) )
 
         } ) ) )
 
@@ -49,22 +51,28 @@ async function preprocess( batch ) {
 
 }
 
-function validate( queue ) {
+function validate( batch ) {
 
-    if ( !queue.seriesId && queue.commands.some( command => command[ "@type" ] !== commandTypes.created ) )
+    if ( !batch.seriesId && batch.commands.some( command => command[ "@type" ] !== commandTypes.created ) )
         throw new Error( "Commands other than Create require a series to be specified" );
-    const untypedCommands = queue.commands.filter( command => !command.type );
+    const untypedCommands = batch.commands.filter( command => !command.type );
     if ( untypedCommands.length )
         throw new Error( `Untyped (or unrecognised) commands found: ${JSON.stringify( untypedCommands )}` );
+    batch.commands.forEach( command => {
+
+        if ( command.type === commandTypes.create && !( command.raw && command.raw.options ) )
+            throw new Error( `Creating a series requires options: ${JSON.stringify( command )}` );
+
+    } );
 
 }
 
 async function process( series, batch ) {
 
-    const queue = await preprocess( batch );
-    validate( queue );
+    const preProcessed = await preProcess( batch );
+    validate( preProcessed );
     let working = undefined;
-    const { seriesId, commands } = queue;
+    const { seriesId, commands } = preProcessed;
     const options = { seriesId };
     for( const { type, raw } of commands ) {
 
@@ -87,6 +95,10 @@ async function process( series, batch ) {
                 working = await processDeleteValues( series, raw, options );
                 break;
 
+            case commandTypes.setItems:
+                working = await processSetItems( series, raw, options );
+                break;
+
             default:
                 throw new Error( `Unhandled: ${type} command ${JSON.stringify( raw )}` );
 
@@ -98,7 +110,29 @@ async function process( series, batch ) {
 
 }
 
-module.exports = series => ( { process: process.bind( this, series ) } );
+module.exports = ( { series, localContextMap } ) => {
+
+    if ( localContextMap ) {
+
+        const keys = Object.keys( localContextMap );
+        documentLoader = function( url ) {
+
+            const matched = keys.find( key => url.endsWith( key ) );
+            if ( matched ) return { document: localContextMap[ matched ] };
+            else {
+
+                const err = new Error( `No local context mapping for ${url}` );
+                console.error( err );
+                throw err;
+
+            }
+
+        };
+
+    }
+    return { process: process.bind( this, series ) };
+
+};
 module.exports.commandTypes = commandTypes;
 module.exports.batchKeys = batchKeys;
 module.exports.props = props;

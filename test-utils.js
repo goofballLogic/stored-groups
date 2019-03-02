@@ -1,5 +1,12 @@
+const { readFileSync } = require( "fs" );
+const { join } = require( "path" );
+
+const context = "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld";
+
 module.exports = {
 
+    buildLocalContextMap,
+    context,
     runTests,
     runTestsSequentially
 
@@ -51,5 +58,22 @@ function runTests( fixtureName, fixture ) {
             if ( results.some( ok => !ok ) ) process.exit( 1 );
 
         } );
+
+}
+
+
+function readJSON( relativePath ) {
+
+    return JSON.parse( readFileSync( join( __dirname, relativePath ) ) );
+
+}
+
+function buildLocalContextMap() {
+
+    return {
+
+        [ context ]: readJSON( "./design/things/context.jsonld" )
+
+    };
 
 }

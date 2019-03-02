@@ -4,10 +4,13 @@ module.exports = async ( series, command, { seriesId } ) => {
 
     const target = await series.loadSeries( seriesId );
     if ( !target ) return undefined;
-    const { values } = command;
-    if ( values ) {
+    const items = command[ batchKeys.items ];
+    if ( items ) {
 
-        target.set( values );
+        if ( Array.isArray( items ) )
+            items.forEach( item => target.data( item ) );
+        else
+            target.data( items );
         await target.save();
 
     }

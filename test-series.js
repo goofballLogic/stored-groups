@@ -1,15 +1,13 @@
 const assert = require( "assert" );
-
 const { join } = require( "path" );
-const { readFileSync } = require( "fs" );
+const { buildLocalContextMap, context } = require( "./test-utils" );
+
 const data = join( __dirname, "data" );
 const storage = require( "./storage/file/storage" )( data );
 
-const context = "https://raw.githubusercontent.com/goofballLogic/stored-groups/master/design/things/context.jsonld";
 const baseNamespace = "https://app.openteamspace.com";
 
 const localContextMap = process.env.USE_LOCAL_CONTEXT && buildLocalContextMap();
-
 const {
 
     createSeries,
@@ -229,20 +227,3 @@ async function run() {
 }
 
 run();
-
-
-function readJSON( relativePath ) {
-
-    return JSON.parse( readFileSync( join( __dirname, relativePath ) ) );
-
-}
-
-function buildLocalContextMap() {
-
-    return {
-
-        [ context ]: readJSON( "./design/things/context.jsonld" )
-
-    };
-
-}
