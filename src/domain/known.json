@@ -1,7 +1,27 @@
 {
     "fieldTypes": {
 
-        "text": "domain.known.fieldTypes.text"
+        "hyperlink": "domain.known.fieldTypes.hyperlink",
+        "dateTime": "xsd:date-time",
+        "number": "xsd:float",
+        "string": "xsd:string",
+        "nav": {
+
+            "edit": "domain.known.fieldTypes.navigation.edit",
+            "series": "domain.known.fieldTypes.navigation.series",
+            "collectionMember": "domain.known.fieldTypes.navigation.collection-member",
+            "addCollectionMember": "domain.known.fieldTypes.navigation.add-collection-member"
+
+        }
+
+    },
+    "types": {
+
+        "valuesForm": "domain.known.types.values-form",
+        "indexForm": "domain.known.types.index-form",
+        "commandForm": "domain.known.types.command-form",
+        "editValuesCommand": "domain.known.types.edit-values-command",
+        "idMap": "IdMap"
 
     },
     "props": {
@@ -10,7 +30,7 @@
         },
         "created": {
             "label": "Created",
-            "edit": "domain.fieldTypes.date-time"
+            "editFieldType": "xsd:date-time"
         }
     }
 }
