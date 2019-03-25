@@ -40,8 +40,6 @@ class Field {
 
     static build( { key, value, values, types, label } ) {
 
-        if ( !value ) return undefined;
-
         const fieldTypes = asArray( values[ "@type" ] );
         const knownProp = known.props[ key ] || {};
         types = types || {

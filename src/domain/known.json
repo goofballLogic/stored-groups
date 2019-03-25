@@ -1,26 +1,27 @@
 {
     "fieldTypes": {
 
-        "hyperlink": "domain.known.fieldTypes.hyperlink",
+        "hyperlink": "domain_known_fieldTypes_hyperlink",
         "dateTime": "xsd:date-time",
         "number": "xsd:float",
         "string": "xsd:string",
         "nav": {
 
-            "edit": "domain.known.fieldTypes.navigation.edit",
-            "series": "domain.known.fieldTypes.navigation.series",
-            "collectionMember": "domain.known.fieldTypes.navigation.collection-member",
-            "addCollectionMember": "domain.known.fieldTypes.navigation.add-collection-member"
+            "edit": "domain_known_fieldTypes_navigation_edit",
+            "series": "domain_known_fieldTypes_navigation_series",
+            "collectionMember": "domain_known_fieldTypes_navigation_collection-member",
+            "addCollectionMember": "domain_known_fieldTypes_navigation_add-collection-member"
 
         }
 
     },
     "types": {
 
-        "valuesForm": "domain.known.types.values-form",
-        "indexForm": "domain.known.types.index-form",
-        "commandForm": "domain.known.types.command-form",
-        "editValuesCommand": "domain.known.types.edit-values-command",
+        "valuesForm": "domain_known_types_values-form",
+        "indexForm": "domain_known_types_index-form",
+        "commandForm": "domain_known_types_command-form",
+        "editValuesCommand": "domain_known_types_edit-values-command",
+        "addMemberCommand": "domain_known_types_add-member-command",
         "idMap": "IdMap"
 
     },
