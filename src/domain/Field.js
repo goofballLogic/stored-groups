@@ -49,7 +49,7 @@ class Field {
 
         };
         label = label || knownProp.label || key;
-
+        if ( typeof value === "undefined" ) value = null;
         return new Field( {
 
             discriminator: key,

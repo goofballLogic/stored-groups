@@ -48,8 +48,18 @@ module.exports = {
         const addItemToMembersForms = await navigateToAddItemToMembersLink.go();
 
         console.log( "Forms for add item to members" );
-        console.log( addItemToMembersForms );
-//        console.dir( addItemToMembersForms, { depth: 5 } );
+        console.dir( addItemToMembersForms, { depth: 5 } );
+
+        const addItemToMembersForm = addItemToMembersForms.find( x => x.type.includes( "domain_known_types_add-member-command" ) );
+        const added = await addItemToMembersForm.save( {
+
+            "familyName": "Gibson",
+            "givenName": "Hawk",
+            "jobTitle": "Chief Mouser",
+            "created": new Date().toISOString()
+
+        } );
+console.log( added );
 
     }
 
