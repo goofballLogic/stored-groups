@@ -1,33 +1,30 @@
 const formsForSeries = require( "./forms" );
-
 const reverse = x => x.split( "" ).reverse().join( "" );
+
+const indexFormType = "domain_known_types_index-form";
+const valuesFormType = "domain_known_types_values-form";
+const editValueCommandType = "domain_known_types_edit-values-command";
+const editNavigationFieldType = "domain_known_fieldTypes_navigation_edit";
+const addMemberCommandType = "domain_known_types_add-member-command";
 
 module.exports = {
 
     async initialize( { user, root } ) {
 
         const forms = await formsForSeries( root );
-        console.log( "Forms for the root series", forms );
-        //console.dir( forms, { depth: 5 } );
 
-        console.log( "Navigate using the first link in the index form" );
-        var indexForm = forms.find( form => form.type.includes( "domain_known_types_index-form" ) );
-        var firstField = indexForm.fields.values().next().value;
-        const seriesBForms = await firstField.go();
+        console.log( "Navigate to the first team, using the first link in the index form" );
+        var listOfTeams = forms.find( form => form.type.includes( indexFormType ) );
+        var linkToFirstTeam = listOfTeams.fields.values().next().value;
+        const teamForms = await linkToFirstTeam.go();
 
-        console.log( "Forms for the series targetted by the first navigation field [series B]", seriesBForms );
-        //console.dir( seriesBForms, { depth: 5 } );
+        console.log( "Follow the edit-values command nav of the values-form for the team series" );
+        const teamValuesForm = teamForms.find( x => x.type.includes( valuesFormType ) );
+        const linkToEditTeamValues = Array.from( teamValuesForm.fields ).find( x => x.type.includes( editNavigationFieldType ) );
+        const teamValuesEditForms = await linkToEditTeamValues.go();
 
-        console.log( "Follow the edit-values command nav of the values-form for of series B" );
-        const seriesBValuesForm = seriesBForms.find( x => x.type.includes( "domain_known_types_values-form" ) );
-        const editNav = Array.from( seriesBValuesForm.fields ).find( x => x.type.includes( "domain_known_fieldTypes_navigation_edit" ) );
-        const seriesBeditValuesForms = await editNav.go();
-
-        console.log( "Forms for editing values of series B", seriesBeditValuesForms );
-        //console.dir( seriesBeditValuesForms, { depth: 5 } );
-
-        console.log( "Update name for the edit values command" );
-        const editValuesCommandForm = seriesBeditValuesForms.find( x => x.type.includes( "domain_known_types_edit-values-command" ) );
+        console.log( "Update the team name using its edit values command form" );
+        const editValuesCommandForm = teamValuesEditForms.find( x => x.type.includes( editValueCommandType ) );
         const nameField = Array.from( editValuesCommandForm.fields ).find( x => x.discriminator === "name" );
         await editValuesCommandForm.save( {
 
@@ -35,23 +32,17 @@ module.exports = {
 
         } );
 
-        console.log( "Navigate using the members link of series B's index-form" );
-        const seriesBindexForm = seriesBForms.find( x => x.type.includes( "domain_known_types_index-form" ) );
-        const membersNav = Array.from( seriesBindexForm.fields ).find( x => x.discriminator === "members" );
+        console.log( "Follow the members link from the team series' index-form" );
+        const teamSeriesIndexForm = teamForms.find( x => x.type.includes( indexFormType ) );
+        const membersNav = Array.from( teamSeriesIndexForm.fields ).find( x => x.discriminator === "members" );
         const membersForms = await membersNav.go();
 
-        console.log( "Forms for members series" );
-        console.log( membersForms );
-
-        const membersValuesForm = membersForms.find( x => x.type.includes( "domain_known_types_values-form" ) );
-        const navigateToAddItemToMembersLink = Array.from( membersValuesForm.fields ).find( x => x.discriminator === "add-item" );
-        const addItemToMembersForms = await navigateToAddItemToMembersLink.go();
-
-        console.log( "Forms for add item to members" );
-        console.dir( addItemToMembersForms, { depth: 5 } );
-
-        const addItemToMembersForm = addItemToMembersForms.find( x => x.type.includes( "domain_known_types_add-member-command" ) );
-        const added = await addItemToMembersForm.save( {
+        console.log( "Add new member" );
+        const membersValuesForm = membersForms.find( x => x.type.includes( valuesFormType ) );
+        const navigateToTheAddItemFormsForMembers = Array.from( membersValuesForm.fields ).find( x => x.discriminator === "add-item" );
+        const addItemToMembersForms = await navigateToTheAddItemFormsForMembers.go();
+        const addItemToMembersForm = addItemToMembersForms.find( x => x.type.includes( addMemberCommandType ) );
+        const addedMemberId = await addItemToMembersForm.save( {
 
             "familyName": "Gibson",
             "givenName": "Hawk",
@@ -59,7 +50,19 @@ module.exports = {
             "created": new Date().toISOString()
 
         } );
-console.log( added );
+        console.log( "Added member id", addedMemberId );
+
+        console.log( "Find added member's forms" );
+        const membersFormsAfterAddingNewMember = await membersNav.go();
+console.dir( membersFormsAfterAddingNewMember, { depth: 5 } );
+        const membersValuesFormAfterAdd = membersFormsAfterAddingNewMember.find( x => x.type.includes( valuesFormType ) );
+
+        const navigateToAddedMemberLink = Array.from( membersValuesFormAfterAdd.fields ).find( x => x.discriminator === addedMemberId );
+
+        const addedMemberForms = await navigateToAddedMemberLink.go();
+
+console.log( "Forms for added member" );
+console.dir( addedMemberForms, { depth: 5 } );
 
     }
 

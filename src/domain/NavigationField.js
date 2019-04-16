@@ -19,16 +19,17 @@ class NavigationField extends Field {
     async go() {
 
         const go = this[ goKey ];
+console.log( go.toString() );
         if ( !go ) return undefined;
         return await go();
 
     }
 
-    static buildForCollectionMember( { key, value, formsForSeries } ) {
+    static buildForIdMapValue( { key, value } ) {
 
         if ( key === "@type" ) return null;
         const fieldTypes = [ knownFieldTypes.nav.collectionMember ];
-        return NavigationField.build( { key, value, formsForSeries, fieldTypes } );
+        return NavigationField.build( { key, value, fieldTypes } );
 
     }
 

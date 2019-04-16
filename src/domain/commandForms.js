@@ -37,11 +37,18 @@ function saveForSubType( series, subType ) {
             return async entries => await series.setValues( entries );
 
         case known.types.addMemberCommand:
-            return async entries => await series.setValues( {
+            return async entries => {
 
-                [ dateid() ]: entries
+                const memberId = entries[ "@id" ] || dateid();
+                if ( "@id" in entries ) entries[ "@id" ] = undefined;
+                await series.setValues( {
 
-            } );
+                    [ memberId ]: entries
+
+                } );
+                return memberId;
+
+            };
 
         default:
             throw new Error( `Unrecognised command type: ${subType}` );
@@ -49,6 +56,7 @@ function saveForSubType( series, subType ) {
     }
 
 }
+
 function formForSubType( { series, values, subType } ) {
 
     const property = propertiesForValues( values );
@@ -73,7 +81,7 @@ function addMemberFormForValues( series, values ) {
     if ( !values ) return undefined;
     if ( !isCollection( values ) ) return null;
     const subType = known.types.addMemberCommand;
-    return formForSubType( { series, values, subType })
+    return formForSubType( { series, values, subType } );
 
 }
 
