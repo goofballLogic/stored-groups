@@ -1,0 +1,16 @@
+{
+    "@context": "devots:node-shape.jsonld",
+    "@type": "NodeShape",
+    "property": [
+        {
+            "path": "name",
+            "name": "Team name",
+            "dataType": "xsd:string"
+        },
+        {
+            "path": "created",
+            "name": "Created",
+            "dateType": "xsd:dateTimeStamp"
+        }
+    ]
+}

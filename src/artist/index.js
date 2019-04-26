@@ -12,11 +12,9 @@ module.exports = {
     async initialize( { user, view } ) {
 
         console.log( user );
-        console.log( view );
         const teamZero = await fetch( view, x => x.name === "Team Zero" );
-        console.log( teamZero );
-        const members = await fetch( teamZero, x => x.name === "Members" );
-        console.log( members );
+        console.dir( teamZero, { depth: 4 } );
+
 
     }
 
