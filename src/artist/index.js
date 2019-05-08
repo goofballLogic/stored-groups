@@ -8,13 +8,17 @@ async function fetch( view, indexPredicate ) {
 
 module.exports = {
 
-
     async initialize( { user, view } ) {
 
         console.log( user );
         const teamZero = await fetch( view, x => x.name === "Team Zero" );
-        console.dir( teamZero, { depth: 4 } );
 
+        console.log( "\n\nHere is Team Zero\n" );
+        console.dir( teamZero, { depth: 6 } );
+
+        // const members = await fetch( teamZero, x => x.name === "Members" );
+        // console.log( "\n\nHere are the members\n" );
+        // console.dir( members, { depth: 4 } );
 
     }
 

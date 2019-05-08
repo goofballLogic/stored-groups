@@ -1,19 +1,20 @@
 const artist = require( "../artist" );
+const { values: valuesCommands } = require( "./commands" );
+const { discriminator } = require( "./symbols" );
 
-const discriminator = Symbol( "discriminator" );
 module.exports = {
 
-    async initialize( { user, root } ) {
+    discriminator,
+    async initialize( { user, root, schemaLoader } ) {
 
-        const view = await buildView( [], root );
+        const view = await buildView( [], root, schemaLoader );
         artist.initialize( { user, view } );
 
     }
 
 };
 
-
-async function buildView( path, node ) {
+async function buildView( path, node, schemaLoader ) {
 
     const values = await node.values();
     const rawIndex = await node.index();
@@ -27,7 +28,7 @@ async function buildView( path, node ) {
                 go: async function () {
 
                     const newNode = await value.go();
-                    return buildView( [ ...path, key ], newNode );
+                    return buildView( [ ...path, key ], newNode, schemaLoader );
 
                 }
 
@@ -35,6 +36,11 @@ async function buildView( path, node ) {
 
         } ), {} )
         : null;
-    return { path, values, index };
+    const commands = {
+
+        values: await valuesCommands( path, node, schemaLoader, values )
+
+    }
+    return { path, values, index, commands };
 
 }
