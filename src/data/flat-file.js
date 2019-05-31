@@ -33,7 +33,7 @@ function series( folder ) {
             if ( !hash ) return values;
 
             const updated = { ...values, ...hash };
-            return ( await save( updated, valuesPath ) );
+            return await save( updated, valuesPath );
 
         },
 

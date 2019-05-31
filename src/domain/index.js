@@ -1,10 +1,11 @@
 const artist = require( "../artist" );
 const { values: valuesCommands } = require( "./commands" );
-const { discriminator } = require( "./symbols" );
+const symbols = require( "./symbols" );
+const { discriminator } = symbols;
 
 module.exports = {
 
-    discriminator,
+    symbols,
     async initialize( { user, root, schemaLoader } ) {
 
         const view = await buildView( [], root, schemaLoader );

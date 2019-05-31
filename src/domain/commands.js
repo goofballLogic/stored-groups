@@ -1,8 +1,7 @@
 const {
 
     discriminator,
-    editValuesCommand,
-    schema: schemaSymbol
+    editValuesCommand
 
 } = require( "./symbols" );
 
@@ -13,7 +12,8 @@ async function editValues( path, node, schemaLoader, values ) {
     return {
 
         [ discriminator ]: editValuesCommand,
-        [ schemaSymbol ]: schema
+        schema,
+        execute: async values => await node.setValues( values )
 
     };
 
