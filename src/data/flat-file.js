@@ -3,6 +3,8 @@ const { load, save, purgeFolder } = require( "./flat-file-operations" );
 const { initialize } = require( "../domain" );
 const schemaLoader = require( "./schemaLoader" );
 
+let options;
+
 function series( folder ) {
 
     const valuesPath = join( folder, "./values.json" );
@@ -55,6 +57,8 @@ function series( folder ) {
             Object.entries( hash ).forEach( ( [ key, value ] ) => {
 
                 if ( key in index ) throw new Error( `Key already exists in this index: ${key}` );
+                if ( typeof value !== "object" ) throw new Error( `Index value must be an object. ${key} is of type ${typeof value}: ${value}` );
+                if ( !value ) throw new Error( `Index value must be truthy. ${key} is ${value}` );
                 index[ key ] = value;
 
             } );
@@ -96,11 +100,26 @@ function series( folder ) {
 
 module.exports = {
 
+    configure( overrideOptions ) {
+
+        if ( overrideOptions ) {
+
+            options = Object.assign( options || {}, overrideOptions );
+
+        } else {
+
+            options = overrideOptions;
+
+        }
+
+    },
+
     async login( user ) {
 
-        const teamsFolder = join( __dirname, "../../data/teams" );
+        const teamsFolder = ( options && options.folder ) || join( __dirname, "../../data/teams" );
         const teamsSeries = series( teamsFolder );
-        initialize( { user, root: teamsSeries, schemaLoader } );
+        const next = ( options && options.initialize ) || initialize;
+        next( { user, root: teamsSeries, schemaLoader } );
         //require( "./flat-file-test" )( series );
 
     }

@@ -24,6 +24,7 @@ async function buildView( path, node, schemaLoader ) {
 
             ...prev,
             [ [ ...path, key ].join( "__" ) ]: {
+
                 ...value,
                 [discriminator]: key,
                 go: async function () {
