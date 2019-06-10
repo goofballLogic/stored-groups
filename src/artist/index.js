@@ -1,14 +1,3 @@
-const { discriminator, editValuesCommand } = require( "../domain/symbols" );
-const { JSDOM } = require( "jsdom" );
-
-async function fetch( view, indexPredicate ) {
-
-    if ( !( view && view.index ) ) return undefined;
-    const item = Object.values( view.index ).find( indexPredicate );
-    return ( item && item.go ) ? await item.go() : undefined;
-
-}
-
 const div = ( key, label, value ) => `<div class="value ${key}"><span class="label">${label}</span><span class="value">${value}</span></div>`;
 const ul = lis => `<ul>${lis.join( "\n" )}</ul>`;
 const li = ( key, content ) => `<li id="${key}">${content}</li>`;
@@ -106,13 +95,14 @@ function renderView( view, render ) {
 
 module.exports = {
 
-    async initialize( { user, view } ) {
+    async initialize( { user, view, window } ) {
 
         console.log( user );
         console.log( view );
 
-        const dom = new JSDOM("<!DOCTYPE html><html><body><main></main></body></html>", { url: "http://dev.openteamspace.com/console" });
-        const container = dom.window.document.querySelector( "main" );
+
+
+        const container = window.document.querySelector( "main" );
 
         function render( html ) {
 
@@ -122,9 +112,9 @@ module.exports = {
 
         }
 
-        dom.window.addEventListener( "hashchange", async e => {
+        window.addEventListener( "hashchange", async e => {
 
-            const hashPath = dom.window.document.location.hash.substring( 1 );
+            const hashPath = window.document.location.hash.substring( 1 );
             const viewPath = view.path.join( "_" );
             if ( hashPath === viewPath ) return;
             const targetNode = view.index && view.index[ hashPath ];
@@ -142,24 +132,6 @@ module.exports = {
         } );
         renderView( view, render );
 
-        return;
-
-        const teamZero = await fetch( view, x => x.name === "Team Zero" );
-
-        console.log( "\n\nHere is Team Zero\n" );
-        console.dir( teamZero, { depth: 6 } );
-
-        const command = teamZero.commands.values.find(c => c[ discriminator ] === editValuesCommand );
-        console.log( "\n\nHere is the command\n" );
-        console.dir( command, { depth: 6 } );
-
-        console.log( "\n\nBefore and after saving\n" );
-
-        console.log( teamZero.values );
-        const reversedName = teamZero.values.name.split( "" ).reverse().join( "" );
-        await command.execute( { name: reversedName } );
-        const teamZero2 = await fetch( view, x => x.name === "Team Zero" );
-        console.log( teamZero2.values );
     }
 
 };

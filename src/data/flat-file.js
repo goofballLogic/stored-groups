@@ -3,8 +3,6 @@ const { load, save, purgeFolder } = require( "./flat-file-operations" );
 const { initialize } = require( "../domain" );
 const schemaLoader = require( "./schemaLoader" );
 
-let options;
-
 function series( folder ) {
 
     const valuesPath = join( folder, "./values.json" );
@@ -98,6 +96,8 @@ function series( folder ) {
 
 }
 
+let options;
+
 module.exports = {
 
     configure( overrideOptions ) {
@@ -119,7 +119,7 @@ module.exports = {
         const teamsFolder = ( options && options.folder ) || join( __dirname, "../../data/teams" );
         const teamsSeries = series( teamsFolder );
         const next = ( options && options.initialize ) || initialize;
-        next( { user, root: teamsSeries, schemaLoader } );
+        next( { user, root: teamsSeries, schemaLoader, window: options.window } );
         //require( "./flat-file-test" )( series );
 
     }

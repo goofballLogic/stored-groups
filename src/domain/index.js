@@ -6,10 +6,10 @@ const { discriminator } = symbols;
 module.exports = {
 
     symbols,
-    async initialize( { user, root, schemaLoader } ) {
+    async initialize( { user, root, schemaLoader, window } ) {
 
         const view = await buildView( [], root, schemaLoader );
-        artist.initialize( { user, view } );
+        artist.initialize( { user, view, window } );
 
     }
 
