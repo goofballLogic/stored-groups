@@ -1,14 +1,19 @@
 import store from "../src/data/idb";
 
-store.configure( {
+( async function() {
 
-    storeName: "idb-test",
-    window: window
+    store.configure( {
 
-} );
+        storeName: "idb-test",
+        window: window
 
-require( "../src/data/data-acceptance-tests" )( store ).then(
+    } );
+    await store.purgeForUser( { username: "me" } );
 
-    () => console.log( "done" )
+    require( "../src/data/data-acceptance-tests" )( store ).then(
 
-);
+        () => console.log( "done" )
+
+    );
+
+}() );

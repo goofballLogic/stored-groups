@@ -51,7 +51,7 @@ function series( folder ) {
         async addToIndex( hash ) {
 
             if ( !( hash && typeof hash === "object" ) ) throw new Error( `Invalid key-value pairs to index: ${hash}` );
-            const index = await load( indexPath ) || {};
+            const index = ( await load( indexPath ) ) || {};
             Object.entries( hash ).forEach( ( [ key, value ] ) => {
 
                 if ( key in index ) throw new Error( `Key already exists in this index: ${key}` );
@@ -70,7 +70,7 @@ function series( folder ) {
 
             const index = await load( indexPath );
             if ( !( keys && keys.length ) ) return index;
-            if ( !Array.isArray( keys ) ) keys = [ keys ];
+            if ( !Array.isArray( keys ) ) keys = Array.from( arguments );
             await Promise.all( keys.map( async key => {
 
                 if ( key in index ) index[ key ] = undefined;
