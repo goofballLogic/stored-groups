@@ -4,8 +4,7 @@ import store from "../src/data/idb";
 
     store.configure( {
 
-        storeName: "idb-test",
-        window: window
+        storeName: "idb-test"
 
     } );
     await store.purgeForUser( { username: "me" } );

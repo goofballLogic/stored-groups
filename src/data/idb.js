@@ -4,8 +4,6 @@ import { Store, set, get, clear, del } from "idb-keyval";
 
 const makePath = ( prev, step ) => `${prev}/${step}`;
 
-
-
 function series( store, namespace = "" ) {
 
     const indexPath = makePath( namespace, "index" );
@@ -161,9 +159,17 @@ export default {
     async login( user ) {
 
         const store = storeForUser( user );
+window.i = { store, get, set };
         const teamsSeries = series( store );
         const next = ( options && options.initialize ) || initialize;
-        next( { user, root: teamsSeries, schemaLoader } )
+        next( {
+
+            user,
+            root: teamsSeries,
+            schemaLoader,
+            window: options.window
+
+        } );
 
     }
 

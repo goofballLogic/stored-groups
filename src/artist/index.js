@@ -100,15 +100,15 @@ module.exports = {
         console.log( user );
         console.log( view );
 
-
-
         const container = window.document.querySelector( "main" );
 
         function render( html ) {
 
             container.innerHTML = html;
             console.log( container.outerHTML );
-            container.querySelector( "a" ).click();
+            const maybeA = container.querySelector( "a" )
+            if ( maybeA ) setTimeout( () => maybeA.click(), 500 );
+            else console.log( "No links to follow :<" );
 
         }
 

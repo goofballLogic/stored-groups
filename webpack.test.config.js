@@ -1,4 +1,7 @@
 const path = require( "path" );
+
+const babelLoader = { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" };
+
 module.exports = [ {
 
     mode: "development",
@@ -10,9 +13,21 @@ module.exports = [ {
         libraryTarget: "umd"
     },
     module: {
-        rules: [
-            { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
-        ]
+        rules: [ babelLoader ]
+    }
+
+}, {
+
+    mode: "development",
+    entry: "./test/scratch-pad.js",
+    output: {
+        path: path.resolve( __dirname, "test/dist" ),
+        filename: "scratch-pad.js",
+        publicPath: "/",
+        libraryTarget: "umd"
+    },
+    module: {
+        rules: [ babelLoader ]
     }
 
 } ];
