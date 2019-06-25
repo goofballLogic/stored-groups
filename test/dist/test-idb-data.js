@@ -261,7 +261,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var idb_
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("const {\n  discriminator,\n  editValuesCommand\n} = __webpack_require__(/*! ./symbols */ \"./src/domain/symbols.js\");\n\nasync function editValues(path, node, schemaLoader, values) {\n  const {\n    fetchSchemaFor\n  } = schemaLoader;\n  const schema = await fetchSchemaFor(values);\n  return {\n    [discriminator]: editValuesCommand,\n    schema,\n    execute: async values => await node.setValues(values)\n  };\n}\n\nmodule.exports = {\n  async values(path, node, schemaLoader, values) {\n    if (!values) return [];\n    return [await editValues(path, node, schemaLoader, values)];\n  }\n\n};\n\n//# sourceURL=webpack:///./src/domain/commands.js?");
+eval("const {\n  discriminator,\n  editValuesCommand\n} = __webpack_require__(/*! ./symbols */ \"./src/domain/symbols.js\");\n\nasync function editValues(_, node, schemaLoader, values) {\n  const {\n    fetchSchemaFor\n  } = schemaLoader;\n  const schema = await fetchSchemaFor(values);\n  return {\n    [discriminator]: editValuesCommand,\n    schema,\n    execute: async values => await node.setValues(values)\n  };\n}\n\nmodule.exports = {\n  async values(path, node, schemaLoader, values) {\n    if (!values) return [];\n    return [await editValues(path, node, schemaLoader, values)];\n  }\n\n};\n\n//# sourceURL=webpack:///./src/domain/commands.js?");
 
 /***/ }),
 

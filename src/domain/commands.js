@@ -5,7 +5,7 @@ const {
 
 } = require( "./symbols" );
 
-async function editValues( path, node, schemaLoader, values ) {
+async function editValues( _, node, schemaLoader, values ) {
 
     const { fetchSchemaFor } = schemaLoader;
     const schema = await fetchSchemaFor( values );
