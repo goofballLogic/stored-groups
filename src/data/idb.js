@@ -1,4 +1,5 @@
 const { initialize } = require( "../domain" );
+const schemaLoader = require( "./idb-schemaLoader" );
 
 import { Store, set, get, clear, del } from "idb-keyval";
 
@@ -6,8 +7,8 @@ const makePath = ( prev, step ) => `${prev}/${step}`;
 
 function series( store, namespace = "" ) {
 
-    const indexPath = makePath( namespace, "index" );
-    const valuesPath = makePath( namespace, "values" );
+    const indexPath = `${namespace}__index`;
+    const valuesPath = `${namespace}__values`;
 
     function decorateIndex( index ) {
 
@@ -96,7 +97,7 @@ function series( store, namespace = "" ) {
         async setValues( hash ) {
 
             const values = await loadValues();
-            // if ( !hash ) return values;
+            if ( !hash ) return values;
 
             const updated = { ...values, ...hash };
             return await saveValues( updated );
@@ -116,10 +117,6 @@ function series( store, namespace = "" ) {
 
 
     };
-
-}
-
-function schemaLoader() {
 
 }
 

@@ -8,41 +8,87 @@ module.exports = {
     symbols,
     async initialize( { user, root, schemaLoader, window } ) {
 
-        const view = await buildView( [], root, schemaLoader );
+        const view = await buildView( [], root, root, schemaLoader );
         artist.initialize( { user, view, window } );
 
     }
 
 };
 
-async function buildView( path, node, schemaLoader ) {
+const buildKey = bits => bits.join( "/" );
+
+async function buildView( path, node, root, schemaLoader ) {
 
     const values = await node.values();
     const rawIndex = await node.index();
+
+    function entryKey( key ) {
+
+        return buildKey( [ ...path, key ] );
+
+    }
+
+    function entryValue( key, value ) {
+
+        return {
+
+            ...value,
+            [discriminator]: key,
+            go: async function () {
+
+                const newNode = await value.go();
+                return buildView( [ ...path, key ], newNode, root, schemaLoader );
+
+            }
+
+        };
+
+    }
+
     const index = rawIndex
         ? Object.entries( rawIndex ).reduce( (prev, [key, value]) => ( {
 
             ...prev,
-            [ [ ...path, key ].join( "__" ) ]: {
-
-                ...value,
-                [discriminator]: key,
-                go: async function () {
-
-                    const newNode = await value.go();
-                    return buildView( [ ...path, key ], newNode, schemaLoader );
-
-                }
-
-            }
+            [ entryKey( key ) ]: entryValue( key, value )
 
         } ), {} )
         : null;
+
     const commands = {
 
+        nav: {
+
+            go: async function( path ) {
+
+                path = path ? Array.isArray( path ) ? path : [ path ] : [];
+                let step = null;
+                let node = root;
+                const newPath = [];
+                while( step = path.shift() ) {
+
+                    const index = await node.index();
+                    const indexStep = index[ step ];
+                    if ( !indexStep ) return undefined;
+                    node = await indexStep.go();
+                    newPath.push( step );
+
+                }
+                return await buildView( newPath, node, root, schemaLoader );
+
+            }
+
+        },
         values: await valuesCommands( path, node, schemaLoader, values )
 
-    }
-    return { path, values, index, commands };
+    };
+
+    return {
+
+        path,
+        values,
+        index,
+        commands
+
+    };
 
 }

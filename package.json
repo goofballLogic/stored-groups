@@ -13,13 +13,17 @@
     "@babel/core": "^7.4.5",
     "babel-loader": "^8.0.6",
     "jsdom": "^15.1.1",
+    "json-loader": "^0.5.7",
     "webpack": "^4.33.0",
     "webpack-cli": "^3.1.2"
   },
   "scripts": {
     "watch-test-static": "fswatch ./src --one-per-batch --recursive | xargs -n 1 sh -c 'date +%H:%M:%S;node test/test-static;echo\n\n\n'",
     "test": "echo $'\n\n\n\n\n' && clear && node test/test-static",
-    "pack": "./node_modules/.bin/webpack-cli --config webpack.test.config.js"
+    "watch-pack": "./node_modules/.bin/webpack-cli --watch --config webpack.test.config.js",
+    "pack": "./node_modules/.bin/webpack-cli --config webpack.test.config.js",
+    "test-flat-file-data": "echo $'\n\n\n\n\n' && node test/test-flat-file-data",
+    "watch-test-flat-file-data": "fswatch ./src --one-per-batch --recursive | xargs -n 1 sh -c 'npm run test-flat-file-data;echo\n\n\n'"
   },
   "repository": {
     "type": "git",

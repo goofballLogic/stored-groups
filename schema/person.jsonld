@@ -1,0 +1,26 @@
+{
+    "@type": "NodeShape",
+    "targetClass": "Person",
+    "property": [
+        {
+            "path": "familyName",
+            "name": "Family name",
+            "dataType": "xsd:string"
+        },
+        {
+            "path": "givenName",
+            "name": "First name",
+            "dataType": "xsd:string"
+        },
+        {
+            "path": "jobTitle",
+            "name": "Job / Occupation",
+            "dataType": "xsd:string"
+        },
+        {
+            "path": "created",
+            "name": "Created",
+            "dateType": "xsd:dateTimeStamp"
+        }
+    ]
+}

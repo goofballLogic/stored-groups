@@ -21,7 +21,6 @@ function renderValue( key, value ) {
 
 function renderIdMapValues( values ) {
 
-    console.log( JSON.stringify( values, null, 3 ) );
     const items = Object.entries( values ).filter( ( [ key ] ) =>
 
         key && key[ 0 ] !== "@" && key !== "schema"
@@ -31,16 +30,14 @@ function renderIdMapValues( values ) {
         li( key, renderValues( value ) )
 
     );
-    return ul( items )
-    return "an id map";
+    return ul( items );
 
 }
 
 function renderValuesByType( values ) {
 
     const types = values[ "@type" ];
-    if( !Array.isArray( types ) ) return null;
-    if( !types.length ) return null;
+    if( !( Array.isArray( types ) && types.length ) ) return null;
     if( types.includes( "IdMap" ) ) return renderIdMapValues( values );
     return null;
 
@@ -57,24 +54,24 @@ const renderValuesByDefault = values =>
 
 const renderValues = values => renderValuesByType( values ) || renderValuesByDefault( values );
 
-const renderViewValues = parentView => ( parentView && parentView.values ) ? renderValues( parentView.values ) : "";
+const renderViewValues = view => ( view && view.values ) ? renderValues( view.values ) : "";
 
-const renderIndex = parentView =>
+const renderIndex = view =>
 
-    ( parentView && parentView.index )
+    ( view && view.index )
 
         ? `<nav>
-            ${Object.entries( parentView.index ).reduce( ( prev, [ path, view ] ) =>
+            ${Object.entries( view.index ).reduce( ( prev, [ path, childView ] ) =>
 
                 `${prev}
                 <a href="#${path}" class="view">
                     ${
 
-                        view.thumbnail ? `<img class="view-thumbnail" src="${view.thumbnail}" />` : ""
+                        childView.thumbnail ? `<img class="view-thumbnail" src="${childView.thumbnail}" />` : ""
 
                     }<span class="name">${
 
-                        view.name || view.path
+                        childView.name || childView.path
 
                     }</span>
                 </a>`,
@@ -84,12 +81,40 @@ const renderIndex = parentView =>
         </nav>`
         : "";
 
+function renderMainNav() {
+
+    return `
+
+        <nav class="main">
+            <a href="#" class="home">
+                <span cass="name">Home</span>
+            </a>
+        </nav>
+
+    `;
+
+}
 function renderView( view, render ) {
 
-    render(
-        renderViewValues( view ) +
-        renderIndex( view )
-    );
+console.log( "Rendering", view );
+
+    render( [
+
+        renderMainNav(),
+        renderIndex( view ),
+        renderViewValues( view )
+
+    ].join( "\n\n" ) );
+
+}
+
+function cleanFragment( window ) {
+
+    if( window.document.location.href.endsWith( "#" ) ) {
+
+        history.replaceState( null, document.title, window.location.pathname + window.location.search )
+
+    }
 
 }
 
@@ -97,40 +122,33 @@ module.exports = {
 
     async initialize( { user, view, window } ) {
 
-        console.log( user );
-        console.log( view );
-
         const container = window.document.querySelector( "main" );
+        const render = html => container.innerHTML = html;
 
-        function render( html ) {
-
-            container.innerHTML = html;
-            console.log( container.outerHTML );
-            const maybeA = container.querySelector( "a" )
-            if ( maybeA ) setTimeout( () => maybeA.click(), 500 );
-            else console.log( "No links to follow :<" );
-
-        }
-
-        window.addEventListener( "hashchange", async e => {
+        async function renderViewForPath() {
 
             const hashPath = window.document.location.hash.substring( 1 );
-            const viewPath = view.path.join( "_" );
+            cleanFragment( window );
+            const viewPath = view.path.join( "/" );
             if ( hashPath === viewPath ) return;
-            const targetNode = view.index && view.index[ hashPath ];
-            if ( !( targetNode && targetNode.go ) ) {
+            const path = hashPath.split( "/" );
+            const targetView = await view.commands.nav.go( path );
+            if ( !targetView ) {
 
-                render( `<div class="not-found">${targetNode ? "Access denied" : "Not found"}</div>` );
+                render( `<div class="not-found">Not found</div>` );
 
             } else {
 
-                view = await targetNode.go();
+                view = targetView;
                 renderView( view, render );
 
             }
 
-        } );
+        }
+
+        window.addEventListener( "hashchange", renderViewForPath );
         renderView( view, render );
+        renderViewForPath();
 
     }
 

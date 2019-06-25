@@ -1,6 +1,7 @@
 const path = require( "path" );
 
 const babelLoader = { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" };
+const jsonldLoader = { test: /\.jsonld$/, exclude: /node_modules/, loader: "json-loader" };
 
 module.exports = [ {
 
@@ -13,7 +14,7 @@ module.exports = [ {
         libraryTarget: "umd"
     },
     module: {
-        rules: [ babelLoader ]
+        rules: [ babelLoader, jsonldLoader ]
     }
 
 }, {
@@ -27,7 +28,7 @@ module.exports = [ {
         libraryTarget: "umd"
     },
     module: {
-        rules: [ babelLoader ]
+        rules: [ babelLoader, jsonldLoader ]
     }
 
 } ];

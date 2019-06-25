@@ -1,7 +1,7 @@
 const { join } = require( "path" );
 const { load, save, purgeFolder } = require( "./flat-file-operations" );
 const { initialize } = require( "../domain" );
-const schemaLoader = require( "./schemaLoader" );
+const schemaLoader = require( "./flat-file-schemaLoader" );
 
 function series( folder ) {
 
