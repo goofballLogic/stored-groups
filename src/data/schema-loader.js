@@ -1,9 +1,10 @@
+const { systemPrefix } = require( "../domain/symbols" );
+
 module.exports = {
 
     async fetchSchemaFor( doc ) {
 
-console.log( "doc", doc );
-        return doc && doc.schema;
+        return doc && doc[ `${systemPrefix}schema` ];
 
     }
 

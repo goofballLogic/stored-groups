@@ -1,7 +1,8 @@
 const {
 
     discriminator,
-    addToIndexCommand
+    addToIndexCommand,
+    systemPrefix
 
 } = require( "../domain/symbols" );
 const {
@@ -17,11 +18,13 @@ const {
 const {
 
     comment,
-    nav,
-    labelledDiv
+    div,
+    labelledDiv,
+    nav
 
 } = require( "./inputs" );
 
+const isInternal = x => x && x.startsWith( "@" ) || x.startsWith( systemPrefix );
 
 function renderValue( key, value, params ) {
 
@@ -41,15 +44,13 @@ function renderValue( key, value, params ) {
 
 function renderIdMapValues( values, params ) {
 
-    const items = Object.entries( values ).filter( ( [ key ] ) =>
+    const items = Object.entries( values )
+        .filter( ( [ key ] ) => key && !isInternal( key ) )
+        .map( ( [ key, value ] ) =>
 
-        key && key[ 0 ] !== "@" && key !== "schema"
+            li( key, renderValues( value, params ) )
 
-    ).map( ( [ key, value ] ) =>
-
-        li( key, renderValues( value, params ) )
-
-    );
+        );
     return ul( items );
 
 }
@@ -89,25 +90,27 @@ const renderIndex = view =>
 
         ? nav(
 
-            Object.entries( view.index ).reduce( ( prev, [ path, childView ] ) =>
+            Object.entries( view.index )
+                .filter( ( [ key ] ) => console.log( key ) || !isInternal( key ) )
+                .reduce( ( prev, [ path, childView ] ) =>
 
-                `${prev}
-                <a href="#${path}" class="view">
-                    ${
+                    `${prev}
+                    <a href="#${path}" class="view">
+                        ${
 
-                        childView.thumbnail
-                            ? `<img class="view-thumbnail" src="${childView.thumbnail}" />`
-                            : div( "view-thumbnail-initial", ( childView.name || childView.path || "?" ).substr( 0, 1 ) )
+                            childView.thumbnail
+                                ? `<img class="view-thumbnail" src="${childView.thumbnail}" />`
+                                : div( "view-thumbnail-initial", ( childView.name || childView.path || "?" ).substr( 0, 1 ) )
 
-                    }<span class="name">${
+                        }<span class="name">${
 
-                        childView.name || childView.path
+                            childView.name || childView.path
 
-                    }</span>
-                </a>`,
-                ""
+                        }</span>
+                    </a>`,
+                    ""
 
-            )
+                )
 
         )
         : "";
@@ -115,7 +118,7 @@ const renderIndex = view =>
 function renderIndexCommand( { path, view, command, document } ) {
 
     if ( !command ) return "";
-    const actionableFormat = view.values && view.values.actionable;
+    const actionableFormat = view.values && view.values[ `${systemPrefix}actionable` ];
     const schema = command.schema;
     const execute = command.execute.bind( command );
     switch( command[ discriminator ] ) {

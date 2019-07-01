@@ -1,7 +1,7 @@
 const artist = require( "../artist" );
 const { values: valuesCommands, index: indexCommands } = require( "./commands" );
 const symbols = require( "./symbols" );
-const { discriminator } = symbols;
+const { discriminator, systemPrefix } = symbols;
 const initializeFromTemplate = require( "./templates" );
 
 module.exports = {
@@ -10,7 +10,8 @@ module.exports = {
     async initialize( { user, root, schemaLoader, options } ) {
 
         const values = await root.values();
-        if ( !( values && values.metadata && values.metadata.version ) ) {
+        const metadata = ( values || {} )[ `${systemPrefix}metadata` ];
+        if ( !( metadata && metadata.version ) ) {
 
             await initializeFromTemplate( root, options );
 
@@ -29,11 +30,7 @@ async function buildView( path, node, root, schemaLoader, options ) {
     const values = await node.values();
     const rawIndex = await node.index();
 
-    function entryKey( key ) {
-
-        return buildKey( [ ...path, key ] );
-
-    }
+    const entryKey = key => buildKey( [ ...path, key ] );
 
     function entryValue( key, value ) {
 
@@ -53,12 +50,14 @@ async function buildView( path, node, root, schemaLoader, options ) {
     }
 
     const index = rawIndex
-        ? Object.entries( rawIndex ).reduce( (prev, [key, value]) => ( {
+        ? Object.entries( rawIndex )
+            .filter( ( [ key ] ) => !key.startsWith( systemPrefix ) )
+            .reduce( (prev, [key, value]) => ( {
 
-            ...prev,
-            [ entryKey( key ) ]: entryValue( key, value )
+                ...prev,
+                [ entryKey( key ) ]: entryValue( key, value )
 
-        } ), {} )
+            } ), {} )
         : null;
 
     const commands = {

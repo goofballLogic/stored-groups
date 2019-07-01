@@ -2,16 +2,18 @@
     "@context": "devots:node-shape.jsonld",
     "@id": "/templates/team/0.0.1",
     "values": {
-        "actionable": { "format": "{count, plural, one {a team} other {# teams}}" },
-        "template": {
+        "__ots:actionable": { "format": "{count, plural, one {a team} other {# teams}}" },
+        "__ots:template": {
             "index": {
-                "immutable": true,
+                "__ots:metadata": {
+                    "immutable": true
+                },
                 "members": {
                     "name": "Members",
                     "@id": "./members",
                     "values": {
                         "@type": "IdMap",
-                        "schema": {
+                        "__ots:schema": {
                             "@type": "NodeShape",
                             "targetClass": "Person",
                             "property": [
@@ -50,7 +52,7 @@
                 }
             },
             "values": {
-                "schema": {
+                "__ots:schema": {
                     "@type": "NodeShape",
                     "property": [
                         {

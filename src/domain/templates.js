@@ -1,3 +1,5 @@
+const { systemPrefix } = require( "./symbols" );
+
 module.exports = async function initializeFromTemplate( node, { template } ) {
 
     console.log( "Node", node );
@@ -6,7 +8,7 @@ module.exports = async function initializeFromTemplate( node, { template } ) {
     await node.setValues( {
 
         ...template.values,
-        metadata: {
+        [ `${systemPrefix}metadata` ]: {
 
             version: template[ "@id" ] || "unknown",
             template
