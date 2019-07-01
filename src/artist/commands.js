@@ -80,8 +80,25 @@ function generateIndexFields( schema ) {
 
     schema = ( schema && schema[ "@type" ] === "NodeShape" ) ? schema : defaultShape;
     return ( Array.isArray( schema.property ) ? schema.property : [].concat( schema.property ) )
-        .map( generateInputField )
+        .map( prop => `
+            ${comment( JSON.stringify( prop ) )}
+            ${generateInputField( prop )}
+        ` )
         .join( "\n" );
+
+}
+
+function generateImmutableValue( { dataType } ) {
+
+    switch( dataType ) {
+
+        case "xsd:dateTimeStamp":
+            const dts = new Date().toISOString();
+            return dts.substring( 0, 19 ) + dts.substr( -1, 1 );
+        default:
+            return undefined;
+
+    }
 
 }
 
@@ -90,14 +107,24 @@ function addToIndex( { execute, path, document, actionableFormat, schema } ) {
     const cid = `add-to-index_${path}`;
     saveHandlers[ cid ] = async function( form ) {
 
+        const generatedValues = ( ( schema && schema.property ) || [] )
+            .filter( prop => prop.immutable )
+            .reduce( ( obj, prop ) => ( {
 
-        const data = Array.from( new FormData( form ) ).reduce( ( obj, [ key, value ] ) => ( {
+                ...obj,
+                [ prop.path ]: generateImmutableValue( prop )
 
-            ...obj,
-            [ decodeURI( key ) ] : value
+            } ), {} );
 
-        } ), {} );
-        return await execute( data );
+        const data = Array.from( new FormData( form ) )
+            .reduce( ( obj, [ key, value ] ) => ( {
+
+                ...obj,
+                [ decodeURI( key ) ] : value
+
+            } ), {} );
+
+        return await execute( { ...data, ...generatedValues } );
 
     };
 

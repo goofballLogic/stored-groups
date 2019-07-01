@@ -17,7 +17,8 @@ const {
 const {
 
     comment,
-    nav
+    nav,
+    labelledDiv
 
 } = require( "./inputs" );
 
@@ -78,7 +79,7 @@ function renderViewValues( view ) {
 
     if ( !( view && view.values ) ) return "";
     const params = { indexCount: view.index ? Object.keys( view.index ).length : 0 };
-    return renderValues( view.values, params );
+    return labelledDiv( "values", "Values", renderValues( view.values, params ) );
 
 }
 
@@ -179,7 +180,6 @@ module.exports = {
 
         async function renderViewForPath( forceUpdate ) {
 
-console.log( forceUpdate );
             const hashPath = document.location.hash.substring( 1 );
             cleanFragment( window );
             if ( !forceUpdate ) {

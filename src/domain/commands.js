@@ -36,7 +36,7 @@ async function addToIndex( path, node, schemaLoader, index, values, options ) {
             const updatedIndex = await node.addToIndex( { [ nodeid ]: entry } );
             // new node
             const newNode = await updatedIndex[ nodeid ].go()
-            await newNode.setValues( { "hello": "world" } );
+            await newNode.setValues( entry );
 
         }
 
