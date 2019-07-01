@@ -1,0 +1,79 @@
+{
+    "@context": "devots:node-shape.jsonld",
+    "@id": "/templates/team/0.0.1",
+    "values": {
+        "actionable": { "format": "{count, plural, one {a team} other {# teams}}" },
+        "template": {
+            "index": {
+                "immutable": true,
+                "members": {
+                    "name": "Members",
+                    "@id": "./members",
+                    "values": {
+                        "@type": "IdMap",
+                        "schema": {
+                            "@type": "NodeShape",
+                            "targetClass": "Person",
+                            "property": [
+                                {
+                                    "path": "familyName",
+                                    "name": "Family name",
+                                    "dataType": "xsd:string"
+                                },
+                                {
+                                    "path": "givenName",
+                                    "name": "First name",
+                                    "dataType": "xsd:string"
+                                },
+                                {
+                                    "path": "jobTitle",
+                                    "name": "Job / Occupation",
+                                    "dataType": "xsd:string"
+                                },
+                                {
+                                    "path": "created",
+                                    "name": "Created",
+                                    "dateType": "xsd:dateTimeStamp"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "goals": {
+                    "name": "Goals"
+                },
+                "measurements": {
+                    "name": "Measurements"
+                },
+                "scores": {
+                    "name": "Scores"
+                }
+            },
+            "values": {
+                "schema": {
+                    "@type": "NodeShape",
+                    "property": [
+                        {
+                            "path": "name",
+                            "name": "Team name",
+                            "dataType": "xsd:string",
+                            "indexed": true
+                        },
+                        {
+                            "path": "created",
+                            "name": "Created",
+                            "dataType": "xsd:dateTimeStamp",
+                            "immutable": true
+                        },
+                        {
+                            "path": "thumbnail",
+                            "name": "Thumbnail image",
+                            "dataType": "xsd:anyURI",
+                            "indexed": true
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

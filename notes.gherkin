@@ -1,0 +1,13 @@
+Scenario: An add command is available for the index
+    Given an index
+    Then an add command is available
+
+Scenario: An immutable index has no command
+    Given an index
+    When the index is not immutable
+    Then an add command is not available
+
+Scenario: Schema for the add command
+    Given an index
+    And a template
+    Then the schema of the add command is the schema of its values

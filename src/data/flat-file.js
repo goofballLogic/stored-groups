@@ -1,7 +1,7 @@
 const { join } = require( "path" );
 const { load, save, purgeFolder } = require( "./flat-file-operations" );
 const { initialize } = require( "../domain" );
-const schemaLoader = require( "./flat-file-schemaLoader" );
+const schemaLoader = require( "./schema-loader" );
 
 function series( folder ) {
 
@@ -119,7 +119,7 @@ module.exports = {
         const teamsFolder = ( options && options.folder ) || join( __dirname, "../../data/teams" );
         const teamsSeries = series( teamsFolder );
         const next = ( options && options.initialize ) || initialize;
-        next( { user, root: teamsSeries, schemaLoader, window: options.window } );
+        next( { user, root: teamsSeries, schemaLoader, options } );
         //require( "./flat-file-test" )( series );
 
     }

@@ -1,5 +1,5 @@
 const { initialize } = require( "../domain" );
-const schemaLoader = require( "./idb-schemaLoader" );
+const schemaLoader = require( "./schema-loader" );
 
 import { Store, set, get, clear, del } from "idb-keyval";
 
@@ -156,7 +156,7 @@ export default {
     async login( user ) {
 
         const store = storeForUser( user );
-window.i = { store, get, set };
+window.i = { store, get, set, Store };
         const teamsSeries = series( store );
         const next = ( options && options.initialize ) || initialize;
         next( {
@@ -164,7 +164,7 @@ window.i = { store, get, set };
             user,
             root: teamsSeries,
             schemaLoader,
-            window: options.window
+            options
 
         } );
 

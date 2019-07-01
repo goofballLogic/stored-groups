@@ -7,9 +7,9 @@ module.exports = async function( store ) {
     let testContext = null;
     store.configure( { initialize: x => { testContext = x; } } );
 
-    console.log( " - Given login, test context user should equal \"me\"" );
-    await store.login( { username: "me" } );
-    assert.deepStrictEqual( testContext.user, { username: "me" } );
+    console.log( " - Given login, test context user should equal \"dat-user\"" );
+    await store.login( { username: "dat-user" } );
+    assert.deepStrictEqual( testContext.user, { username: "dat-user" } );
 
     const { root } = testContext;
 

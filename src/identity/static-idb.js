@@ -2,11 +2,11 @@ import data from "../data/idb";
 
 export default {
 
-    run( storeName = "static-idb" ) {
+    run( options ) {
 
         const user = { id: "test-user" };
-        const options = { storeName, window };
-console.log( options );
+        options.window = window;
+        options.storeName = options.storeName || "static-idb";
         data.configure( options );
         data.login( user );
 

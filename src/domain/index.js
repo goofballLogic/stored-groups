@@ -1,15 +1,22 @@
 const artist = require( "../artist" );
-const { values: valuesCommands } = require( "./commands" );
+const { values: valuesCommands, index: indexCommands } = require( "./commands" );
 const symbols = require( "./symbols" );
 const { discriminator } = symbols;
+const initializeFromTemplate = require( "./templates" );
 
 module.exports = {
 
     symbols,
-    async initialize( { user, root, schemaLoader, window } ) {
+    async initialize( { user, root, schemaLoader, options } ) {
 
-        const view = await buildView( [], root, root, schemaLoader );
-        artist.initialize( { user, view, window } );
+        const values = await root.values();
+        if ( !( values && values.metadata && values.metadata.version ) ) {
+
+            await initializeFromTemplate( root, options );
+
+        }
+        const view = await buildView( [], root, root, schemaLoader, options );
+        artist.initialize( { user, view, window: options.window } );
 
     }
 
@@ -17,7 +24,7 @@ module.exports = {
 
 const buildKey = bits => bits.join( "/" );
 
-async function buildView( path, node, root, schemaLoader ) {
+async function buildView( path, node, root, schemaLoader, options ) {
 
     const values = await node.values();
     const rawIndex = await node.index();
@@ -37,7 +44,7 @@ async function buildView( path, node, root, schemaLoader ) {
             go: async function () {
 
                 const newNode = await value.go();
-                return buildView( [ ...path, key ], newNode, root, schemaLoader );
+                return buildView( [ ...path, key ], newNode, root, schemaLoader, options );
 
             }
 
@@ -73,12 +80,13 @@ async function buildView( path, node, root, schemaLoader ) {
                     newPath.push( step );
 
                 }
-                return await buildView( newPath, node, root, schemaLoader );
+                return await buildView( newPath, node, root, schemaLoader, options );
 
             }
 
         },
-        values: await valuesCommands( path, node, schemaLoader, values )
+        values: await valuesCommands( path, node, schemaLoader, rawIndex, values, options ),
+        index: await indexCommands( path, node, schemaLoader, rawIndex, values, options )
 
     };
 

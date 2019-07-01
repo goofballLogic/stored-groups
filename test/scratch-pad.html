@@ -16,6 +16,30 @@
 
             }
 
+            form > * {
+
+                display: none;
+
+            }
+
+            form > .reveal {
+
+                display: block;
+
+            }
+
+            form.populating > * {
+
+                display: block;
+
+            }
+
+            form.populating > .reveal {
+
+                display: none;
+
+            }
+
             article.hero {
 
                 padding: 100px;
@@ -28,14 +52,32 @@
             nav {
 
                 display: flex;
+                margin: 10px;
+                padding: 10px;
                 align-items: flex-end;
-                height: 120px;
+                border: solid 0.1px #555;
 
             }
 
-            nav .view {
+            nav a {
 
-                padding: 10px;
+                text-decoration: none;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                color: #555;
+
+            }
+
+            nav > * + * {
+
+                margin-left: 20px;
+
+            }
+
+            .view .name {
+
+                text-align: center;
 
             }
 
@@ -44,6 +86,16 @@
                 display: block;
                 max-width: 100px;
                 max-height: 100px;
+
+            }
+
+            .view-thumbnail-initial {
+
+                text-decoration: none;
+                font-size: 80px;
+                text-align: center;
+                height: 96px;
+                width: 96px;
 
             }
         </style>
