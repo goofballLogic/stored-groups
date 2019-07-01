@@ -24,23 +24,25 @@ const saveHandlers = {};
 async function formSubmitHandler( e ) {
 
     e.preventDefault();
-    if ( e.target ) {
+    const form = e.target;
+    if ( form ) {
 
-        const { classList } = e.target;
-        const command = e.target.dataset.command;
-        e.target.dataset.command = "";
+
+        const { classList } = form;
+        const command = form.dataset.command;
+        form.dataset.command = "";
         switch( command ) {
 
             case "reveal":
                 if ( !classList.contains( "populating" ) ) classList.add( "populating" );
                 break;
             case "save":
-                await saveHandlers[ e.target.dataset.cid ]( e.target );
-                classList.remove( "populating" );
+                await saveHandlers[ form.dataset.cid ]( form );
+                form.dispatchEvent( new CustomEvent( "artist-refresh", { bubbles: true } ) );
                 break;
             case "cancel":
                 classList.remove( "populating" );
-                e.target.reset();
+                form.reset();
                 break;
             default:
                 throw new Error( "Unrecognised command - " + command );

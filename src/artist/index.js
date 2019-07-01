@@ -177,12 +177,17 @@ module.exports = {
         const container = document.querySelector( "main" );
         const render = html => container.innerHTML = html;
 
-        async function renderViewForPath() {
+        async function renderViewForPath( forceUpdate ) {
 
+console.log( forceUpdate );
             const hashPath = document.location.hash.substring( 1 );
             cleanFragment( window );
-            const viewPath = view.path.join( "/" );
-            if ( hashPath === viewPath ) return;
+            if ( !forceUpdate ) {
+
+                const viewPath = view.path.join( "/" );
+                if ( hashPath === viewPath ) return;
+
+            }
             const path = hashPath.split( "/" );
             const targetView = await view.commands.nav.go( path );
             if ( !targetView ) {
@@ -199,6 +204,8 @@ module.exports = {
         }
 
         window.addEventListener( "hashchange", renderViewForPath );
+        document.addEventListener( "artist-refresh", () => renderViewForPath( true ) );
+
         renderView( { path: view.path.join( "/" ), view, render, document } );
         renderViewForPath();
 
