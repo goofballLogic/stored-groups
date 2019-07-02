@@ -2,10 +2,10 @@
     "@context": "devots:node-shape.jsonld",
     "@id": "/templates/team/0.0.1",
     "values": {
-        "__ots:actionable": { "format": "{count, plural, one {a team} other {# teams}}" },
-        "__ots:template": {
+        "http://openteamspace.com/vocab/actionable": { "format": "{count, plural, one {a team} other {# teams}}" },
+        "http://openteamspace.com/vocab/template": {
             "index": {
-                "__ots:metadata": {
+                "http://openteamspace.com/vocab/metadata": {
                     "immutable": true
                 },
                 "members": {
@@ -13,7 +13,7 @@
                     "@id": "./members",
                     "values": {
                         "@type": "IdMap",
-                        "__ots:schema": {
+                        "http://openteamspace.com/vocab/schema": {
                             "@type": "NodeShape",
                             "targetClass": "Person",
                             "property": [
@@ -52,7 +52,7 @@
                 }
             },
             "values": {
-                "__ots:schema": {
+                "http://openteamspace.com/vocab/schema": {
                     "@type": "NodeShape",
                     "property": [
                         {

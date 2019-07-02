@@ -1,7 +1,13 @@
 const artist = require( "../artist" );
 const { values: valuesCommands, index: indexCommands } = require( "./commands" );
 const symbols = require( "./symbols" );
-const { discriminator, systemPrefix } = symbols;
+const {
+
+    discriminator,
+    sys,
+    isSystem
+
+} = symbols;
 const initializeFromTemplate = require( "./templates" );
 
 module.exports = {
@@ -10,7 +16,7 @@ module.exports = {
     async initialize( { user, root, schemaLoader, options } ) {
 
         const values = await root.values();
-        const metadata = ( values || {} )[ `${systemPrefix}metadata` ];
+        const metadata = sys( values, "metadata" );
         if ( !( metadata && metadata.version ) ) {
 
             await initializeFromTemplate( root, options );
@@ -49,9 +55,10 @@ async function buildView( path, node, root, schemaLoader, options ) {
 
     }
 
+
     const index = rawIndex
         ? Object.entries( rawIndex )
-            .filter( ( [ key ] ) => !key.startsWith( systemPrefix ) )
+            .filter( ( [ key ] ) => !isSystem( key ) )
             .reduce( (prev, [key, value]) => ( {
 
                 ...prev,

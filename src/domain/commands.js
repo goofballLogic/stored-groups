@@ -4,7 +4,7 @@ const {
     discriminator,
     editValuesCommand,
     addToIndexCommand,
-    systemPrefix
+    sys
 
 } = require( "./symbols" );
 
@@ -25,7 +25,8 @@ async function editValues( _, node, schemaLoader, values ) {
 async function addToIndex( path, node, schemaLoader, index, values, options ) {
 
     const { fetchSchemaFor } = schemaLoader;
-    const schema = await fetchSchemaFor( values && ( values[ `${systemPrefix}template` ] || {} ).values );
+    const template = sys( values, "template" );
+    const schema = await fetchSchemaFor( template && template.values );
     return {
 
         [ discriminator ]: addToIndexCommand,
@@ -51,7 +52,8 @@ async function addToIndex( path, node, schemaLoader, index, values, options ) {
             await newNode.setValues( entry );
 
             // set index
-            const newIndex = values[ `${systemPrefix}template` ] && values[ `${systemPrefix}template` ].index;
+            const template = sys( values, "template" );
+            const newIndex = template && template.index;
             if ( newIndex ) await newNode.addToIndex( newIndex );
 
         }

@@ -1,3 +1,5 @@
+const systemPrefix = "http://openteamspace.com/vocab/";
+
 module.exports = {
 
     discriminator: Symbol( "discriminator" ),
@@ -5,6 +7,8 @@ module.exports = {
 
     addToIndexCommand: Symbol( "add-to-index" ),
 
-    systemPrefix: "__ots:"
+    sys( obj, prop ) { return obj && obj[ systemPrefix + prop ]; },
+    asSystem( suffix ) { return systemPrefix + suffix; },
+    isSystem( prop ) { return prop && prop.startsWith( systemPrefix ); }
 
 };

@@ -1,10 +1,10 @@
-const { systemPrefix } = require( "../domain/symbols" );
+const { sys } = require( "../domain/symbols" );
 
 module.exports = {
 
     async fetchSchemaFor( doc ) {
 
-        return doc && doc[ `${systemPrefix}schema` ];
+        return sys( doc, "schema" );
 
     }
 

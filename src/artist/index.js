@@ -2,7 +2,8 @@ const {
 
     discriminator,
     addToIndexCommand,
-    systemPrefix
+    sys,
+    isSystem
 
 } = require( "../domain/symbols" );
 const {
@@ -24,7 +25,7 @@ const {
 
 } = require( "./inputs" );
 
-const isInternal = x => x && x.startsWith( "@" ) || x.startsWith( systemPrefix );
+const isInternal = x => x && x.startsWith( "@" ) || isSystem( x );
 
 function renderValue( key, value, params ) {
 
@@ -118,7 +119,7 @@ const renderIndex = view =>
 function renderIndexCommand( { path, view, command, document } ) {
 
     if ( !command ) return "";
-    const actionableFormat = view.values && view.values[ `${systemPrefix}actionable` ];
+    const actionableFormat = sys( view.values, "actionable" );
     const schema = command.schema;
     const execute = command.execute.bind( command );
     switch( command[ discriminator ] ) {
