@@ -1,5 +1,5 @@
-const nav = content =>
-    `<nav>${content}</nav>`;
+const nav = ( content, maybeClass ) =>
+    `<nav${maybeClass ? ` class="${maybeClass}"` : ""}>${content}</nav>`;
 
 const div = ( className, content ) =>
     `<div class="${className}">${content}</div>`;

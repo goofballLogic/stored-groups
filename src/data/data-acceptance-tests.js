@@ -96,6 +96,16 @@ module.exports = async function( store ) {
     assert.deepStrictEqual( { JBG: { name: k0.JBG.name } }, { JBG: { name: k.JBG.name } } );
     assert.deepStrictEqual( Object.keys( k ), Object.keys( k0 ) );
 
+    console.log( " - Navigate up to indexed item's parent" );
+    const s = await h.parent();
+    const svalues = await s.values();
+    const rootValues = await root.values();
+    assert.deepStrictEqual( svalues, rootValues );
+
+    console.log( " - Attempt to naviate to root's parent should return undefined" );
+    const t = await root.parent();
+    assert( t === undefined );
+
 }
 
 function polyfill( maybeWebpackAssert ) {

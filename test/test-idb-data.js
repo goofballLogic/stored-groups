@@ -7,7 +7,7 @@ import store from "../src/data/idb";
         storeName: "idb-test"
 
     } );
-    await store.purgeForUser( { username: "me" } );
+    await store.purgeForUser( { username: "dat-user" } );
 
     require( "../src/data/data-acceptance-tests" )( store ).then(
 

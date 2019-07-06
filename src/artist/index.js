@@ -1,164 +1,45 @@
 const {
 
-    discriminator,
-    addToIndexCommand,
-    sys,
-    isSystem
+    renderIndexCommands,
+    renderValuesCommands
 
-} = require( "../domain/symbols" );
+} = require( "./render/command-renderer" );
 const {
 
-    addToIndex
+    renderViewValues
 
-} = require( "./commands" );
+} = require( "./render/values-renderer" );
 const {
 
-    maybeFormat
+    renderIndex
 
-} = require( "./message-formatting" );
+} = require( "./render/index-renderer" );
 const {
 
-    comment,
     div,
-    labelledDiv,
     nav
 
 } = require( "./inputs" );
 
-const isInternal = x => x && x.startsWith( "@" ) || isSystem( x );
+const renderMainNav = ( path ) => nav(`
 
-function renderValue( key, value, params ) {
-
-    switch( key ) {
-
-        case "name":
-            return labelledDiv( "value " + key, "Name", maybeFormat( value, params ) );
-        case "schema":
-            return "";
-        default:
-            if ( key[ 0 ] === "@" ) return "";
-            return comment( `Unknown: ${key} ${JSON.stringify(value)}` );
-
+    <a href="#" class="home"><span class="name">Home</span></a>
+    ${( path && path.length )
+        ? `<a href="#${path.slice( 0, -1 ).join(" / ")}"><span class="name">Up</span></a>`
+        : ""
     }
-
-}
-
-function renderIdMapValues( values, params ) {
-
-    const items = Object.entries( values )
-        .filter( ( [ key ] ) => key && !isInternal( key ) )
-        .map( ( [ key, value ] ) =>
-
-            li( key, renderValues( value, params ) )
-
-        );
-    return ul( items );
-
-}
-
-function renderValuesByType( values, params ) {
-
-    const types = values[ "@type" ];
-    if( !( Array.isArray( types ) && types.length ) ) return null;
-    if( types.includes( "IdMap" ) ) return renderIdMapValues( values, params );
-    return null;
-
-}
-
-const renderValuesByDefault = ( values, params ) =>
-
-    Object.entries( values ).reduce(
-
-        ( prev, [ key, value ] ) => `${prev}${renderValue( key, value, params )}\n`,
-        ""
-
-    );
-
-const renderValues = ( values, params ) =>
-    renderValuesByType( values, params ) || renderValuesByDefault( values, params );
-
-function renderViewValues( view ) {
-
-    if ( !( view && view.values ) ) return "";
-    const params = { indexCount: view.index ? Object.keys( view.index ).length : 0 };
-    return labelledDiv( "values", "Values", renderValues( view.values, params ) );
-
-}
-
-const renderIndex = view =>
-
-    ( view && view.index )
-
-        ? nav(
-
-            Object.entries( view.index )
-                .filter( ( [ key ] ) => console.log( key ) || !isInternal( key ) )
-                .reduce( ( prev, [ path, childView ] ) =>
-
-                    `${prev}
-                    <a href="#${path}" class="view">
-                        ${
-
-                            childView.thumbnail
-                                ? `<img class="view-thumbnail" src="${childView.thumbnail}" />`
-                                : div( "view-thumbnail-initial", ( childView.name || childView.path || "?" ).substr( 0, 1 ) )
-
-                        }<span class="name">${
-
-                            childView.name || childView.path
-
-                        }</span>
-                    </a>`,
-                    ""
-
-                )
-
-        )
-        : "";
-
-function renderIndexCommand( { path, view, command, document } ) {
-
-    if ( !command ) return "";
-    const actionableFormat = sys( view.values, "actionable" );
-    const schema = command.schema;
-    const execute = command.execute.bind( command );
-    switch( command[ discriminator ] ) {
-
-        case addToIndexCommand:
-            return addToIndex( { execute, path, schema, document, actionableFormat } );
-
-        default:
-            return "";
-
-    }
-
-}
-
-const renderIndexCommands = ( { path, view, document } ) => view.commands.index
-    ? nav(
-        view.commands.index
-            .map( command => renderIndexCommand( { path, view, command, document } ) )
-            .filter( x => x )
-            .join( "\n" )
-    )
-    : "";
-
-const renderMainNav = () => nav(`
-
-    <a href="#" class="home"><span cass="name">Home</span></a>
 
 `);
 
 function renderView( { path, view, render, document } ) {
 
-console.log( "Rendering", view );
-
     render( [
 
-        renderMainNav(),
+        renderMainNav( path ),
+        renderViewValues( view ),
+        renderValuesCommands( { path, view, document } ),
         renderIndex( view ),
         renderIndexCommands( { path, view, document } ),
-        renderViewValues( view )
 
     ].join( "\n\n" ) );
 
@@ -192,7 +73,7 @@ module.exports = {
                 if ( hashPath === viewPath ) return;
 
             }
-            const path = hashPath.split( "/" );
+            const path = hashPath.split( "/" ).filter( x => x );
             const targetView = await view.commands.nav.go( path );
             if ( !targetView ) {
 

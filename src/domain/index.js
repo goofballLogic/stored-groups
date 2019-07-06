@@ -1,5 +1,6 @@
 const artist = require( "../artist" );
 const { values: valuesCommands, index: indexCommands } = require( "./commands" );
+const { node: nodeNavigations, entry: entryNavigations } = require( "./navigations" );
 const symbols = require( "./symbols" );
 const {
 
@@ -8,7 +9,8 @@ const {
     isSystem
 
 } = symbols;
-const initializeFromTemplate = require( "./templates" );
+const { initializeFromTemplate } = require( "./templates" );
+const pick = require( "../pick" );
 
 module.exports = {
 
@@ -36,25 +38,26 @@ async function buildView( path, node, root, schemaLoader, options ) {
     const values = await node.values();
     const rawIndex = await node.index();
 
-    const entryKey = key => buildKey( [ ...path, key ] );
+    const buildViewForPathAndNode =
+        ( newPath, newNode ) => buildView( newPath, newNode, root, schemaLoader, options );
+
+    const entryKey =
+        key => buildKey( [ ...path, key ] );
 
     function entryValue( key, value ) {
 
+        if ( typeof value !== "object" ) return undefined;
+        if ( !value ) return undefined;
+        const entryProps = Object.keys( value ).filter( x => x !== "go" );
         return {
 
-            ...value,
-            [discriminator]: key,
-            go: async function () {
-
-                const newNode = await value.go();
-                return buildView( [ ...path, key ], newNode, root, schemaLoader, options );
-
-            }
+            ...pick( value, entryProps ),
+            [ discriminator ]: key,
+            nav: entryNavigations( value, buildViewForPathAndNode )
 
         };
 
     }
-
 
     const index = rawIndex
         ? Object.entries( rawIndex )
@@ -69,28 +72,7 @@ async function buildView( path, node, root, schemaLoader, options ) {
 
     const commands = {
 
-        nav: {
-
-            go: async function( path ) {
-
-                path = path ? Array.isArray( path ) ? path : [ path ] : [];
-                let step = null;
-                let node = root;
-                const newPath = [];
-                while( step = path.shift() ) {
-
-                    const index = await node.index();
-                    const indexStep = index[ step ];
-                    if ( !indexStep ) return undefined;
-                    node = await indexStep.go();
-                    newPath.push( step );
-
-                }
-                return await buildView( newPath, node, root, schemaLoader, options );
-
-            }
-
-        },
+        nav: await nodeNavigations( root, buildViewForPathAndNode ),
         values: await valuesCommands( path, node, schemaLoader, rawIndex, values, options ),
         index: await indexCommands( path, node, schemaLoader, rawIndex, values, options )
 

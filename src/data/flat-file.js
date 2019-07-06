@@ -90,33 +90,37 @@ function series( folder ) {
             decorateIndex( index );
             return index;
 
+        },
+
+        async parent() {
+
+            const newFolder = join( folder, ".." );
+            if ( newFolder.length < options.folder.length ) return undefined;
+            return series( newFolder );
+
         }
 
     }
 
 }
 
-let options;
+let options = {
+
+    folder: join( __dirname, "../../data/teams" )
+
+};
 
 module.exports = {
 
     configure( overrideOptions ) {
 
-        if ( overrideOptions ) {
-
-            options = Object.assign( options || {}, overrideOptions );
-
-        } else {
-
-            options = overrideOptions;
-
-        }
+        options = Object.assign( options || {}, overrideOptions );
 
     },
 
     async login( user ) {
 
-        const teamsFolder = ( options && options.folder ) || join( __dirname, "../../data/teams" );
+        const teamsFolder = options.folder;
         const teamsSeries = series( teamsFolder );
         const next = ( options && options.initialize ) || initialize;
         next( { user, root: teamsSeries, schemaLoader, options } );

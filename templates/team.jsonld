@@ -2,42 +2,44 @@
     "@context": "devots:node-shape.jsonld",
     "@id": "/templates/team/0.0.1",
     "values": {
-        "http://openteamspace.com/vocab/actionable": { "format": "{count, plural, one {a team} other {# teams}}" },
-        "http://openteamspace.com/vocab/template": {
+        "otsv:actionable": "{count, plural, one {a team} other {# teams}}",
+        "otsv:template": {
             "index": {
-                "http://openteamspace.com/vocab/metadata": {
-                    "immutable": true
+                "otsv:metadata": {
+                    "otsv:immutable": true
                 },
                 "members": {
                     "name": "Members",
-                    "@id": "./members",
-                    "values": {
-                        "@type": "IdMap",
-                        "http://openteamspace.com/vocab/schema": {
-                            "@type": "NodeShape",
-                            "targetClass": "Person",
-                            "property": [
-                                {
-                                    "path": "familyName",
-                                    "name": "Family name",
-                                    "dataType": "xsd:string"
-                                },
-                                {
-                                    "path": "givenName",
-                                    "name": "First name",
-                                    "dataType": "xsd:string"
-                                },
-                                {
-                                    "path": "jobTitle",
-                                    "name": "Job / Occupation",
-                                    "dataType": "xsd:string"
-                                },
-                                {
-                                    "path": "created",
-                                    "name": "Created",
-                                    "dateType": "xsd:dateTimeStamp"
-                                }
-                            ]
+                    "otsv:nested-template": {
+                        "values": {
+                            "@type": "IdMap",
+                            "otsv:actionable": "{count, plural, one {a person} other {# people}}",
+                            "otsv:schema": {
+                                "@type": "NodeShape",
+                                "targetClass": "Person",
+                                "property": [
+                                    {
+                                        "path": "familyName",
+                                        "name": "Family name",
+                                        "dataType": "xsd:string"
+                                    },
+                                    {
+                                        "path": "givenName",
+                                        "name": "First name",
+                                        "dataType": "xsd:string"
+                                    },
+                                    {
+                                        "path": "jobTitle",
+                                        "name": "Job / Occupation",
+                                        "dataType": "xsd:string"
+                                    },
+                                    {
+                                        "path": "created",
+                                        "name": "Created",
+                                        "dateType": "xsd:dateTimeStamp"
+                                    }
+                                ]
+                            }
                         }
                     }
                 },
@@ -52,7 +54,7 @@
                 }
             },
             "values": {
-                "http://openteamspace.com/vocab/schema": {
+                "otsv:schema": {
                     "@type": "NodeShape",
                     "property": [
                         {

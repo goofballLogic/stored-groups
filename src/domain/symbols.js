@@ -1,4 +1,4 @@
-const systemPrefix = "http://openteamspace.com/vocab/";
+const systemPrefix = "otsv:";
 
 module.exports = {
 

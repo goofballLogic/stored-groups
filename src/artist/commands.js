@@ -60,9 +60,16 @@ const defaultShape = {
 
 };
 
-function generateInputField( prop ) {
+function generateInputField( prop, maybeValues ) {
 
-    const opts = { name: encodeURI( prop.path ), label: prop.name, readonly: prop.immutable };
+    const opts = {
+
+        name: encodeURI( prop.path ),
+        label: prop.name,
+        readonly: prop.immutable,
+        value: maybeValues && maybeValues[ prop.path ]
+
+    };
     switch( prop.dataType ) {
 
         case "xsd:dateTimeStamp":
@@ -76,15 +83,26 @@ function generateInputField( prop ) {
 
 }
 
-function generateIndexFields( schema ) {
+function generateDefaultSchemaFields( schema, maybeValues ) {
 
     schema = ( schema && schema[ "@type" ] === "NodeShape" ) ? schema : defaultShape;
     return ( Array.isArray( schema.property ) ? schema.property : [].concat( schema.property ) )
         .map( prop => `
             ${comment( JSON.stringify( prop ) )}
-            ${generateInputField( prop )}
+            ${generateInputField( prop, maybeValues )}
         ` )
         .join( "\n" );
+
+}
+
+function generateFieldsForIdMap( schema, values ) {
+    return "??";
+}
+
+function generateFieldsForSchemaAndTypes( { schema, types, values } ) {
+
+    if ( types && types.includes( "IdMap" ) ) return generateFieldsForIdMap( schema, values );
+    return generateDefaultSchemaFields( schema, values );
 
 }
 
@@ -138,8 +156,46 @@ function addToIndex( { execute, path, document, actionableFormat, schema } ) {
     return `
         <form class="add-to-index" data-cid="${cid}">
 
-            ${generateIndexFields( schema )}
+            ${generateDefaultSchemaFields( schema )}
             <button name="command" class="reveal">Add ${format( actionableFormat, { count: 1 } )}</button>
+            <button name="command" class="save">Save</button>
+            <button name="command" class="cancel">Cancel</button>
+
+        </formt>
+    `;
+
+}
+
+function editValues( { execute, path, document, schema, types, values } ) {
+
+    const cid = `edit-values_${path}`;
+    saveHandlers[ cid ] = async function( form ) {
+
+        const data = Array.from( new FormData( form ) )
+            .reduce( ( obj, [ key, value ] ) => ( {
+
+                ...obj,
+                [ decodeURI( key ) ] : value
+
+            } ), {} );
+
+        //return await execute( { ...data, ...generatedValues } );
+        console.log( "Edit values", data );
+
+    };
+
+    if ( !document.body.dataset.formSubmitHandler ) {
+
+        document.body.addEventListener( "click", formSubmitCommandDetector );
+        document.body.addEventListener( "submit", formSubmitHandler );
+        document.body.dataset.formSubmitHandler = true;
+
+    }
+    return `
+        <form class="edit-values" data-cid="${cid}">
+
+            ${generateFieldsForSchemaAndTypes( { schema, types, values } )}
+            <button name="command" class="reveal">Edit</button>
             <button name="command" class="save">Save</button>
             <button name="command" class="cancel">Cancel</button>
 
@@ -150,6 +206,7 @@ function addToIndex( { execute, path, document, actionableFormat, schema } ) {
 
 module.exports = {
 
-    addToIndex
+    addToIndex,
+    editValues
 
 };

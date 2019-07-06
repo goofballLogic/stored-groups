@@ -1,22 +1,42 @@
 const dateid = require( "../dateid" );
+
 const {
 
     discriminator,
     editValuesCommand,
     addToIndexCommand,
-    sys
+    sys,
+    asSystem
 
 } = require( "./symbols" );
+const {
+
+    applyTemplate
+
+} = require( "./templates" );
+const pick = require( "../pick" );
+
+const indexableProps = schema => ( schema && Array.isArray( schema.property ) )
+    ? schema.property.filter( prop => prop.indexed ).map( prop => prop.path )
+    : [];
 
 async function editValues( _, node, schemaLoader, values ) {
 
     const { fetchSchemaFor } = schemaLoader;
     const schema = await fetchSchemaFor( values );
+    if ( !schema ) return null;
     return {
 
         [ discriminator ]: editValuesCommand,
         schema,
-        execute: async values => await node.setValues( values )
+        execute: async values => {
+
+            // save values
+            await node.setValues( values )
+throw new Error( "Not implemented" );
+            // update index
+
+        }
 
     };
 
@@ -27,34 +47,28 @@ async function addToIndex( path, node, schemaLoader, index, values, options ) {
     const { fetchSchemaFor } = schemaLoader;
     const template = sys( values, "template" );
     const schema = await fetchSchemaFor( template && template.values );
+    if ( !schema ) return null;
     return {
 
         [ discriminator ]: addToIndexCommand,
         schema,
-        execute: async entry => {
+        execute: async newValues => {
 
             const nodeid = dateid();
 
-            const indexableProps = ( schema && Array.isArray( schema.property ) )
-                ? schema.property.filter( prop => prop.indexed ).map( prop => prop.path )
-                : [];
-            if ( !indexableProps.length ) indexableProps.push( "name" );
+            const indexEntry = pick( values, indexableProps( schema ) );
 
-            const indexedEntry = indexableProps.reduce( ( x, path ) => ( { ...x, [ path ]: entry[ path ] } ), {} );
+            // add entry to the index
+            const updatedIndex = await node.addToIndex( { [ nodeid ]: indexEntry } );
 
-            // add to the index
-            const updatedIndex = await node.addToIndex( { [ nodeid ]: indexedEntry } );
-
-            // get new node
+            // get new node from the index
             const newNode = await updatedIndex[ nodeid ].go();
 
-            // set values
-            await newNode.setValues( entry );
+            const newValuesWithSchema = { ...newValues, [ asSystem( "schema" ) ]: schema };
 
-            // set index
             const template = sys( values, "template" );
             const newIndex = template && template.index;
-            if ( newIndex ) await newNode.addToIndex( newIndex );
+            await applyTemplate( newNode, newIndex, newValuesWithSchema );
 
         }
 
@@ -67,9 +81,11 @@ module.exports = {
     async index( path, node, schemaLoader, index, values, options ) {
 
         const { template } = options;
+        const metadata = sys( index, "metadata" );
+        const immutable = sys( metadata, "immutable" );
         return [
 
-            ( index && index.immutable ) || await addToIndex( path, node, schemaLoader, index, values, template )
+            !immutable && await addToIndex( path, node, schemaLoader, index, values, template )
 
         ].filter( x => x );
 
@@ -78,11 +94,12 @@ module.exports = {
     async values( path, node, schemaLoader, index, values, options ) {
 
         if ( !values ) return [];
+
         return [
 
             await editValues( path, node, schemaLoader, values )
 
-        ];
+        ].filter( x => x );
 
     }
 

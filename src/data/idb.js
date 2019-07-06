@@ -115,6 +115,13 @@ function series( store, namespace = "" ) {
 
         },
 
+        async parent() {
+
+            if ( !namespace ) return undefined;
+            const lastIndexOfSlash = namespace && namespace.lastIndexOf( "/" );
+            return series( store, namespace.substring( 0, lastIndexOfSlash ) );
+
+        }
 
     };
 
