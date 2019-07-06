@@ -20,7 +20,7 @@ const indexableProps = schema => ( schema && Array.isArray( schema.property ) )
     ? schema.property.filter( prop => prop.indexed ).map( prop => prop.path )
     : [];
 
-async function editValues( _, node, schemaLoader, values ) {
+async function editValues( path, node, schemaLoader, values ) {
 
     const { fetchSchemaFor } = schemaLoader;
     const schema = await fetchSchemaFor( values );
@@ -33,13 +33,14 @@ async function editValues( _, node, schemaLoader, values ) {
 
             // save values
             await node.setValues( values )
-throw new Error( "Not implemented" );
-            // update index
-            const indexEntry = pick( values, indexableProps( schema ) );
 
             // find index
             const parent = await node.parent();
-            const parentIndex = await parent.index();
+
+            // update index
+            const indexKey = path[ path.length - 1 ];
+            const indexEntry = pick( values, indexableProps( schema ) );
+            await parent.updateIndex( { [ indexKey] : indexEntry } );
 
         }
 
@@ -61,7 +62,7 @@ async function addToIndex( path, node, schemaLoader, index, values, options ) {
 
             const nodeid = dateid();
 
-            const indexEntry = pick( values, indexableProps( schema ) );
+            const indexEntry = pick( newValues, indexableProps( schema ) );
 
             // add entry to the index
             const updatedIndex = await node.addToIndex( { [ nodeid ]: indexEntry } );

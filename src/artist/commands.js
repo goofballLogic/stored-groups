@@ -179,8 +179,7 @@ function editValues( { execute, path, document, schema, types, values } ) {
 
             } ), {} );
 
-        //return await execute( { ...data, ...generatedValues } );
-        console.log( "Edit values", data );
+        return await execute( data );
 
     };
 
