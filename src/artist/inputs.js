@@ -19,7 +19,7 @@ const comment = text =>
 const input = ( { name, label, inputType, readonly, value, textValue } ) =>
     `<label>
         <span class="label-text">${label}</span>
-        <input type="${readonly ? "hidden" : inputType}" name="${name}" />
+        <input type="${readonly ? "hidden" : inputType}" name="${name}" ${value ? `value="${value}"` : ""}" />
         ${readonly ? `<span class="readonly-text">${textValue || value}</span>` : ""}
     </label>`;
 
