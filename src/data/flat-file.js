@@ -18,6 +18,24 @@ function series( folder ) {
 
     }
 
+    async function updateIndex( hash, allowUpdates = false) {
+
+        if ( !( hash && typeof hash === "object" ) ) throw new Error( `Invalid key-value pairs to index: ${hash}` );
+        const index = ( await load( indexPath ) ) || {};
+        Object.entries( hash ).forEach( ( [ key, value ] ) => {
+
+            if ( !allowUpdates && ( key in index ) ) throw new Error( `Key already exists in this index: ${key}` );
+            if ( typeof value !== "object" ) throw new Error( `Index value must be an object. ${key} is of type ${typeof value}: ${value}` );
+            if ( !value ) throw new Error( `Index value must be truthy. ${key} is ${value}` );
+            index[ key ] = value;
+
+        } );
+        const updated = await save( index, indexPath );
+        decorateIndex( updated );
+        return updated;
+
+    }
+
     return {
 
         async values() {
@@ -50,19 +68,12 @@ function series( folder ) {
 
         async addToIndex( hash ) {
 
-            if ( !( hash && typeof hash === "object" ) ) throw new Error( `Invalid key-value pairs to index: ${hash}` );
-            const index = ( await load( indexPath ) ) || {};
-            Object.entries( hash ).forEach( ( [ key, value ] ) => {
+            return await updateIndex( hash );
+        },
 
-                if ( key in index ) throw new Error( `Key already exists in this index: ${key}` );
-                if ( typeof value !== "object" ) throw new Error( `Index value must be an object. ${key} is of type ${typeof value}: ${value}` );
-                if ( !value ) throw new Error( `Index value must be truthy. ${key} is ${value}` );
-                index[ key ] = value;
+        async updateIndex( hash ) {
 
-            } );
-            const updated = await save( index, indexPath );
-            decorateIndex( updated );
-            return updated;
+            return await updateIndex( hash, true );
 
         },
 

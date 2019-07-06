@@ -35,6 +35,11 @@ async function editValues( _, node, schemaLoader, values ) {
             await node.setValues( values )
 throw new Error( "Not implemented" );
             // update index
+            const indexEntry = pick( values, indexableProps( schema ) );
+
+            // find index
+            const parent = await node.parent();
+            const parentIndex = await parent.index();
 
         }
 

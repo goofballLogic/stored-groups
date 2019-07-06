@@ -1,4 +1,5 @@
 const assert = polyfill( require( "assert" ) );
+const pruneKeys = require( "../prune-keys" );
 
 module.exports = async function( store ) {
 
@@ -105,6 +106,17 @@ module.exports = async function( store ) {
     console.log( " - Attempt to naviate to root's parent should return undefined" );
     const t = await root.parent();
     assert( t === undefined );
+
+    console.log( " - Update an index's values" );
+    const u = await root.addToIndex( { SJ: { name: "SJM", num: 1 } } );
+    assert( "num" in u.SJ );
+    const v = await root.updateIndex( { SJ: { name: "SJG" } } );
+    assert.strictEqual( v.SJ.name, "SJG" );
+    assert( !( "num" in v.SJ ) );
+    const w = await root.index();
+    assert.deepStrictEqual( pruneKeys( v.SJ, x => x === "go" ), pruneKeys( w.SJ, x => x === "go" ) );
+
+
 
 }
 
