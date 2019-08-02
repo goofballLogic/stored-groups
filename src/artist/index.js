@@ -16,27 +16,31 @@ const {
 } = require( "./render/index-renderer" );
 const {
 
+    a,
     div,
-    nav
+    nav,
+    span
 
 } = require( "./inputs" );
 
-const renderMainNav = ( path ) => nav(`
+function renderMainNav( path ) {
 
-    <a href="#" class="home"><span class="name">Home</span></a>
-    ${( path && path.length )
-        ? `<a href="#${path.slice( 0, -1 ).join(" / ")}"><span class="name">Up</span></a>`
-        : ""
-    }
+    const hrefUp = path && path.length && `#${path.slice( 0, -1 ).join(" / ")}`;
+    return nav(
 
-`);
+        a( "#", "home", span( "name", "Home" ) ) +
+        hrefUp ? a( hrefUp, "up", span( "name", "Up" ) ) : ""
+
+    );
+
+}
 
 function renderView( { path, view, render, document } ) {
 
     render( [
 
         renderMainNav( path ),
-        renderViewValues( view ),
+        renderViewValues( { path, view, document } ),
         renderValuesCommands( { path, view, document } ),
         renderIndex( view ),
         renderIndexCommands( { path, view, document } ),
@@ -59,6 +63,7 @@ module.exports = {
 
     async initialize( { user, view, window } ) {
 
+console.log(view);
         const document = window.document;
         const container = document.querySelector( "main" );
         const render = html => container.innerHTML = html;

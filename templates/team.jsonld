@@ -2,7 +2,7 @@
     "@context": "devots:node-shape.jsonld",
     "@id": "/templates/team/0.0.1",
     "values": {
-        "otsv:actionable": "{count, plural, one {a team} other {# teams}}",
+        "otsv:actionable": "{count, plural, one {team} other {# teams}}",
         "otsv:template": {
             "index": {
                 "otsv:metadata": {
@@ -13,7 +13,7 @@
                     "otsv:nested-template": {
                         "values": {
                             "@type": "IdMap",
-                            "otsv:actionable": "{count, plural, one {a person} other {# people}}",
+                            "otsv:actionable": "team members",
                             "otsv:schema": {
                                 "@type": "NodeShape",
                                 "targetClass": "Person",
@@ -34,9 +34,10 @@
                                         "dataType": "xsd:string"
                                     },
                                     {
+                                        "immutable": true,
                                         "path": "created",
                                         "name": "Created",
-                                        "dateType": "xsd:dateTimeStamp"
+                                        "dataType": "xsd:dateTimeStamp"
                                     }
                                 ]
                             }

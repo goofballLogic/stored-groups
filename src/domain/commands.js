@@ -1,4 +1,7 @@
 const dateid = require( "../dateid" );
+const { applyTemplate } = require( "./templates" );
+const pick = require( "../pick" );
+const asArray = require( "../asArray" );
 
 const {
 
@@ -9,12 +12,6 @@ const {
     asSystem
 
 } = require( "./symbols" );
-const {
-
-    applyTemplate
-
-} = require( "./templates" );
-const pick = require( "../pick" );
 
 const indexableProps = schema => ( schema && Array.isArray( schema.property ) )
     ? schema.property.filter( prop => prop.indexed ).map( prop => prop.path )
@@ -40,7 +37,9 @@ async function editValues( path, node, schemaLoader, values ) {
             // update index
             const indexKey = path[ path.length - 1 ];
             const indexEntry = pick( values, indexableProps( schema ) );
-            await parent.updateIndex( { [ indexKey] : indexEntry } );
+
+            if ( Object.keys( indexEntry ).length )
+                await parent.updateIndex( { [ indexKey] : indexEntry } );
 
         }
 
