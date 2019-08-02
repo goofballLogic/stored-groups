@@ -190,21 +190,21 @@ function generateValues( schemaProperties ) {
 
 }
 
-function buildEntry( previousValues, generatedValues, schemaProperties ) {
+function buildEntry( values, generatedValues, schemaProperties ) {
 
     return schemaProperties
         .reduce( ( obj, prop ) => ( {
 
             ...obj,
-            [ prop.path ]: ( prop.immutable && ( prop.path in previousValues ) )
-                ? previousValues[ prop.path ]
+            [ prop.path ]: ( prop.immutable && ( prop.path in values ) )
+                ? values[ prop.path ]
                 : generatedValues[ prop.path ]
 
         } ), {} );
 
 }
 
-function buildSaveHandler( execute, schema, values ) {
+function buildSaveHandler( execute, schema, previousValues ) {
 
     return async function( form ) {
 
@@ -212,6 +212,7 @@ function buildSaveHandler( execute, schema, values ) {
         const schemaProperties = ( schema && schema.property ) || [];
         const generatedValues = generateValues( schemaProperties );
         const isIdMap = formData.get( "@type" ) === "IdMap";
+        const initialData = isIdMap ? {} : buildEntry( previousValues, generatedValues, schemaProperties );
         const data = Array.from( formData )
             .filter( ( [ key ] ) => !key.startsWith( "@" ) )
             .reduce( ( obj, [ encodedKey, value ] ) => {
@@ -219,38 +220,29 @@ function buildSaveHandler( execute, schema, values ) {
                 const key = decodeURI( encodedKey );
                 if ( isIdMap ) {
 
-                    const slash = key.indexOf( "/" );
-                    const id = key.substring( 0, slash );
-                    const path = key.substring( slash + 1 );
+                    const [ id, path ] = key.split( "/" );
+                    const previousIdValue = previousValues[ id ];
+                    const idValue = obj[ id ] || buildEntry( previousIdValue, generatedValues, schemaProperties );
                     const schemaProp = schemaProperties.find( prop => prop.path === path );
-                    const previousValues = values[ id ];
-                    let entry = obj[ id ] || buildEntry( previousValues, generatedValues, schemaProperties );
-                    if ( schemaProp && !schemaProp.immutable )
-                        entry = { ...entry, [ path ]: value };
-                    return {
+                    if ( schemaProp && !schemaProp.immutable ) {
 
-                        ...obj,
-                        [ id ]: entry
+                        idValue[ path ] = value;
+                        obj[ id ] = idValue;
 
-                    };
+                    }
 
                 } else {
 
-                    return {
-
-                        ...obj,
-                        [ key ]: value
-
-                    };
+                    const schemaProp = schemaProperties.find( prop => prop.path === key );
+                    if ( schemaProp && !schemaProp.immutable )
+                        obj[ key ] = value;
 
                 }
+                return obj;
 
-            }, {} )
+            }, initialData )
 
-        if ( isIdMap )
-            return await execute( { ...data } );
-        else
-            return await execute( { ...data, ...generatedValues } );
+        return await execute( data );
 
     };
 
