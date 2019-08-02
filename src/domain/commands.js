@@ -1,7 +1,6 @@
 const dateid = require( "../dateid" );
 const { applyTemplate } = require( "./templates" );
 const pick = require( "../pick" );
-const asArray = require( "../asArray" );
 
 const {
 
@@ -26,10 +25,18 @@ async function editValues( path, node, schemaLoader, values ) {
 
         [ discriminator ]: editValuesCommand,
         schema,
-        execute: async values => {
-console.log("Saving values", values);
+        execute: async ( values, removedKeys ) => {
+
             // save values
-            await node.setValues( values )
+console.log( "Saving values", values );
+            await node.setValues( values );
+
+            if ( removedKeys ) {
+
+console.log( "Removing keys", removedKeys );
+                await node.removeValues( removedKeys );
+
+            }
 
             // find index
             const parent = await node.parent();

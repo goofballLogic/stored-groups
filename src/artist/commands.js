@@ -2,7 +2,7 @@ const { format } = require( "./message-formatting" );
 const { input, comment } = require( "./inputs" );
 const asArray = require( "../asArray" );
 const dateid = require( "../dateid" );
-const { isSystem } = require( "../domain/symbols" );
+const { isSystem, asSystem } = require( "../domain/symbols" );
 
 function formSubmitCommandDetector( e ) {
 
@@ -70,6 +70,16 @@ async function formSubmitHandler( e ) {
                 Array.from( form.querySelectorAll( ".new-item" ) )
                     .filter( i => i.dataset.cid === commandCid )
                     .forEach( ele => ele.remove() );
+                break;
+            case "delete-existing-item":
+                Array.from( form.querySelectorAll( ".existing-item" ) )
+                    .filter( i => i.dataset.cid === commandCid )
+                    .forEach( ele => ele.remove() );
+                const removedElement = document.createElement( "input" );
+                removedElement.type = "hidden";
+                removedElement.name = asSystem( "removed" );
+                removedElement.value = commandCid;
+                form.appendChild( removedElement );
                 break;
             case "cancel":
                 classList.remove( "populating" );
@@ -146,8 +156,9 @@ const generateNewMemberFieldsForIdMap = ( schema, values ) => `
 
 const generateExistingMembersFieldsForIdMapMember = ( schema, key, value ) => `
 
-    <div>
+    <div class="existing-item" data-cid="${key}">
         ${generateMemberSchemaFields( schema, value, key )}
+        <button name="command" class="delete-existing-item" data-cid="${key}">Remove</button>
     </div>
 
 `;
@@ -201,7 +212,7 @@ function buildEntry( values, generatedValues, schemaProperties ) {
         .reduce( ( obj, prop ) => ( {
 
             ...obj,
-            [ prop.path ]: ( prop.immutable && ( prop.path in values ) )
+            [ prop.path ]: ( prop.immutable && values && ( prop.path in values ) )
                 ? values[ prop.path ]
                 : generatedValues[ prop.path ]
 
@@ -218,8 +229,9 @@ function buildSaveHandler( execute, schema, previousValues ) {
         const generatedValues = generateValues( schemaProperties );
         const isIdMap = formData.get( "@type" ) === "IdMap";
         const initialData = isIdMap ? {} : buildEntry( previousValues, generatedValues, schemaProperties );
+        const removed = formData.getAll( asSystem( "removed" ) );
         const data = Array.from( formData )
-            .filter( ( [ key ] ) => !key.startsWith( "@" ) )
+            .filter( ( [ key ] ) => !( key.startsWith( "@" ) || isSystem( key ) ) )
             .reduce( ( obj, [ encodedKey, value ] ) => {
 
                 const key = decodeURI( encodedKey );
@@ -247,7 +259,7 @@ function buildSaveHandler( execute, schema, previousValues ) {
 
             }, initialData )
 
-        return await execute( data );
+        return await execute( data, removed );
 
     };
 
