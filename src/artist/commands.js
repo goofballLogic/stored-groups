@@ -144,8 +144,13 @@ const generateNewMemberFieldsForIdMap = ( schema, values ) => `
 
 `;
 
-const generateExistingMembersFieldsForIdMapMember = ( schema, key, value ) =>
-    generateMemberSchemaFields( schema, value, key );
+const generateExistingMembersFieldsForIdMapMember = ( schema, key, value ) => `
+
+    <div>
+        ${generateMemberSchemaFields( schema, value, key )}
+    </div>
+
+`;
 
 const generateExistingMembersFieldsForIdMap = ( schema, values ) =>
     Object.entries( values )
