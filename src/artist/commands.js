@@ -177,20 +177,40 @@ function generateImmutableValue( { dataType } ) {
 
 }
 
-function buildSaveHandler( execute, schema ) {
+function generateValues( schemaProperties ) {
+
+    return schemaProperties
+        .filter( prop => prop.immutable )
+        .reduce( ( obj, prop ) => ( {
+
+            ...obj,
+            [ prop.path ]: generateImmutableValue( prop )
+
+        } ), {} );
+
+}
+
+function buildEntry( previousValues, generatedValues, schemaProperties ) {
+
+    return schemaProperties
+        .reduce( ( obj, prop ) => ( {
+
+            ...obj,
+            [ prop.path ]: ( prop.immutable && ( prop.path in previousValues ) )
+                ? previousValues[ prop.path ]
+                : generatedValues[ prop.path ]
+
+        } ), {} );
+
+}
+
+function buildSaveHandler( execute, schema, values ) {
 
     return async function( form ) {
 
         const formData = new FormData( form );
-        const generatedValues = ( ( schema && schema.property ) || [] )
-            .filter( prop => prop.immutable )
-            .reduce( ( obj, prop ) => ( {
-
-                ...obj,
-                [ prop.path ]: generateImmutableValue( prop )
-
-            } ), {} );
-
+        const schemaProperties = ( schema && schema.property ) || [];
+        const generatedValues = generateValues( schemaProperties );
         const isIdMap = formData.get( "@type" ) === "IdMap";
         const data = Array.from( formData )
             .filter( ( [ key ] ) => !key.startsWith( "@" ) )
@@ -201,13 +221,12 @@ function buildSaveHandler( execute, schema ) {
 
                     const slash = key.indexOf( "/" );
                     const id = key.substring( 0, slash );
-                    const prop = key.substring( slash + 1 );
-                    const entry = {
-
-                        ...( obj[ id ] || generatedValues ),
-                        [ prop ]: value
-
-                    };
+                    const path = key.substring( slash + 1 );
+                    const schemaProp = schemaProperties.find( prop => prop.path === path );
+                    const previousValues = values[ id ];
+                    let entry = obj[ id ] || buildEntry( previousValues, generatedValues, schemaProperties );
+                    if ( schemaProp && !schemaProp.immutable )
+                        entry = { ...entry, [ path ]: value };
                     return {
 
                         ...obj,
@@ -226,7 +245,7 @@ function buildSaveHandler( execute, schema ) {
 
                 }
 
-            }, {} );
+            }, {} )
 
         if ( isIdMap )
             return await execute( { ...data } );
@@ -237,9 +256,9 @@ function buildSaveHandler( execute, schema ) {
 
 }
 
-function addSaveHandler( { cid, document, execute, schema } ) {
+function addSaveHandler( { cid, document, execute, schema, values } ) {
 
-    saveHandlers[ cid ] = buildSaveHandler( execute, schema );
+    saveHandlers[ cid ] = buildSaveHandler( execute, schema, values );
     if ( document.body.dataset.formSubmitHandlerInstalled ) return;
     document.body.addEventListener( "click", formSubmitCommandDetector );
     document.body.addEventListener( "submit", formSubmitHandler );
@@ -269,7 +288,7 @@ function addToIndex( { execute, path, document, actionableFormat, schema } ) {
 function editValues( { execute, path, document, schema, types, actionableFormat, values } ) {
 
     const cid = `edit-values_${path}`;
-    addSaveHandler( { cid, document, execute, schema } );
+    addSaveHandler( { cid, document, execute, schema, values } );
     const commandText = action => actionableFormat ? `${action} ${actionableFormat}` : action;
     return `
         <form class="edit-values" data-cid="${cid}">

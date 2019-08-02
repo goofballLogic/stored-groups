@@ -27,7 +27,7 @@ async function editValues( path, node, schemaLoader, values ) {
         [ discriminator ]: editValuesCommand,
         schema,
         execute: async values => {
-
+console.log("Saving values", values);
             // save values
             await node.setValues( values )
 
