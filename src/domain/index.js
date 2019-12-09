@@ -9,7 +9,7 @@ const {
     isSystem
 
 } = symbols;
-const { initializeFromTemplate } = require( "./templates" );
+const { initializeFromTemplate, ensureVersionUpgrades } = require( "./templates" );
 const pick = require( "../pick" );
 
 module.exports = {
@@ -24,6 +24,7 @@ module.exports = {
             await initializeFromTemplate( root, options );
 
         }
+        await ensureVersionUpgrades( root, options );
         const view = await buildView( [], root, root, schemaLoader, options );
         artist.initialize( { user, view, window: options.window } );
 

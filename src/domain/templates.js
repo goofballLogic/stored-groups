@@ -61,9 +61,44 @@ async function initializeFromTemplate( node, { template } ) {
 
 }
 
+const semver = id => {
+
+    const [ x, y, z ] = ( ( id && id.split( "/" ).pop() ) || "" ).split( "." );
+    return [ x, y, z ].map( n => Number( n || "0" ) );
+
+}
+
+async function applyUpgrade( fromVersion, targetVersion, node, template ) {
+
+    const values = await node.values();
+    Object.keys( values )
+        .filter( isSystem )
+        .forEach( key => console.log( key ) );
+
+        console.log( "From", fromVersion );
+    console.log( values );
+    console.log( "To", targetVersion );
+    console.log( template );
+
+}
+
+async function ensureVersionUpgrades( node, { template } ) {
+
+    const targetVersion = semver( template[ "@id" ] )
+    const values = await node.values();
+    const metadata = ( values && values[ asSystem( "metadata" ) ] ) || {};
+    const fromVersion = semver( metadata && metadata.version );
+    if ( fromVersion[ 0 ] > targetVersion[ 0 ] ) return;
+    if ( fromVersion[ 1 ] > targetVersion[ 1 ] ) return;
+    if ( fromVersion[ 2 ] >= targetVersion[ 2 ] ) return;
+    await applyUpgrade( fromVersion, targetVersion, node, template );
+
+}
+
 module.exports = {
 
     initializeFromTemplate,
+    ensureVersionUpgrades,
     applyTemplate
 
 };
