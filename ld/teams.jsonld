@@ -1,0 +1,100 @@
+{
+    "@context": "http://localhost:8080/context.jsonld",
+    "@graph": [{
+        "@context": {
+            "@base": "tenant-1/teams/team-1/"
+        },
+        "@id": "../team-1",
+        "@type": "ots:Team",
+        "name": "The eggheads",
+        "scoresheet": "scoresheets/1",
+        "members": [
+            {
+                "@type": "ots:Member",
+                "@id": "members/roo",
+                "name": "Andrew"
+            },
+            {
+                "@type": "ots:Member",
+                "@id": "members/sj",
+                "name": "Sarah-Jane"
+            }
+        ],
+        "scoresheets": {
+            "@id": "scoresheets/1",
+            "@type": "ots:Scoresheet",
+            "created": "2019-01-01T00:00:00Z",
+            "points": [
+                {
+                    "@type": "ots:Scoresheet.Point",
+                    "range": [
+                        -3,
+                        5
+                    ],
+                    "goal": "goals/goal-1",
+                    "measure": "Was the build broken by new code added this sprint?"
+                },
+                {
+                    "@type": "ots:Scoresheet.Point",
+                    "range": [
+                        -2,
+                        0
+                    ],
+                    "measure": "Were bugs found in production (only ones introduced during the last release)?",
+                    "goal": "goals/goal-2"
+                }
+            ]
+        },
+        "scores": [
+            {
+                "@type": "ots:Score",
+                "created": "2019-03-01T00:00:00Z",
+                "member": "members/roo",
+                "scoresheet": "scoresheets/1",
+                "goal": "goals/goal-1",
+                "amount": -4,
+                "description": "Broke the build on Wednesday and didn't fix it until Friday!",
+                "period": "periods/period-1"
+            },
+            {
+                "@type": "ots:Score",
+                "created": "2019-03-01T00:00:00Z",
+                "member": "members/sj",
+                "scoresheet": "scoresheets/1",
+                "goal": "goals/goal-1",
+                "amount": 5,
+                "description": "Did not break the build",
+                "period": "periods/period-1"
+            },
+            {
+                "@type": "ots:Score",
+                "created": "2019-03-01T00:00:00Z",
+                "member": "members/roo",
+                "scoresheet": "scoresheets/1",
+                "goal": "goals/goal-2",
+                "amount": -1,
+                "description": "Spelling mistakes",
+                "period": "periods/period-1"
+            }
+        ],
+        "goals": [
+            {
+                "@type": "ots:Goal",
+                "@id": "goals/goal-1",
+                "name": "Don't break the build"
+            },
+            {
+                "@type": "ots:Goal",
+                "@id": "goals/goal-2",
+                "name": "Catch all the bugs"
+            }
+        ],
+        "periods": [
+            {
+                "@type": "ots:Period",
+                "@id": "periods/period-1",
+                "name": "Sprint 12"
+            }
+        ]
+    }]
+}

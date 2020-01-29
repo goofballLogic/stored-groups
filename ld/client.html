@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        * {
+            font-family: Arial;
+        }
+
+        body,
+        input,
+        select,
+        textarea {
+            font-size: 1em;
+        }
+
+        p {
+            margin: 0 0 1em 0;
+        }
+
+        form {
+            padding: 1em;
+        }
+
+        #browse-mode,
+        #edit-mode {
+            display: none;
+        }
+
+        .browse-mode #browse-mode {
+            display: block;
+        }
+
+        .edit-mode #edit-mode {
+            display: block;
+        }
+
+        input:invalid {
+            color: red;
+        }
+    </style>
+    <script src="./manage-sw.js"></script>
+    <script src="./jsonld.min.js"></script>
+    <script src="./ld-query.js"></script>
+    <script type="module">
+        import { fetchAndExpandObjects, fetchObjects } from "./fetcher.js";
+        import { indexShapesByTargetClass } from "./shaper.js";
+        import { renderPropEditor, renderPropViewer } from "./renderers.js";
+
+        (async function () {
+
+            const maybeAtob = x => x && atob(x);
+            const emplaceText = (className, content) => Array
+                .from(document.querySelectorAll(className))
+                .forEach(el => el.textContent = content);
+
+            const [contextDocument] = await fetchObjects("context");
+            const context = contextDocument["@context"];
+
+            const [teams, schema] = await fetchAndExpandObjects("teams", "schema");
+            const schemaQuery = LD(schema, context);
+            const teamsQuery = LD(teams, context);
+            const shapeIndex = indexShapesByTargetClass(schemaQuery, context);
+window.teams = teamsQuery;
+            const picker = document.querySelector("#picker");
+
+            const url = new URL(location.href);
+            const currentShapeName = url.searchParams.get("shape") || "Team";
+            emplaceText(".current-shape-name", currentShapeName);
+            const currentMode = url.searchParams.get("mode") || "browse";
+
+
+            function editor() {
+
+                document.body.classList.add("edit-mode");
+
+                for (var key in shapeIndex) {
+                    const option = document.createElement("option");
+                    option.value = key;
+                    option.text = key;
+                    if (option.value == currentShapeName) option.selected = true;
+                    picker.add(option);
+                }
+
+                picker.addEventListener("change", e => navToShapeEditor(e.target.value));
+
+                function navToShapeEditor(shapeName) {
+                    location.href = `?shape=${shapeName}&at=${Date.now()}`;
+                }
+
+                function render(shapeName) {
+                    const shape = shapeIndex[shapeName];
+                    document.title = `${shapeName} shape editor`;
+                    const rendered = shape
+                        .queryAll("sh:property")
+                        .map(renderPropEditor)
+                        .join("");
+                    document.querySelector("#editor").innerHTML = rendered;
+                }
+
+                render(currentShapeName);
+
+            }
+
+            function browser() {
+
+                const currentClass = maybeAtob(url.searchParams.get("class")) || `${context.ots}Team`;
+                const currentClassPropQuery = schemaQuery.queryAll(`sh:class[@id=${currentClass}]`)
+                    .map(x => x.parent())
+                    .filter(x => !x.query("sh:maxCount"))
+                [0];
+                const currentClassName =
+                    (currentClassPropQuery && currentClassPropQuery.query("sh:labelTemplate @value"))
+                    || currentClass.substring(context.ots.length) + "s";
+                emplaceText(".current-class-name", currentClassName);
+
+                document.body.classList.add("browse-mode");
+
+                const objs = teamsQuery.queryAll(`[@type=${currentClass}]`);
+                const itemsList = document.querySelector("#items");
+                objs.forEach(o => {
+
+                    const id = o.query(">@id");
+                    const li = document.createElement("LI");
+                    if(id) {
+                        const a = document.createElement("A");
+                        a.href = id ? `?mode=view&id=${btoa(id)}` : "#";
+                        a.textContent = o.query(">ots:name @value") || "??";
+                        li.appendChild(a);
+                    } else {
+                        li.textContent = o.query(">ots:name @value") || "??";
+                    }
+                    itemsList.appendChild(li);
+
+                });
+
+            }
+
+            function viewer() {
+
+                document.body.classList.add("view-mode");
+                const id = maybeAtob(url.searchParams.get("id"));
+                if (!id) throw new Error("No id specified to view");
+                const objectsQuery = teamsQuery.queryAll(`#${id}`);
+                const objectQuery = objectsQuery.find(x => x.query(">@type"));
+                if (!objectQuery) throw new Error("Not found (or not typed): " + id);
+                const name = objectQuery.query(">ots:name @value")
+                const created = objectQuery.query(">ots:created @value");
+                emplaceText(".current-object-name", name || created);
+                const objClass = objectQuery.query(">@type").filter(t => t.startsWith(context.ots))[0];
+                const objKey = objClass && objClass.substring(context.ots.length);
+                const shape = objClass && shapeIndex[objKey];
+                document.title = `${objKey} viewer`;
+                const rendered = shape.queryAll("sh:property").map(p => renderPropViewer(p, objectQuery)).join("");
+                document.querySelector("#view").innerHTML = rendered;
+
+            }
+            switch (currentMode) {
+                case "edit":
+                    editor();
+                    break;
+                case "browse":
+                    browser();
+                    break;
+                case "view":
+                    viewer();
+                    break;
+                default:
+                    alert("Unknown mode " + currentMode);
+            }
+
+        }());
+
+    </script>
+</head>
+
+<body>
+    <section id="edit-mode">
+        <h2>Edit <span class="current-shape-name"></span></h2>
+        <form id="editor">
+
+        </form>
+        Choose a different shape:
+        <select id="picker"></select>
+    </section>
+    <section id="browse-mode">
+        <h2><span class="current-class-name"></span></h2>
+        <ul id="items">
+        </ul>
+    </section>
+    <section id="view-mode">
+        <h2><span class="current-object-name"></span></h2>
+        <div id="view"></div>
+    </section>
+</body>
+
+</html>

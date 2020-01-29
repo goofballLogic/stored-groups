@@ -1,0 +1,168 @@
+{
+    "@context": "http://localhost:8080/context.jsonld",
+    "@graph": [
+        {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Team",
+            "sh:property": [
+                {
+                    "sh:path": "name",
+                    "sh:dataType": "xsd:string",
+                    "sh:pattern": ".{4,50}",
+                    "sh:minCount": 1,
+                    "sh:maxCount": 1,
+                    "sh:labelTemplate": "Name",
+                    "sh:description": "The name of your team"
+                },
+                {
+                    "sh:path": "ots:scoresheet",
+                    "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:maxCount": 1,
+                    "sh:class": "ots:Scoresheet",
+                    "sh:labelTemplate": "Current scoresheet"
+                },
+                {
+                    "sh:path": "ots:members",
+                    "sh:class": "ots:Member",
+                    "sh:labelTemplate": "Members"
+                },
+                {
+                    "sh:path": "ots:scoresheets",
+                    "sh:class": "ots:Scoresheet",
+                    "sh:labelTemplate": "Scoresheets"
+                },
+                {
+                    "sh:path": "ots:scores",
+                    "sh:class": "ots:Score",
+                    "sh:labelTemplate": "Scores"
+                },
+                {
+                    "sh:path": "ots:goals",
+                    "sh:class": "ots:Goal",
+                    "sh:labelTemplate": "Goals"
+                },
+                {
+                    "sh:path": "ots:periods",
+                    "sh:class": "ots:Period",
+                    "sh:labelTemplate": "Scoring periods"
+                }
+            ]
+        },
+        {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Member",
+            "sh:property": [
+                {
+                    "sh:path": "ots:name",
+                    "sh:dataType": "xsd:string",
+                    "sh:pattern": ".{2,50}",
+                    "sh:minCount": 1,
+                    "sh:maxCount": 1
+                }
+            ]
+        },
+        {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Scoresheet",
+            "sh:property": [
+                {
+                    "sh:path": "ots:created",
+                    "sh:dataType": "xsd:dateTime",
+                    "sh:minCount": 1,
+                    "sh:maxCount": 1
+                },
+                {
+                    "sh:path": "ots:points",
+                    "sh:dataType": "ots:Scoresheet.Point",
+                    "sh:nodeKind": "sh:BlankNode"
+                }
+            ]
+        },
+        {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Scoresheet.Point",
+            "sh:property": [ {
+                "sh:path": "ots:range",
+                "sh:dataType": "xsd:integer",
+                "sh:minCount": 2,
+                "sh:maxCount": 2
+            }, {
+                "sh:path": "ots:goal",
+                "sh:nodeKind": "sh:IRI",
+                "sh:class": "ots:Goal",
+                "sh:minCount": 1,
+                "sh:maxCount": 1,
+                "sh:description": "The goal we are trying to achieve"
+            }, {
+                "sh:path": "ots:measure",
+                "sh:dataType": "xsd:string",
+                "sh:labelTemplate": "Measurement",
+                "sh:description": "What will be measured to determine points"
+            }]
+        },
+        {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Score",
+            "sh:property": [ {
+                "sh:path": "ots:created",
+                "sh:dataType": "xsd:dateTime",
+                "sh:minCount": 1,
+                "sh:maxCount": 1
+            }, {
+                "sh:path": "ots:member",
+                "sh:dataType": "ots:Member",
+                "sh:nodeKind": "sh:IRI",
+                "sh:minCount": 1,
+                "sh:maxCount": 1
+            }, {
+                "sh:path": "ots:scoresheet",
+                "sh:dataType": "ots:Scoresheet",
+                "sh:nodeKind": "sh:IRI",
+                "sh:minCount": 1,
+                "sh:maxCount": 1
+            }, {
+                "sh:path": "ots:goal",
+                "sh:dataType": "ots:Goal",
+                "sh:nodeKind": "sh:IRI",
+                "sh:minCount": 1,
+                "sh:maxCount": 1
+            }, {
+                "sh:path": "ots:amount",
+                "sh:dataType": "xsd:integer",
+                "sh:minCount": 1,
+                "sh:maxCount": 1
+            }, {
+                "sh:path": "ots:description",
+                "sh:dataType": "xsd:string",
+                "sh:minCount": 1,
+                "sh:maxCount": 1,
+                "sh:pattern": ".{5,50}"
+            }]
+        }, {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Goal",
+            "sh:property": [
+                {
+                    "sh:path": "ots:name",
+                    "sh:dataType": "xsd:string",
+                    "sh:pattern": ".{2,50}",
+                    "sh:minCount": 1,
+                    "sh:maxCount": 1
+                }
+            ]
+        }, {
+            "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Period",
+            "sh:property": [
+                {
+                    "sh:path": "ots:name",
+                    "sh:dataType": "xsd:string",
+                    "sh:pattern": ".{2,50}",
+                    "sh:minCount": 1,
+                    "sh:maxCount": 1
+                }
+            ]
+        }
+    ]
+}
