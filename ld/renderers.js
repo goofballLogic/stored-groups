@@ -6,12 +6,23 @@ const xsdInteger = `${xsd}integer`;
 const sh = "http://www.w3.org/ns/shacl#";
 const shIRI = `${sh}IRI`;
 
-const viewerRenderers = {
+const vocabBase = "http://openteamspace.com/vocab#";
+const vocab = x => `${vocabBase}${x}`;
+const unvocab = x => x.startsWith(vocabBase) ? x.substring(vocabBase.length, 0) : x;
 
+const viewerRenderers = {
+    [xsdString]: (p, o) => viewRenderer(p, o, xsdString),
+    [xsdDateTime]: (p, o) => viewRenderer(p, o, xsdDateTime)
 };
+
+const valueFormatters = {
+    [xsdString]: formatStringForView,
+    [xsdDateTime]: formatDateTimeForView
+};
+
 const editorRenderers = {
-    [xsdString]: x => inputRenderer(x, "text"),
-    [xsdDateTime]: x => inputRenderer(x, "date"),
+    [xsdString]: x => inputRenderer(x, xsdString),
+    [xsdDateTime]: x => inputRenderer(x, xsdDateTime),
     [xsdInteger]: x => inputRenderer(x, "integer", "1")
 };
 
@@ -24,7 +35,9 @@ const HTML = {
     "span": (className, ...args) => `<span class="${className}">${stringify(args)}</span>`,
     "div": (className, ...args) => `<div class="${className}">${stringify(args)}</div>`,
     "p": (className, ...args) => `<p class="${className}">${stringify(args)}</p>`,
-    "a": (className, href, ...args) => `<a class="${className}" href="${href}">${stringify(args)}</a>`
+    "a": (className, href, ...args) => `<a class="${className}" href="${href}">${stringify(args)}</a>`,
+    "ul": (className, ...liContents) => `<ul class="${className}">${stringify(liContents.map(x => HTML.li(null, x)))}</ul>`,
+    "li": (className, ...args) => `<li class="${className}">${stringify(args)}</li>`
 };
 
 export const renderPropEditor = propQuery => renderClassPropEditor(propQuery) || renderLiteralPropEditor(propQuery);
@@ -78,7 +91,7 @@ function renderClassPropEditor(propQuery) {
 function renderLiteralPropViewer(propQuery, objectQuery) {
     const dataType = propQuery.query("sh:dataType @id") || xsdString;
     const renderer = viewerRenderers[dataType];
-    const controls = renderer ? renderer(propQuery) : dataType;
+    const controls = renderer ? renderer(propQuery, objectQuery) : dataType;
     return HTML.div("property-controls", controls);
 }
 
@@ -87,6 +100,57 @@ function renderLiteralPropEditor(propQuery) {
     const renderer = editorRenderers[dataType];
     const controls = renderer ? renderer(propQuery) : dataType;
     return HTML.div("property-controls", controls);
+}
+
+const createdProp = vocab("created");
+
+function viewRenderer(propQuery, objectQuery, inputType) {
+    const path = propQuery.query("sh:path @id");
+
+    const labelTemplate = propQuery.query("sh:labelTemplate @value");
+    const label = labelTemplate || (path === createdProp ? "Created" : path);
+    const minCount = parseInt(propQuery.query("sh:minCount @value") || "0");
+    const maxCount = parseInt(propQuery.query("sh:maxCount @value") || "1");
+    const description = propQuery.query("sh:description @value");
+    const rawValues = objectQuery ? objectQuery.queryAll(`> ${path} > @value`): [];
+    const values = rawValues.map(x => formatForView(x, inputType));
+
+    if (Math.max(values.length, maxCount) > 5) {
+
+        return HTML.a(
+            "linked-collection",
+            "#",
+            label
+        );
+
+    }
+    return HTML.div(
+        "prop",
+        label,
+        ": ",
+        ...values
+    );
+}
+
+
+function formatForView(value, inputType) {
+
+    const formatter = valueFormatters[inputType] || valueFormatters[xsdString];
+    return formatter(value);
+
+}
+
+function formatStringForView(value) {
+
+    return value || "";
+
+}
+
+function formatDateTimeForView(value) {
+
+    const parsed = new Date(value);
+    return parsed.toLocaleDateString([], { dateStyle: "full" });
+
 }
 
 function inputRenderer(propQuery, inputType) {

@@ -6,7 +6,7 @@
             "sh:targetClass": "ots:Team",
             "sh:property": [
                 {
-                    "sh:path": "name",
+                    "sh:path": "ots:name",
                     "sh:dataType": "xsd:string",
                     "sh:pattern": ".{4,50}",
                     "sh:minCount": 1,
@@ -25,27 +25,32 @@
                 {
                     "sh:path": "ots:members",
                     "sh:class": "ots:Member",
-                    "sh:labelTemplate": "Members"
+                    "sh:labelTemplate": "Members",
+                    "sh:maxCount": 200
                 },
                 {
                     "sh:path": "ots:scoresheets",
                     "sh:class": "ots:Scoresheet",
-                    "sh:labelTemplate": "Scoresheets"
+                    "sh:labelTemplate": "Scoresheets",
+                    "sh:maxCount": 200
                 },
                 {
                     "sh:path": "ots:scores",
                     "sh:class": "ots:Score",
-                    "sh:labelTemplate": "Scores"
+                    "sh:labelTemplate": "Scores",
+                    "sh:maxCount": 10000
                 },
                 {
                     "sh:path": "ots:goals",
                     "sh:class": "ots:Goal",
-                    "sh:labelTemplate": "Goals"
+                    "sh:labelTemplate": "Goals",
+                    "sh:maxCount": 10000
                 },
                 {
                     "sh:path": "ots:periods",
                     "sh:class": "ots:Period",
-                    "sh:labelTemplate": "Scoring periods"
+                    "sh:labelTemplate": "Scoring periods",
+                    "sh:maxCount": 10000
                 }
             ]
         },
