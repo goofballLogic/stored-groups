@@ -21,17 +21,18 @@ const valueFormatters = {
 };
 
 const editorRenderers = {
-    [xsdString]: x => inputRenderer(x, xsdString),
-    [xsdDateTime]: x => inputRenderer(x, xsdDateTime),
-    [xsdInteger]: x => inputRenderer(x, "integer", "1")
+    [xsdString]: (p, o) => inputRenderer(p, o, xsdString),
+    [xsdDateTime]: (p, o) => inputRenderer(p, o, xsdDateTime),
+    [xsdInteger]: (p, o) => inputRenderer(p, o, xsdInteger)
 };
 
 const stringify = args => args.filter(x => x).join("");
+const maybeValue = value => value == null ? "" : `value="${value}"`;
 
 const HTML = {
     "label": (...args) => `<label>${stringify(args)}</label>`,
-    "input_int": inputName => `<input type="number" name="${inputName} step="1" pattern="^\\d+$" />`,
-    "input": (inputType, inputName) => `<input type="${inputType}" name="${inputName}" />`,
+    "input_int": (inputName, value) => `<input type="number" name="${inputName} step="1" pattern="^\\d+$" ${maybeValue(value)} />`,
+    "input": (inputType, inputName, value) => `<input type="${inputType}" name="${inputName}" ${maybeValue(value)} />`,
     "span": (className, ...args) => `<span class="${className}">${stringify(args)}</span>`,
     "div": (className, ...args) => `<div class="${className}">${stringify(args)}</div>`,
     "p": (className, ...args) => `<p class="${className}">${stringify(args)}</p>`,
@@ -40,7 +41,7 @@ const HTML = {
     "li": (className, ...args) => `<li class="${className}">${stringify(args)}</li>`
 };
 
-export const renderPropEditor = propQuery => renderClassPropEditor(propQuery) || renderLiteralPropEditor(propQuery);
+export const renderPropEditor = (propQuery, objectQuery) => renderClassPropEditor(propQuery, objectQuery) || renderLiteralPropEditor(propQuery, objectQuery);
 
 export const renderPropViewer = (propQuery, objectQuery) => renderClassPropViewer(propQuery, objectQuery) || renderLiteralPropViewer(propQuery, objectQuery);
 
@@ -95,10 +96,10 @@ function renderLiteralPropViewer(propQuery, objectQuery) {
     return HTML.div("property-controls", controls);
 }
 
-function renderLiteralPropEditor(propQuery) {
+function renderLiteralPropEditor(propQuery, objectQuery) {
     const dataType = propQuery.query("sh:dataType @id") || xsdString;
     const renderer = editorRenderers[dataType];
-    const controls = renderer ? renderer(propQuery) : dataType;
+    const controls = renderer ? renderer(propQuery, objectQuery) : dataType;
     return HTML.div("property-controls", controls);
 }
 
@@ -153,7 +154,7 @@ function formatDateTimeForView(value) {
 
 }
 
-function inputRenderer(propQuery, inputType) {
+function inputRenderer(propQuery, objectQuery, inputType) {
     const path = propQuery.query("sh:path @id");
     const labelTemplate = propQuery.query("sh:labelTemplate @value");
     const label = labelTemplate || path;
@@ -166,11 +167,26 @@ function inputRenderer(propQuery, inputType) {
         return inputType + " with maxCount " + maxCount;
     }
     const description = propQuery.query("sh:description @value");
-    const input = inputType == "integer" ? HTML.input_int(path) : HTML.input(inputType, path);
+    const pathQuery = objectQuery && objectQuery.query(`> ${path}`);
+    const value = pathQuery ? pathQuery.query(">@value") : null;
+    const input = htmlInputRenderer(path, value, inputType);
     const maybeDescription =  description && HTML.p("property-description", description);
     return HTML.label(
         label,
         input,
         maybeDescription
     );
+}
+
+function htmlInputRenderer(path, value, inputType) {
+    switch(inputType) {
+        case xsdInteger:
+            return HTML.input_int(path, value);
+        case xsdDateTime:
+            return HTML.input("datetime", path, value);
+        case xsdString:
+            return HTML.input("text", path, value);
+        default:
+            throw new Error(`Unrecognised: ${inputType}`);
+    }
 }
