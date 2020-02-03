@@ -117,8 +117,6 @@ window.st = {
     teamsQuery
 }
             const url = new URL(location.href);
-            const currentShapeName = url.searchParams.get("shape") || "Team";
-            emplaceText(".current-shape-name", currentShapeName);
             const currentMode = url.searchParams.get("mode") || "browse";
 
             document.querySelector("#mode-name").textContent = currentMode;
@@ -167,18 +165,33 @@ window.st = {
                 location.href = `?mode=edit&shape=${shapeName}&at=${Date.now()}`;
             }
 
+            function currentShapeName(objectQuery) {
+                if( !objectQuery) return url.searchParams.get("shape") || "Team";
+                const objClass = objectQuery.query(">@type").filter(t => t.startsWith(context.ots))[0];
+                return objClass && objClass.substring(context.ots.length);
+            }
+
+            function shapeForObject(objQuery) {
+                const shapeName = currentShapeName(objQuery);
+                return objClass && shapeIndex[shapeName];
+            }
+
             function editor() {
 
                 document.body.classList.add("edit-mode");
 
+
                 const objectQuery = currentObject();
                 populateObjectName(objectQuery, "new");
+
+                const shapeName = currentShapeName(objectQuery);
+                emplaceText(".current-shape-name", shapeName);
 
                 for (var key in shapeIndex) {
                     const option = document.createElement("option");
                     option.value = key;
                     option.text = key;
-                    if (option.value == currentShapeName) option.selected = true;
+                    if (option.value == shapeName) option.selected = true;
                     picker.add(option);
                 }
 
@@ -194,7 +207,7 @@ window.st = {
                     document.querySelector("#editor").innerHTML = rendered;
                 }
 
-                render(currentShapeName);
+                render(shapeName);
 
             }
 
@@ -237,9 +250,7 @@ window.st = {
                 document.body.classList.add("view-mode");
                 const objectQuery = currentObject(true);
                 populateObjectName(objectQuery);
-                const objClass = objectQuery.query(">@type").filter(t => t.startsWith(context.ots))[0];
-                const objKey = objClass && objClass.substring(context.ots.length);
-                const shape = objClass && shapeIndex[objKey];
+
                 document.title = `${objKey} viewer`;
                 const rendered = shape.queryAll("sh:property").map(p => renderPropViewer(p, objectQuery)).join("");
                 document.querySelector("#view").innerHTML = rendered;

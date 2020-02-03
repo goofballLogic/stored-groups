@@ -156,7 +156,15 @@ function formatDateTimeForView(value) {
 
 function inputRenderer(propQuery, objectQuery, inputType) {
     const path = propQuery.query("sh:path @id");
+
+    if(path == vocab("created")) {
+        return renderPropViewer(propQuery, objectQuery);
+    }
     const labelTemplate = propQuery.query("sh:labelTemplate @value");
+
+    const pathQuery = objectQuery && objectQuery.query(`> ${path}`);
+    const value = pathQuery ? pathQuery.query(">@value") : null;
+
     const label = labelTemplate || path;
     const minCount = parseInt(propQuery.query("sh:minCount @value") || "0");
     const maxCount = parseInt(propQuery.query("sh:maxCount @value") || "1");
@@ -167,8 +175,7 @@ function inputRenderer(propQuery, objectQuery, inputType) {
         return inputType + " with maxCount " + maxCount;
     }
     const description = propQuery.query("sh:description @value");
-    const pathQuery = objectQuery && objectQuery.query(`> ${path}`);
-    const value = pathQuery ? pathQuery.query(">@value") : null;
+
     const input = htmlInputRenderer(path, value, inputType);
     const maybeDescription =  description && HTML.p("property-description", description);
     return HTML.label(
@@ -183,7 +190,7 @@ function htmlInputRenderer(path, value, inputType) {
         case xsdInteger:
             return HTML.input_int(path, value);
         case xsdDateTime:
-            return HTML.input("datetime", path, value);
+            return HTML.input("datetime-local", path, value && value.substring(0, 19));
         case xsdString:
             return HTML.input("text", path, value);
         default:
