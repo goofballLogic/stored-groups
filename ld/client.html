@@ -118,8 +118,18 @@ window.st = {
 }
             const url = new URL(location.href);
             const currentMode = url.searchParams.get("mode") || "browse";
-
             document.querySelector("#mode-name").textContent = currentMode;
+
+            if(url.searchParams.has("save")) {
+
+                const whenValue = Number.parseInt(url.searchParams.get("save"));
+                const when = new Date(whenValue);
+                alert(`Saved ${when.toString()}`);
+
+            }
+
+            const currentId = maybeAtob(url.searchParams.get("id"));
+            document.querySelectorAll("input[name='@id']").forEach(input => input.value = currentId);
 
             function setAll(selector, values) {
                 const found = document.querySelectorAll(selector);
@@ -139,12 +149,11 @@ window.st = {
             setAll(".home-link", { href: homeUrl.toString() });
 
             function currentObject(required = false) {
-                const id = maybeAtob(url.searchParams.get("id"));
-                if (!id) {
+                if (!currentId) {
                     if (required) throw new Error("No id specified");
                     return;
                 }
-                const objectsQuery = teamsQuery.queryAll(`#${id}`);
+                const objectsQuery = teamsQuery.queryAll(`#${currentId}`);
                 const objectQuery = objectsQuery.find(x => x.query(">@type"));
                 if (!objectQuery) throw new Error("Not found (or not typed): " + id);
                 return objectQuery;
@@ -181,7 +190,6 @@ window.st = {
 
                 document.body.classList.add("edit-mode");
 
-
                 const objectQuery = currentObject();
                 populateAndReturnObjectName(objectQuery, "new");
 
@@ -205,7 +213,7 @@ window.st = {
                         .queryAll("sh:property")
                         .map(propQuery => renderPropEditor(propQuery, objectQuery))
                         .join("");
-                    document.querySelector("#editor").innerHTML = rendered;
+                    document.querySelector("#editor .inputs").innerHTML = rendered;
                 }
 
                 render(shapeName);
@@ -292,7 +300,15 @@ window.st = {
             </h2>
             <select id="picker"></select>
         </header>
-        <form id="editor">
+        <form id="editor" method="POST" action="/edits?styff=1#2">
+
+            <div class="inputs">
+
+            </div>
+            <div class="submission">
+                <input type="hidden" name="@id" />
+                <input type="submit" value="Save" />
+            </div>
 
         </form>
 
