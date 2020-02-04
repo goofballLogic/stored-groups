@@ -150,7 +150,7 @@ window.st = {
                 return objectQuery;
             }
 
-            function populateObjectName(objectQuery, defaultValue) {
+            function populateAndReturnObjectName(objectQuery, defaultValue) {
                 const name =
                     ( objectQuery && objectQuery.query(">ots:name @value") )
                     ||
@@ -158,6 +158,7 @@ window.st = {
                     ||
                     defaultValue;
                 emplaceText(".current-object-name", name);
+                return name;
             }
 
 
@@ -173,7 +174,7 @@ window.st = {
 
             function shapeForObject(objQuery) {
                 const shapeName = currentShapeName(objQuery);
-                return objClass && shapeIndex[shapeName];
+                return shapeName && shapeIndex[shapeName];
             }
 
             function editor() {
@@ -182,7 +183,7 @@ window.st = {
 
 
                 const objectQuery = currentObject();
-                populateObjectName(objectQuery, "new");
+                populateAndReturnObjectName(objectQuery, "new");
 
                 const shapeName = currentShapeName(objectQuery);
                 emplaceText(".current-shape-name", shapeName);
@@ -249,9 +250,10 @@ window.st = {
 
                 document.body.classList.add("view-mode");
                 const objectQuery = currentObject(true);
-                populateObjectName(objectQuery);
+                const objName = populateAndReturnObjectName(objectQuery);
 
-                document.title = `${objKey} viewer`;
+                const shape = shapeForObject(objectQuery);
+                document.title = `${objName} viewer`;
                 const rendered = shape.queryAll("sh:property").map(p => renderPropViewer(p, objectQuery)).join("");
                 document.querySelector("#view").innerHTML = rendered;
 
