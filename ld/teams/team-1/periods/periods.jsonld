@@ -1,0 +1,15 @@
+{
+    "@context": [
+        "http://localhost:8080/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/periods/"
+        }
+    ],
+    "@graph": [
+        {
+            "@type": "ots:Period",
+            "@id": "period-1",
+            "name": "Sprint 12"
+        }
+    ]
+}

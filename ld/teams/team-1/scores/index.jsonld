@@ -1,0 +1,40 @@
+{
+    "@context": [
+        "http://localhost:8080/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/scores/"
+        }
+    ],
+    "@graph": [
+        {
+            "@type": "ots:Score",
+            "created": "2019-03-01T00:00:00Z",
+            "member": "../members/roo",
+            "scoresheet": "../scoresheets/1",
+            "goal": "../goals/goal-1",
+            "amount": -4,
+            "description": "Broke the build on Wednesday and didn't fix it until Friday!",
+            "period": "../periods/period-1"
+        },
+        {
+            "@type": "ots:Score",
+            "created": "2019-03-01T00:00:00Z",
+            "member": "../members/sj",
+            "scoresheet": "../scoresheets/1",
+            "goal": "../goals/goal-1",
+            "amount": 5,
+            "description": "Did not break the build",
+            "period": "../periods/period-1"
+        },
+        {
+            "@type": "ots:Score",
+            "created": "2019-03-01T00:00:00Z",
+            "member": "../members/roo",
+            "scoresheet": "../scoresheets/1",
+            "goal": "../goals/goal-2",
+            "amount": -1,
+            "description": "Spelling mistakes",
+            "period": "../periods/period-1"
+        }
+    ]
+}

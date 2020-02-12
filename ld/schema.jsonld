@@ -24,30 +24,35 @@
                 },
                 {
                     "sh:path": "ots:members",
+                    "sh:nodeKind": "sh:IRI",
                     "sh:class": "ots:Member",
-                    "sh:labelTemplate": "Members",
+                    "sh:labelTemplate": "Team members",
                     "sh:maxCount": 200
                 },
                 {
                     "sh:path": "ots:scoresheets",
+                    "sh:nodeKind": "sh:IRI",
                     "sh:class": "ots:Scoresheet",
                     "sh:labelTemplate": "Scoresheets",
                     "sh:maxCount": 200
                 },
                 {
                     "sh:path": "ots:scores",
+                    "sh:nodeKind": "sh:IRI",
                     "sh:class": "ots:Score",
                     "sh:labelTemplate": "Scores",
                     "sh:maxCount": 10000
                 },
                 {
                     "sh:path": "ots:goals",
+                    "sh:nodeKind": "sh:IRI",
                     "sh:class": "ots:Goal",
                     "sh:labelTemplate": "Goals",
                     "sh:maxCount": 10000
                 },
                 {
                     "sh:path": "ots:periods",
+                    "sh:nodeKind": "sh:IRI",
                     "sh:class": "ots:Period",
                     "sh:labelTemplate": "Scoring periods",
                     "sh:maxCount": 10000

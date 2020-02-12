@@ -66,9 +66,7 @@
             padding: 1em;
         }
 
-        #browse-mode,
-        #view-mode,
-        #edit-mode {
+        .mode {
             display: none;
         }
 
@@ -84,6 +82,10 @@
             display: block;
         }
 
+        .browse-collection-mode #browse-collection-mode {
+            display: block;
+        }
+
         input:invalid {
             color: red;
         }
@@ -94,7 +96,7 @@
     <script type="module">
         import { fetchAndExpandObjects, fetchObjects } from "./fetcher.js";
         import { indexShapesByTargetClass } from "./shaper.js";
-        import { renderPropEditor, renderPropViewer } from "./renderers.js";
+        import { renderPropEditor, renderPropViewer, renderChildViewerLink } from "./renderers.js";
 
         (async function () {
 
@@ -118,6 +120,8 @@ window.st = {
 }
             const url = new URL(location.href);
             const currentMode = url.searchParams.get("mode") || "browse";
+            const currentOwner = url.searchParams.get("owner");
+
             document.querySelector("#mode-name").textContent = currentMode;
 
             if(url.searchParams.has("save")) {
@@ -155,8 +159,17 @@ window.st = {
                 }
                 const objectsQuery = teamsQuery.queryAll(`#${currentId}`);
                 const objectQuery = objectsQuery.find(x => x.query(">@type"));
-                if (!objectQuery) throw new Error("Not found (or not typed): " + id);
+                if (!objectQuery) throw new Error(`Not found (or not typed): ${id}`);
                 return objectQuery;
+            }
+
+            function currentPropShape(required = false) {
+                const parent = currentObject(required);
+                const parentShape = shapeForObject(parent);
+                const prop = atob(url.searchParams.get("prop"));
+                const propShapePath = parentShape.query(`sh:property sh:path[@id=${prop}]`);
+                if(!propShapePath) throw new Error(`Not found: ${prop} of ${id}`);
+                return propShapePath.parent();
             }
 
             function populateAndReturnObjectName(objectQuery, defaultValue) {
@@ -220,6 +233,23 @@ window.st = {
 
             }
 
+            function collectionBrowser() {
+
+                emplaceText(".current-owner-name", currentOwner);
+                const parent = currentObject(true);
+                const name = parent.query("ots:name @value");
+                const propShape = currentPropShape(true);
+                const prop = propShape.query("sh:path @id");
+                const label = propShape.query("sh:labelTemplate @value") || prop.query("sh:path @id");
+                emplaceText(".current-collection-name", label);
+
+                document.body.classList.add("browse-collection-mode");
+
+                const objs = parent.queryAll(prop);
+                const itemsList = document.querySelector("#browse-collection-mode #items");
+                itemsList.innerHTML = objs.map(renderChildViewerLink).join("\n");
+            }
+
             function browser() {
 
                 const currentClass = maybeAtob(url.searchParams.get("class")) || `${context.ots}Team`;
@@ -235,22 +265,23 @@ window.st = {
                 document.body.classList.add("browse-mode");
 
                 const objs = teamsQuery.queryAll(`[@type=${currentClass}]`);
-                const itemsList = document.querySelector("#items");
-                objs.forEach(o => {
+                const itemsList = document.querySelector("#browse-mode #items");
+                itemsList.innerHTML = objs.map(renderChildViewerLink).join("\n");
+                // objs.forEach(o => {
 
-                    const id = o.query(">@id");
-                    const li = document.createElement("LI");
-                    if (id) {
-                        const a = document.createElement("A");
-                        a.href = id ? `?mode=view&id=${btoa(id)}` : "#";
-                        a.textContent = o.query(">ots:name @value") || "??";
-                        li.appendChild(a);
-                    } else {
-                        li.textContent = o.query(">ots:name @value") || "??";
-                    }
-                    itemsList.appendChild(li);
+                //     const id = o.query(">@id");
+                //     const li = document.createElement("LI");
+                //     if (id) {
+                //         const a = document.createElement("A");
+                //         a.href = id ? `?mode=view&id=${btoa(id)}` : "#";
+                //         a.textContent = o.query(">ots:name @value") || "??";
+                //         li.appendChild(a);
+                //     } else {
+                //         li.textContent = o.query(">ots:name @value") || "??";
+                //     }
+                //     itemsList.appendChild(li);
 
-                });
+                // });
 
             }
 
@@ -277,6 +308,9 @@ window.st = {
                 case "view":
                     viewer();
                     break;
+                case "browse-collection":
+                    collectionBrowser();
+                    break;
                 default:
                     alert("Unknown mode " + currentMode);
             }
@@ -291,7 +325,7 @@ window.st = {
         <a href="" class="home-link">Home</a>
         <span id="mode-name">loading</span> mode
     </header>
-    <section id="edit-mode">
+    <section id="edit-mode" class="mode">
         <header>
             <h2>
                 Edit
@@ -313,14 +347,22 @@ window.st = {
         </form>
 
     </section>
-    <section id="browse-mode">
+    <section id="browse-collection-mode" class="mode">
+        <header>
+            <h3><span class="current-owner-name"></span></h3>
+            <h2><span class="current-collection-name"></span></h2>
+        </header>
+        <ul id="items">
+        </ul>
+    </section>
+    <section id="browse-mode" class="mode">
         <header>
             <h2><span class="current-class-name"></span></h2>
         </header>
         <ul id="items">
         </ul>
     </section>
-    <section id="view-mode">
+    <section id="view-mode" class="mode">
         <header>
             <h2>
                 <span class="current-object-name"></span>

@@ -41,9 +41,43 @@ const HTML = {
     "li": (className, ...args) => `<li class="${className}">${stringify(args)}</li>`
 };
 
-export const renderPropEditor = (propQuery, objectQuery) => renderClassPropEditor(propQuery, objectQuery) || renderLiteralPropEditor(propQuery, objectQuery);
+export const renderPropEditor = (propQuery, objectQuery) =>
+    renderClassPropEditor(propQuery, objectQuery)
+    || renderLiteralPropEditor(propQuery, objectQuery);
 
-export const renderPropViewer = (propQuery, objectQuery) => renderClassPropViewer(propQuery, objectQuery) || renderLiteralPropViewer(propQuery, objectQuery);
+export const renderPropViewer = (propQuery, objectQuery) =>
+    renderCollectionPropViewer(propQuery, objectQuery)
+    || renderClassPropViewer(propQuery, objectQuery)
+    || renderLiteralPropViewer(propQuery, objectQuery);
+
+export const renderChildViewerLink = (objectQuery) =>
+    renderObjectLink(objectQuery);
+
+const viewLink = id => `?mode=view&id=${btoa(id)}`;
+const browseChildrenLink = (id, childProp, owner) => `?mode=browse-collection&id=${btoa(id)}&prop=${btoa(childProp)}&owner=${encodeURIComponent(owner)}`;
+const browseClassLink = shapeClass => `?mode=browse&class=${btoa(shapeClass)}`;
+
+function renderCollectionPropViewer(propQuery, objectQuery) {
+    const id = objectQuery.query("> @id");
+    const shapeClass = propQuery.query("sh:class @id");
+    if (!shapeClass) return undefined;
+    const nodeKind = propQuery.query("sh:nodeKind @id");
+    if (nodeKind !== shIRI) return undefined;
+    const maxCount = propQuery.query("sh:maxCount @value");
+    if (maxCount < 2) return undefined;
+    const path = propQuery.query("sh:path @id");
+    if (!path) return undefined;
+    const label = propQuery.query("sh:labelTemplate @value") || path;
+    const owner = objectQuery.query("> ots:name @value") || objectQuery.query("> @id");
+    return HTML.div(
+        "",
+        HTML.a(
+            "view-children",
+            browseChildrenLink(id, path, owner),
+            label
+        )
+    );
+}
 
 function renderClassPropViewer(propQuery, objectQuery) {
 
@@ -60,11 +94,27 @@ function renderClassPropViewer(propQuery, objectQuery) {
 
         return HTML.div(
             "class-property",
-            HTML.a("linked-object", `?mode=view&id=${btoa(id)}`,label),
+            HTML.a(
+                "linked-object",
+                viewLink(id),
+                label
+            ),
             description
         );
 
     }
+}
+
+function renderObjectLink(objectQuery) {
+
+    const id = objectQuery.query(">@id");
+    if (!id) return undefined;
+    const objectName = objectQuery.query(">ots:name @value") || "??";
+    return HTML.a(
+        "child-object",
+        viewLink(id),
+        objectName
+    );
 }
 
 function renderClassPropEditor(propQuery) {
@@ -85,7 +135,14 @@ function renderClassPropEditor(propQuery) {
     }
 
     const labelTemplate = propQuery.query("sh:labelTemplate @value");
-    return HTML.div("object-index", HTML.a("object-index", `?mode=browse&class=${btoa(shapeClass)}&at=${Date.now()}`, labelTemplate || shapeClass));
+    return HTML.div(
+        "object-index",
+        HTML.a(
+            "object-index",
+            browseClassLink(shapeClass),
+            labelTemplate || shapeClass
+        )
+    );
 
 }
 

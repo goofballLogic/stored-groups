@@ -1,0 +1,20 @@
+{
+    "@context": [
+        "http://localhost:8080/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/members/"
+        }
+    ],
+    "@graph": [
+        {
+            "@type": "ots:Member",
+            "@id": "roo",
+            "name": "Andrew"
+        },
+        {
+            "@type": "ots:Member",
+            "@id": "sj",
+            "name": "Sarah-Jane"
+        }
+    ]
+}

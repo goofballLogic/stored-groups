@@ -1,0 +1,20 @@
+{
+    "@context": [
+        "http://localhost:8080/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/goals/"
+        }
+    ],
+    "@graph": [
+        {
+            "@type": "ots:Goal",
+            "@id": "goal-1",
+            "name": "Don't break the build"
+        },
+        {
+            "@type": "ots:Goal",
+            "@id": "goal-2",
+            "name": "Catch all the bugs"
+        }
+    ]
+}
