@@ -15,5 +15,6 @@ async function fetchObject(o) {
 
 async function fetchAndExpandObject(o) {
     const json = await fetchObject(o);
+console.log(1, json);
     return jsonld.expand(json);
 }

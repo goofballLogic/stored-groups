@@ -1,0 +1,103 @@
+digraph G {
+
+    penwidth=0.1
+    node [ fontsize=6; fontname=arial; penwidth=0.1; shape=box; style=filled; fillcolor=white; ]
+    edge [ penwidth=0.1; arrowsize=0.5 ]
+
+    subgraph dev_tooling {
+
+        node [ shape=none ]
+        data_storage_sw
+        start
+        end
+    }
+
+    subgraph cluster_generic {
+        color=white; style=filled; fillcolor=grey95
+        data_format [ fillcolor=green ]
+        choose_dataset
+        view_object [ fillcolor=green ]
+        navigate_to_object [ fillcolor=green ]
+        navigate_to_collection [ fillcolor=yellow ]
+        view_collection [ fillcolor=green ]
+        create_object [ fillcolor=yellow ]
+        edit_object [ fillcolor=yellow ]
+            eo_relate_to_1
+            eo_relate_to_collection
+            eo_relate_to_1_delete
+        edit_collection
+        delete_object
+        generic_code_complete [ fillcolor=yellow ]
+    }
+
+    subgraph cluster_provider {
+        color=white; style=filled; fillcolor=grey95
+        data_storage_google
+        login_google
+        logout
+        logout_google
+        provider_complete
+    }
+
+    subgraph cluster_webcomponent_bridge {
+        color=white; style=filled; fillcolor=grey95
+        ct_web_component
+        vo_web_component
+        vc_web_component
+        eo_web_component
+        logout_web_component
+        web_component_code_complete
+    }
+
+    subgraph cluster_dev_ots {
+        color=white; style=filled; fillcolor=grey95
+        physical_schema
+        logical_schema [ fillcolor=yellow ]
+        splash_screen
+        dev_ux_design
+        dev_base_web_components
+        dev_graph_web_components
+        dev_graphical
+        dev_code_complete [ fillcolor=yellow ]
+    }
+
+    start -> data_format
+
+    logical_schema -> choose_dataset
+    data_format -> choose_dataset -> view_object
+    choose_dataset -> view_collection -> edit_collection -> generic_code_complete
+    view_object -> navigate_to_object -> generic_code_complete
+    view_object -> navigate_to_collection -> generic_code_complete
+    view_object -> create_object -> generic_code_complete
+    view_object -> delete_object  -> generic_code_complete
+    view_object -> edit_object
+    edit_object -> eo_relate_to_1 -> eo_relate_to_1_delete  -> generic_code_complete
+    edit_object -> eo_relate_to_collection  -> generic_code_complete
+
+    data_storage_sw -> edit_object -> data_storage_google
+    data_storage_sw -> edit_collection -> data_storage_google
+    data_storage_sw -> delete_object -> data_storage_google
+    data_storage_sw -> create_object -> data_storage_google
+
+    generic_code_complete -> ct_web_component -> web_component_code_complete
+    generic_code_complete -> vo_web_component -> web_component_code_complete
+    generic_code_complete -> vc_web_component -> web_component_code_complete
+    generic_code_complete -> eo_web_component -> web_component_code_complete
+    logout -> logout_web_component -> web_component_code_complete -> end
+
+    data_format -> physical_schema
+    logical_schema -> physical_schema -> dev_code_complete
+    generic_code_complete -> dev_ux_design
+    dev_ux_design -> dev_base_web_components -> dev_code_complete
+    dev_ux_design -> dev_graphical -> dev_code_complete
+    dev_graph_web_components -> dev_code_complete
+    dev_code_complete -> end
+
+    data_storage_google -> provider_complete
+
+    physical_schema -> data_storage_google
+
+    login_google -> logout -> logout_google -> provider_complete
+
+    provider_complete -> end
+}

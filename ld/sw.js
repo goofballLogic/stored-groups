@@ -1,4 +1,18 @@
-const version = "0.3.0";
+const window = {};
+const x = importScripts("jsonld.min.js");
+const jsonld = window.jsonld;
+delete window;
+
+jsonld.documentLoader = async (url) => {
+    const res = await readThrough(new Request(url));
+    return {
+        contextUrl: null,
+        document: await res.json(),
+        documentUrl: url
+    };
+};
+
+const version = "0.3.2";
 const log = (...args) => console.log("[ServiceWorker]", version, ...args);
 
 self.addEventListener("install", event => {
@@ -26,18 +40,18 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
 
     const url = new URL(event.request.url);
-    if(url.pathname.endsWith(".jsonld"))
+    if (url.pathname.endsWith(".jsonld"))
         event.respondWith(handleFetchJSONLD(event));
-    if(url.pathname.endsWith("/edits"))
+    if (url.pathname.endsWith("/edits"))
         event.respondWith(handleEdits(event));
 
 });
 
 async function handleFetchJSONLD(event) {
 
-    switch(event.request.method) {
+    switch (event.request.method) {
         case "GET":
-            return readThrough(event);
+            return readThrough(event.request);
         default:
             break;
     }
@@ -47,7 +61,7 @@ async function handleFetchJSONLD(event) {
 async function handleEdits(event) {
 
     const ct = event.request.headers.get("content-type");
-    switch(ct) {
+    switch (ct) {
         case "application/x-www-form-urlencoded":
             return await handleEditsFormData(event);
         default:
@@ -61,7 +75,7 @@ async function handleEditsFormData(event) {
 
     const formData = await event.request.formData();
     const id = formData.get("@id");
-    if(!id) throw new Error("No object id found");
+    if (!id) throw new Error("No object id found");
 
     const parsed = Array.from(formData.entries());
     await cacheWrite("edits", id, parsed);
@@ -75,35 +89,130 @@ async function handleEditsFormData(event) {
 
 const CACHE = "json_cache";
 
-async function readThrough(event) {
+async function readThrough(req) {
 
     const cache = await caches.open(CACHE);
-    const matched = await cache.match(event.request);
-    if( matched ) {
+    const matched = await cache.match(req);
+    if (matched) {
 
-        log("from cache", event.request.url);
-        return matched.clone();
+        return await decorateJsonResponse(req, matched.clone());
 
     } else {
 
-        log("from server", event.request.url);
-        const resp = await fetch(event.request);
-        log("caching", event.request.url);
+        log("from server", req.url);
+        const resp = await fetch(req);
+        log("caching", req.url);
         const clone = resp.clone();
-        await cache.put(event.request, resp);
-        log("cached", event.request.url);
+        await cache.put(req, resp);
+        log("cached", req.url);
         return clone;
 
     }
 
 }
 
-const idbVersion = 1;
+async function decorateJsonResponse(req, res) {
+    const url = new URL(req.url);
+    if (url.pathname.endsWith("teams.jsonld")) {
+        try {
+            return await decorateTeamsResponse(req, res);
+        } catch(err) {
+            console.error(err);
+            return res;
+        }
+    } else {
+        return res;
+    }
+}
+
+function findObjectById(doc, key) {
+    return doc.find(x => x["@id"] === key);
+}
+
+async function decorateTeamsResponse(req, res) {
+
+    const working = res.clone()
+    const baseHeaders = working.headers;
+    const baseData = await working.json();
+    const expanded = await jsonld.expand(baseData);
+    const db = await openCacheDatabase();
+    const keys = await readObjectStore(db, "edits", store => store.getAllKeys());
+    while(keys.length > 0) {
+        const key = keys.shift();
+        const object = findObjectById(expanded, key);
+        if(object) {
+            const edit = await readObjectStore(db, "edits", store => store.get(key));
+            if(edit && edit.data) {
+                for(const prop of edit.data) {
+                    object[prop[0]] = prop[1];
+                }
+            }
+        }
+    }
+    const contextURL = new URL(req.url);
+    contextURL.pathname = "/context.jsonld";
+    const compacted = await jsonld.compact(expanded, { "@context": contextURL.toString() });
+    const originalContentType = baseHeaders.get("content-type");
+    const patchedBody = new Blob([JSON.stringify(compacted)], { type: originalContentType });
+    const patchedHeaders = new Headers();
+    for(let header of baseHeaders.entries()) {
+        patchedHeaders.set(header[0], header[1]);
+    }
+    return new Response(patchedBody, {
+        headers: patchedHeaders
+    });
+}
 
 async function cacheWrite(category, key, data) {
 
+    const db = await openCacheDatabase();
+    await writeObjectStore(db, category, store => store.put({ key, data }));
+
+}
+
+async function readObjectStore(db, storeName, query) {
+
     return new Promise((resolve, reject) => {
 
+        const transaction = db.transaction([storeName], "readonly");
+        const objectStore = transaction.objectStore(storeName);
+        const request = query(objectStore);
+        request.onerror = reject;
+        request.onsuccess = e => resolve(e.target.result);
+
+    });
+
+}
+
+async function writeObjectStore(db, storeName, command) {
+
+    return new Promise((resolve, reject) => {
+
+        const transaction = db.transaction([storeName], "readwrite");
+        const objectStore = transaction.objectStore(storeName);
+        const request = command(objectStore);
+        request.onerror = reject;
+        request.onsuccess = e => resolve(e.target.result);
+
+    });
+
+}
+
+
+async function openCacheDatabaseTransaction(storeNames, transactionType = "readwrite") {
+
+    const db = await openCacheDatabase();
+    return new Promise((resolve, reject) => {
+
+    });
+
+}
+
+const idbVersion = 1;
+
+async function openCacheDatabase() {
+
+    return new Promise((resolve, reject) => {
         const openRequest = indexedDB.open(CACHE, idbVersion);
         openRequest.onerror = reject;
         openRequest.onupgradeneeded = oune => {
@@ -111,18 +220,7 @@ async function cacheWrite(category, key, data) {
             db.createObjectStore(category, { keyPath: "key" });
             console.log("Created object store", category, "in", CACHE, "(version", idbVersion, ")");
         };
-        openRequest.onsuccess = ose => {
-            const db = ose.target.result;
-            const transaction = db.transaction([category], "readwrite");
-            transaction.oncomplete = resolve;
-            transaction.onerror = reject;
-            const objectStore = transaction.objectStore(category);
-            const addRequest = objectStore.put({ key, data });
-            addRequest.onsuccess = () => {
-                console.log("Added", {key, data});
-            }
-        }
-
+        openRequest.onsuccess = ose => resolve(ose.target.result);
     });
 
 }
