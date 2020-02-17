@@ -1,5 +1,5 @@
 {
-    "@context": "http://localhost:8080/context.jsonld",
+    "@context": "http://localhost:8080/data/context/index.jsonld",
     "@graph": [
         {
             "@type": "sh:NodeShape",

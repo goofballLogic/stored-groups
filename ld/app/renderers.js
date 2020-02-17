@@ -54,7 +54,7 @@ export const renderChildViewerLink = (objectQuery) =>
     renderObjectLink(objectQuery);
 
 const viewLink = id => `?mode=view&id=${btoa(id)}`;
-const browseChildrenLink = (id, childProp, owner) => `?mode=browse-collection&id=${btoa(id)}&prop=${btoa(childProp)}&owner=${encodeURIComponent(owner)}`;
+const browseChildLink = (childId, prop, parentId) => `?mode=browse-collection&parent=${btoa(parentId)}&prop=${btoa(prop)}&id=${btoa(childId)}`;
 const browseClassLink = shapeClass => `?mode=browse&class=${btoa(shapeClass)}`;
 
 function renderCollectionPropViewer(propQuery, objectQuery) {
@@ -69,11 +69,12 @@ function renderCollectionPropViewer(propQuery, objectQuery) {
     if (!path) return undefined;
     const label = propQuery.query("sh:labelTemplate @value") || path;
     const owner = objectQuery.query("> ots:name @value") || objectQuery.query("> @id");
+    const childId = objectQuery.query(`> ${path} @id`);
     return HTML.div(
         "",
         HTML.a(
-            "view-children",
-            browseChildrenLink(id, path, owner),
+            "view-child",
+            browseChildLink(childId, path, id),
             label
         )
     );

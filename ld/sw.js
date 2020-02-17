@@ -1,5 +1,5 @@
 const window = {};
-const x = importScripts("jsonld.min.js");
+const x = importScripts("./lib/jsonld.min.js");
 const jsonld = window.jsonld;
 delete window;
 
@@ -12,8 +12,10 @@ jsonld.documentLoader = async (url) => {
     };
 };
 
-const version = "0.3.2";
+const version = "0.4.0";
 const log = (...args) => console.log("[ServiceWorker]", version, ...args);
+const context_path = "/context/index.jsonld";
+const edits_db = "edits";
 
 self.addEventListener("install", event => {
 
@@ -78,7 +80,7 @@ async function handleEditsFormData(event) {
     if (!id) throw new Error("No object id found");
 
     const parsed = Array.from(formData.entries());
-    await cacheWrite("edits", id, parsed);
+    await cacheWrite(edits_db, id, parsed);
 
     const referrer = event.request.referrer;
     const url = new URL(referrer);
@@ -101,11 +103,19 @@ async function readThrough(req) {
 
         log("from server", req.url);
         const resp = await fetch(req);
-        log("caching", req.url);
-        const clone = resp.clone();
-        await cache.put(req, resp);
-        log("cached", req.url);
-        return clone;
+        if(resp.ok) {
+
+            log("caching", req.url);
+            const clone = resp.clone();
+            await cache.put(req, resp);
+            log("cached", req.url);
+            return clone;
+
+        } else {
+
+            return resp;
+
+        }
 
     }
 
@@ -113,7 +123,7 @@ async function readThrough(req) {
 
 async function decorateJsonResponse(req, res) {
     const url = new URL(req.url);
-    if (url.pathname.endsWith("teams.jsonld")) {
+    if (/^\/teams\/.*\.jsonld/.test(url.pathname)) {
         try {
             return await decorateTeamsResponse(req, res);
         } catch(err) {
@@ -135,13 +145,13 @@ async function decorateTeamsResponse(req, res) {
     const baseHeaders = working.headers;
     const baseData = await working.json();
     const expanded = await jsonld.expand(baseData);
-    const db = await openCacheDatabase();
-    const keys = await readObjectStore(db, "edits", store => store.getAllKeys());
+    const db = await openCacheDatabase(edits_db);
+    const keys = await readObjectStore(db, edits_db, store => store.getAllKeys());
     while(keys.length > 0) {
         const key = keys.shift();
         const object = findObjectById(expanded, key);
         if(object) {
-            const edit = await readObjectStore(db, "edits", store => store.get(key));
+            const edit = await readObjectStore(db, edits_db, store => store.get(key));
             if(edit && edit.data) {
                 for(const prop of edit.data) {
                     object[prop[0]] = prop[1];
@@ -150,7 +160,7 @@ async function decorateTeamsResponse(req, res) {
         }
     }
     const contextURL = new URL(req.url);
-    contextURL.pathname = "/context.jsonld";
+    contextURL.pathname = context_path;
     const compacted = await jsonld.compact(expanded, { "@context": contextURL.toString() });
     const originalContentType = baseHeaders.get("content-type");
     const patchedBody = new Blob([JSON.stringify(compacted)], { type: originalContentType });
@@ -165,7 +175,7 @@ async function decorateTeamsResponse(req, res) {
 
 async function cacheWrite(category, key, data) {
 
-    const db = await openCacheDatabase();
+    const db = await openCacheDatabase(category);
     await writeObjectStore(db, category, store => store.put({ key, data }));
 
 }
@@ -198,19 +208,9 @@ async function writeObjectStore(db, storeName, command) {
 
 }
 
-
-async function openCacheDatabaseTransaction(storeNames, transactionType = "readwrite") {
-
-    const db = await openCacheDatabase();
-    return new Promise((resolve, reject) => {
-
-    });
-
-}
-
 const idbVersion = 1;
 
-async function openCacheDatabase() {
+async function openCacheDatabase(category) {
 
     return new Promise((resolve, reject) => {
         const openRequest = indexedDB.open(CACHE, idbVersion);

@@ -1,6 +1,6 @@
 {
     "@context": [
-        "http://localhost:8080/context.jsonld",
+        "http://localhost:8080/data/context/index.jsonld",
         {
             "@base": "tenant-1/teams/team-1/scores/"
         }

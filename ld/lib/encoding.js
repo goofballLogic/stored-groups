@@ -1,0 +1,1 @@
+export const maybeAtob = x => x && atob(x);

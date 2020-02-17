@@ -2,317 +2,99 @@
 <html>
 
 <head>
-    <style>
-        * {
-            font-family: Arial;
-        }
-
-        section {
-            display: none;
-        }
-
-        .edit-link {
-            visibility: hidden;
-        }
-
-        .edit-link::before {
-            content: "✎";
-            visibility: visible;
-        }
-
-        body {
-            margin: 0;
-        }
-
-        section {
-            margin: 0;
-            padding: 40px;
-        }
-
-        section {
-            margin: 10px 0;
-        }
-
-        section>header {
-            margin: -40px -40px 20px -40px;
-        }
-
-        header {
-
-            padding: 10px;
-            border-bottom: solid 1px black;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4 {
-            margin: 0 0 10px 0;
-
-        }
-
-        body,
-        input,
-        select,
-        textarea {
-            font-size: 1em;
-        }
-
-        p {
-            margin: 0 0 1em 0;
-        }
-
-        form {
-            padding: 1em;
-        }
-
-        .mode {
-            display: none;
-        }
-
-        .browse-mode #browse-mode {
-            display: block;
-        }
-
-        .edit-mode #edit-mode {
-            display: block;
-        }
-
-        .view-mode #view-mode {
-            display: block;
-        }
-
-        .browse-collection-mode #browse-collection-mode {
-            display: block;
-        }
-
-        input:invalid {
-            color: red;
-        }
-    </style>
-    <script src="./manage-sw.js"></script>
-    <script src="./jsonld.min.js"></script>
-    <script src="./ld-query.js"></script>
+    <link rel="stylesheet" href="app/main.css">
+    <title>Simple teams</title>
+    <script src="./app/manage-sw.js"></script>
+    <script src="./lib/jsonld.min.js"></script>
+    <script src="./lib/ld-query.js"></script>
     <script type="module">
-        import { fetchAndExpandObjects, fetchObjects } from "./fetcher.js";
-        import { indexShapesByTargetClass } from "./shaper.js";
-        import { renderPropEditor, renderPropViewer, renderChildViewerLink } from "./renderers.js";
+        import { build as buildFetchers } from "./lib/fetcher.js";
+        import { indexShapesByTargetClass } from "./lib/shaper.js";
+        import { renderPropEditor, renderPropViewer, renderChildViewerLink } from "./app/renderers.js";
+        import { build } from "./app/page-context.js";
+        import routes from "./app/routes/index.js";
+
+        const emplaceText = (className, content) => Array
+            .from(document.querySelectorAll(className))
+            .forEach(el => el.textContent = content);
 
         (async function () {
 
-            const maybeAtob = x => x && atob(x);
-            const emplaceText = (className, content) => Array
-                .from(document.querySelectorAll(className))
-                .forEach(el => el.textContent = content);
-
-            const [contextDocument] = await fetchObjects("context");
-            const context = contextDocument["@context"];
-
-            const [teams, schema] = await fetchAndExpandObjects("teams", "schema");
-            const schemaQuery = LD(schema, context);
-            const teamsQuery = LD(teams, context);
-            const shapeIndex = indexShapesByTargetClass(schemaQuery, context);
-            const picker = document.querySelector("#picker");
-
-window.st = {
-    schemaQuery,
-    teamsQuery
-}
             const url = new URL(location.href);
-            const currentMode = url.searchParams.get("mode") || "browse";
-            const currentOwner = url.searchParams.get("owner");
 
-            document.querySelector("#mode-name").textContent = currentMode;
+            // determine current URL-context
+            const current = await build(url);
+            const { queries, docs } = current;
+            console.log(current);
+            console.log(queries, docs);
 
-            if(url.searchParams.has("save")) {
+            (function notifications() {
 
-                const whenValue = Number.parseInt(url.searchParams.get("save"));
-                const when = new Date(whenValue);
-                alert(`Saved ${when.toString()}`);
+                if (url.searchParams.has("save")) {
 
-            }
+                    const whenValue = Number.parseInt(url.searchParams.get("save"));
+                    const when = new Date(whenValue);
+                    alert(`Saved ${when.toString()}`);
 
-            const currentId = maybeAtob(url.searchParams.get("id"));
-            document.querySelectorAll("input[name='@id']").forEach(input => input.value = currentId);
+                }
 
-            function setAll(selector, values) {
-                const found = document.querySelectorAll(selector);
-                for (const x of found) {
-                    for (const key in values) {
-                        x[key] = values[key];
+            })();
+
+            (function templates(){
+
+                function setAll(selector, values) {
+                    const found = document.querySelectorAll(selector);
+                    for (const x of found) {
+                        for (const key in values) {
+                            x[key] = values[key];
+                        }
                     }
                 }
-            }
+                document.querySelector("#mode-name").textContent = current.mode;
+                document.querySelectorAll("input[name='@id']").forEach(input => input.value = current.id);
 
-            const editUrl = new URL(location.href);
-            editUrl.searchParams.set("mode", "edit");
-            setAll(".edit-link", { href: editUrl.toString() });
+                const editUrl = new URL(location.href);
+                editUrl.searchParams.set("mode", "edit");
+                setAll(".edit-link", { href: editUrl.toString() });
 
-            const homeUrl = new URL(location.href);
-            homeUrl.search = "";
-            setAll(".home-link", { href: homeUrl.toString() });
+                const homeUrl = new URL(location.href);
+                homeUrl.search = "";
+                setAll(".home-link", { href: homeUrl.toString() });
 
-            function currentObject(required = false) {
-                if (!currentId) {
-                    if (required) throw new Error("No id specified");
-                    return;
-                }
-                const objectsQuery = teamsQuery.queryAll(`#${currentId}`);
-                const objectQuery = objectsQuery.find(x => x.query(">@type"));
-                if (!objectQuery) throw new Error(`Not found (or not typed): ${id}`);
-                return objectQuery;
-            }
+            })();
 
-            function currentPropShape(required = false) {
-                const parent = currentObject(required);
-                const parentShape = shapeForObject(parent);
-                const prop = atob(url.searchParams.get("prop"));
-                const propShapePath = parentShape.query(`sh:property sh:path[@id=${prop}]`);
-                if(!propShapePath) throw new Error(`Not found: ${prop} of ${id}`);
-                return propShapePath.parent();
-            }
-
-            function populateAndReturnObjectName(objectQuery, defaultValue) {
-                const name =
-                    ( objectQuery && objectQuery.query(">ots:name @value") )
-                    ||
-                    ( objectQuery && objectQuery.query(">ots:created @value") )
-                    ||
-                    defaultValue;
+            function nameCurrentContext(objectQuery, defaultName, titleTransform) {
+                const name = objectQuery && (
+                    objectQuery.query(">ots:name @value") ||
+                    objectQuery.query(">ots:created @value")
+                ) || defaultName;
                 emplaceText(".current-object-name", name);
-                return name;
-            }
-
-
-            function navToShapeEditor(shapeName) {
-                location.href = `?mode=edit&shape=${shapeName}&at=${Date.now()}`;
+                document.title = (typeof titleTransform == "function") ? titleTransform(name) : name;
             }
 
             function currentShapeName(objectQuery) {
-                if( !objectQuery) return url.searchParams.get("shape") || "Team";
-                const objClass = objectQuery.query(">@type").filter(t => t.startsWith(context.ots))[0];
-                return objClass && objClass.substring(context.ots.length);
+                if (!objectQuery) return url.searchParams.get("shape") || "Team";
+                const objClass = objectQuery.query(">@type").filter(t => t.startsWith(docs.context.ots))[0];
+                return objClass && objClass.substring(docs.context.ots.length);
             }
 
+            const shapeIndex = indexShapesByTargetClass(queries.schema, docs.context);
             function shapeForObject(objQuery) {
                 const shapeName = currentShapeName(objQuery);
                 return shapeName && shapeIndex[shapeName];
             }
 
-            function editor() {
+            const currentRoute = routes[current.mode];
+            if( !currentRoute) {
+                alert("Unknown mode " + current.mode);
+            } else {
 
-                document.body.classList.add("edit-mode");
-
-                const objectQuery = currentObject();
-                populateAndReturnObjectName(objectQuery, "new");
-
-                const shapeName = currentShapeName(objectQuery);
-                emplaceText(".current-shape-name", shapeName);
-
-                for (var key in shapeIndex) {
-                    const option = document.createElement("option");
-                    option.value = key;
-                    option.text = key;
-                    if (option.value == shapeName) option.selected = true;
-                    picker.add(option);
-                }
-
-                picker.addEventListener("change", e => navToShapeEditor(e.target.value));
-
-                function render(shapeName) {
-                    const shape = shapeIndex[shapeName];
-                    document.title = `${shapeName} shape editor`;
-                    const rendered = shape
-                        .queryAll("sh:property")
-                        .map(propQuery => renderPropEditor(propQuery, objectQuery))
-                        .join("");
-                    document.querySelector("#editor .inputs").innerHTML = rendered;
-                }
-
-                render(shapeName);
-
-            }
-
-            function collectionBrowser() {
-
-                emplaceText(".current-owner-name", currentOwner);
-                const parent = currentObject(true);
-                const name = parent.query("ots:name @value");
-                const propShape = currentPropShape(true);
-                const prop = propShape.query("sh:path @id");
-                const label = propShape.query("sh:labelTemplate @value") || prop.query("sh:path @id");
-                emplaceText(".current-collection-name", label);
-
-                document.body.classList.add("browse-collection-mode");
-
-                const objs = parent.queryAll(prop);
-                const itemsList = document.querySelector("#browse-collection-mode #items");
-                itemsList.innerHTML = objs.map(renderChildViewerLink).join("\n");
-            }
-
-            function browser() {
-
-                const currentClass = maybeAtob(url.searchParams.get("class")) || `${context.ots}Team`;
-                const currentClassPropQuery = schemaQuery.queryAll(`sh:class[@id=${currentClass}]`)
-                    .map(x => x.parent())
-                    .filter(x => !x.query("sh:maxCount"))
-                [0];
-                const currentClassName =
-                    (currentClassPropQuery && currentClassPropQuery.query("sh:labelTemplate @value"))
-                    || currentClass.substring(context.ots.length) + "s";
-                emplaceText(".current-class-name", currentClassName);
-
-                document.body.classList.add("browse-mode");
-
-                const objs = teamsQuery.queryAll(`[@type=${currentClass}]`);
-                const itemsList = document.querySelector("#browse-mode #items");
-                itemsList.innerHTML = objs.map(renderChildViewerLink).join("\n");
-                // objs.forEach(o => {
-
-                //     const id = o.query(">@id");
-                //     const li = document.createElement("LI");
-                //     if (id) {
-                //         const a = document.createElement("A");
-                //         a.href = id ? `?mode=view&id=${btoa(id)}` : "#";
-                //         a.textContent = o.query(">ots:name @value") || "??";
-                //         li.appendChild(a);
-                //     } else {
-                //         li.textContent = o.query(">ots:name @value") || "??";
-                //     }
-                //     itemsList.appendChild(li);
-
-                // });
-
-            }
-
-            function viewer() {
-
-                document.body.classList.add("view-mode");
-                const objectQuery = currentObject(true);
-                const objName = populateAndReturnObjectName(objectQuery);
-
-                const shape = shapeForObject(objectQuery);
-                document.title = `${objName} viewer`;
-                const rendered = shape.queryAll("sh:property").map(p => renderPropViewer(p, objectQuery)).join("");
-                document.querySelector("#view").innerHTML = rendered;
-
-            }
-
-            switch (currentMode) {
-                case "edit":
-                    editor();
-                    break;
-                case "browse":
-                    browser();
-                    break;
-                case "view":
-                    viewer();
-                    break;
-                case "browse-collection":
-                    collectionBrowser();
-                    break;
-                default:
-                    alert("Unknown mode " + currentMode);
+                const emplace = (selector, content) => emplaceText(`.${current.mode} ${selector}`, content);
+                currentRoute.handler({
+                    url,
+                    ...current,
+                    emplace
+                });
             }
 
         }());
@@ -322,7 +104,7 @@ window.st = {
 
 <body>
     <header>
-        <a href="" class="home-link">Home</a>
+        <a href="/client.html" class="home-link">Home</a>
         <span id="mode-name">loading</span> mode
     </header>
     <section id="edit-mode" class="mode">
@@ -332,7 +114,6 @@ window.st = {
                 <span class="current-shape-name"></span>:
                 <span class="current-object-name"></span>
             </h2>
-            <select id="picker"></select>
         </header>
         <form id="editor" method="POST" action="/edits?styff=1#2">
 
