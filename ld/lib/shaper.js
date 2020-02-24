@@ -3,7 +3,15 @@ export function indexShapesByTargetClass(schemaQuery, context) {
     const addShape = addShapeToIndex(context);
     return schemaQuery.queryAll("sh:targetClass")
         .map(prop => [ prop.query("@id"), prop.parent() ])
-        .reduce(addShape, {});
+        .reduce(addShape, {
+            shapeForObject: function(objQuery) { return this[currentShapeName(context, objQuery)]; }
+        });
+}
+
+function currentShapeName(context, objectQuery) {
+    if (!objectQuery) return null;
+    const objClass = objectQuery.query(">@type").filter(t => t.startsWith(context.ots))[0];
+    return objClass && objClass.substring(context.ots.length);
 }
 
 function addShapeToIndex(context) {

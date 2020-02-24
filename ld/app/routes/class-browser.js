@@ -1,7 +1,7 @@
 import { maybeAtob } from "../../lib/encoding.js";
 import { renderChildViewerLink } from "../renderers.js";
 
-export default function browser({ url, docs, queries, emplace }) {
+export default function({ url, docs, queries, emplace }) {
 
     const currentClass = maybeAtob(url.searchParams.get("class")) || `${docs.context.ots}Team`;
     const currentClassPropQuery = queries.schema.queryAll(`sh:class[@id=${currentClass}]`)

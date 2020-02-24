@@ -1,13 +1,16 @@
-export default function collectionBrowser() {
+export default function collectionBrowser({ queries, docs, emplace, shapeIndex }) {
+console.log(arguments);
+    const { parent } = queries;
 
-    const parent = currentObject(true);
     const name = parent.query("ots:name @value");
-    emplaceText(".current-owner-name", name);
+    emplace(".current-owner-name", name);
 
-    const propShape = currentPropShape(true);
+    const parentShape = shapeIndex.shapeForObject( parent);
+console.log(parentShape);
+
     const prop = propShape.query("sh:path @id");
     const label = propShape.query("sh:labelTemplate @value") || prop.query("sh:path @id");
-    emplaceText(".current-collection-name", label);
+    emplace(".current-collection-name", label);
 
     document.body.classList.add("browse-collection-mode");
 

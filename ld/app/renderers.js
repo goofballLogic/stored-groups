@@ -1,3 +1,5 @@
+import routes from "./routes/index.js";
+
 const xsd = "http://www.w3.org/2001/XMLSchema#";
 const xsdString = `${xsd}string`;
 const xsdDateTime = `${xsd}dateTime`;
@@ -53,9 +55,10 @@ export const renderPropViewer = (propQuery, objectQuery) =>
 export const renderChildViewerLink = (objectQuery) =>
     renderObjectLink(objectQuery);
 
-const viewLink = id => `?mode=view&id=${btoa(id)}`;
-const browseChildLink = (childId, prop, parentId) => `?mode=browse-collection&parent=${btoa(parentId)}&prop=${btoa(prop)}&id=${btoa(childId)}`;
-const browseClassLink = shapeClass => `?mode=browse&class=${btoa(shapeClass)}`;
+const viewLink = id =>
+    routes.view.url(id);
+const browseChildLink = (childId, prop, parentId) =>
+    routes["view-collection"].url(childId, prop, parentId);
 
 function renderCollectionPropViewer(propQuery, objectQuery) {
     const id = objectQuery.query("> @id");

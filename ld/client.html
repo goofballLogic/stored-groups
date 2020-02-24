@@ -25,9 +25,10 @@
             // determine current URL-context
             const current = await build(url);
             const { queries, docs } = current;
+            const shapeIndex = indexShapesByTargetClass(queries.schema, docs.context);
+
             console.log(current);
             console.log(queries, docs);
-
             (function notifications() {
 
                 if (url.searchParams.has("save")) {
@@ -72,17 +73,7 @@
                 document.title = (typeof titleTransform == "function") ? titleTransform(name) : name;
             }
 
-            function currentShapeName(objectQuery) {
-                if (!objectQuery) return url.searchParams.get("shape") || "Team";
-                const objClass = objectQuery.query(">@type").filter(t => t.startsWith(docs.context.ots))[0];
-                return objClass && objClass.substring(docs.context.ots.length);
-            }
-
-            const shapeIndex = indexShapesByTargetClass(queries.schema, docs.context);
-            function shapeForObject(objQuery) {
-                const shapeName = currentShapeName(objQuery);
-                return shapeName && shapeIndex[shapeName];
-            }
+            nameCurrentContext(queries.data, "??");
 
             const currentRoute = routes[current.mode];
             if( !currentRoute) {
@@ -93,8 +84,11 @@
                 currentRoute.handler({
                     url,
                     ...current,
-                    emplace
+                    emplace,
+                    shapeIndex
                 });
+                document.body.classList.add(`${current.mode}-mode`);
+
             }
 
         }());

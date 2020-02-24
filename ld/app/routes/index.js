@@ -1,19 +1,60 @@
-import browser from "./browser.js";
-import collectionBrowser from "./collection-browser.js";
+import classBrowser from "./class-browser.js";
 import editor from "./editor.js";
-import viewer from "./viewer.js";
+
+import viewCollection from "./view-collection.js";
+import viewObject from "./view-object.js";
+
+const url = new URL(location.href);
+url.search = "";
+url.hash = "";
+
+function newURL() { return new URL(url); }
+
+function decorateSearch(url, bits) {
+    if(bits) {
+        Object.entries(bits).forEach(([key, value]) => {
+            url.searchParams.set(key, value);
+        });
+    }
+    return url;
+}
+
+function requireParam(name, value) {
+    if(value === null || value === undefined || value === "") throw new Error(`Required ${name} is ${value}`);
+}
 
 export default {
-    "edit": {
-        handler: editor
-    },
+    // --- deprecated
     "browse": {
-        handler: browser
+        handler: classBrowser
     },
+    // ---
     "view": {
-        handler: viewer
+        handler: viewObject,
+        url: (id) => {
+            requireParam("id", id);
+            return decorateSearch(newURL(), {
+                mode: "view",
+                id: btoa(id)
+            });
+        }
     },
-    "browse-collection": {
-        handler: collectionBrowser
+    "view-collection": {
+        handler: viewCollection,
+        url: (collectionId, prop, parentId) => {
+            return decorateSearch(newURL(), {
+                mode: "view-collection",
+                "collection-id": btoa(collectionId),
+                "prop": btoa(prop),
+                "parent-id": btoa(parentId)
+            });
+        }
+    },
+
+    "edit": {
+        handler: editor,
+        url: () => {
+            return decorateSearch(newURL());
+        }
     }
 }

@@ -22,7 +22,7 @@ export async function build(url) {
         mode: url.searchParams.get("mode") || "browse",
         id: maybeAtob(url.searchParams.get("id")),
         collection: maybeAtob(url.searchParams.get("collection-id")),
-        parent: maybeAtob(url.searchParams.get("parent")),
+        parent: maybeAtob(url.searchParams.get("parent-id")),
         prop: maybeAtob(url.searchParams.get("prop"))
     });
 
