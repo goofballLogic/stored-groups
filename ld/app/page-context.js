@@ -10,7 +10,7 @@ const urls = {
 };
 
 const maybeAtob = x => x && atob(x);
-export async function build(url) {
+export async function build(url, tenant) {
 
     // const context
     const current = {
@@ -27,7 +27,7 @@ export async function build(url) {
     });
 
     // fetched context
-    const { fetchAndExpandDocuments, fetchDocuments, fetchAndExpandObjects } = buildFetchers(urls.root);
+    const { fetchAndExpandDocuments, fetchDocuments, fetchAndExpandObjects } = buildFetchers(urls.root, tenant);
     const { LD } = ld;
 
     const [

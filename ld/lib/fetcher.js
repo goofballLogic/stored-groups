@@ -3,7 +3,7 @@ const mapIf = async (xs, func) =>
         x && func(x)
     ));
 
-export function build(basePath) {
+export function build(basePath, tenant) {
 
     return {
         fetchAndExpandDocuments,

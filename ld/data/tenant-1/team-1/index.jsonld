@@ -20,8 +20,7 @@
             }
         }
     ],
-    "@graph": [
-        {
+    {
             "@id": "team-1",
             "@type": "ots:Team",
             "name": "The eggheads",
@@ -31,6 +30,5 @@
             "scores": "team-1/scores",
             "goals": "team-1/goals",
             "periods": "team-1/periods"
-        }
-    ]
+    }
 }

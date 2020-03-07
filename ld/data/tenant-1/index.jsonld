@@ -1,0 +1,15 @@
+{
+    "@context": [
+        "http://localhost:8080/data/context/index.jsonld",
+        {
+            "@base": "tenant-1/teams/"
+        }
+    ],
+    "@graph": [
+        {
+            "@id": "team-1",
+            "@type": "ots:Team",
+            "name": "The eggheads"
+        }
+    ]
+}

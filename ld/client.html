@@ -8,7 +8,6 @@
     <script src="./lib/jsonld.min.js"></script>
     <script src="./lib/ld-query.js"></script>
     <script type="module">
-        import { build as buildFetchers } from "./lib/fetcher.js";
         import { indexShapesByTargetClass } from "./lib/shaper.js";
         import { renderPropEditor, renderPropViewer, renderChildViewerLink } from "./app/renderers.js";
         import { build } from "./app/page-context.js";
@@ -23,7 +22,7 @@
             const url = new URL(location.href);
 
             // determine current URL-context
-            const current = await build(url);
+            const current = await build(url, "tenant-1");
             const { queries, docs } = current;
             const shapeIndex = indexShapesByTargetClass(queries.schema, docs.context);
 
