@@ -1,5 +1,5 @@
 {
-    "@context": "http://localhost:8080/data/context/index.jsonld",
+    "@context": "http://dev.openteamspace.com/vocab/context.jsonld",
     "@graph": [
         {
             "@type": "sh:NodeShape",

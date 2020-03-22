@@ -17,7 +17,13 @@ export async function build(url, tenant) {
         dataRoot: tenantRootUrl
     };
 
-    // URL-derived context
+    /*
+        This detects any context which can be determined from the URL itself without any additional data fetching
+        For example, the URL may contain a querystring indicating what the current page represents:
+         - id of an
+         - id of an object which is a collection
+         - ids of a parent object and property from which the current object/collection has been reached
+    */
     Object.assign(current, {
         mode: url.searchParams.get("mode") || "browse",
         id: maybeAtob(url.searchParams.get("id")),
@@ -26,7 +32,9 @@ export async function build(url, tenant) {
         prop: maybeAtob(url.searchParams.get("prop"))
     });
 
-    // fetched context
+    /*
+        Various utilities for fetching data
+    */
     const { fetchAndExpandDocuments, fetchDocuments, fetchAndExpandObjects } = buildFetchers(urls.root, tenant);
     const { LD } = ld;
 

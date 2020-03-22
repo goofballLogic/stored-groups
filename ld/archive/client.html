@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="app/main.css">
+    <title>Simple teams</title>
+    <!--script src="./app/manage-sw.js"></script-->
+    <script src="./lib/jsonld.min.js"></script>
+    <script src="./lib/ld-query.js"></script>
+    <script type="module">
+        import { indexShapesByTargetClass } from "./lib/shaper.js";
+        import { renderPropEditor, renderPropViewer, renderChildViewerLink } from "./app/renderers.js";
+        import { build } from "./app/page-context.js";
+        import routes from "./app/routes/index.js";
+
+        const emplaceText = (className, content) => Array
+            .from(document.querySelectorAll(className))
+            .forEach(el => el.textContent = content);
+
+        (async function () {
+
+            const url = new URL(location.href);
+
+            // determine current URL-context
+            const current = await build(url, "tenant-1");
+            const { queries, docs } = current;
+            const shapeIndex = indexShapesByTargetClass(queries.schema, docs.context);
+
+            console.log(current);
+            console.log(queries, docs);
+            (function notifications() {
+
+                if (url.searchParams.has("save")) {
+
+                    const whenValue = Number.parseInt(url.searchParams.get("save"));
+                    const when = new Date(whenValue);
+                    alert(`Saved ${when.toString()}`);
+
+                }
+
+            })();
+
+            (function templates(){
+
+                function setAll(selector, values) {
+                    const found = document.querySelectorAll(selector);
+                    for (const x of found) {
+                        for (const key in values) {
+                            x[key] = values[key];
+                        }
+                    }
+                }
+                document.querySelector("#mode-name").textContent = current.mode;
+                document.querySelectorAll("input[name='@id']").forEach(input => input.value = current.id);
+
+                const editUrl = new URL(location.href);
+                editUrl.searchParams.set("mode", "edit");
+                setAll(".edit-link", { href: editUrl.toString() });
+
+                const homeUrl = new URL(location.href);
+                homeUrl.search = "";
+                setAll(".home-link", { href: homeUrl.toString() });
+
+            })();
+
+            function nameCurrentContext(objectQuery, defaultName, titleTransform) {
+                const name = objectQuery && (
+                    objectQuery.query(">ots:name @value") ||
+                    objectQuery.query(">ots:created @value")
+                ) || defaultName;
+                emplaceText(".current-object-name", name);
+                document.title = (typeof titleTransform == "function") ? titleTransform(name) : name;
+            }
+
+            nameCurrentContext(queries.data, "??");
+
+            const currentRoute = routes[current.mode];
+            if( !currentRoute) {
+                alert("Unknown mode " + current.mode);
+            } else {
+
+                const emplace = (selector, content) => emplaceText(`.${current.mode} ${selector}`, content);
+                currentRoute.handler({
+                    url,
+                    ...current,
+                    emplace,
+                    shapeIndex
+                });
+                document.body.classList.add(`${current.mode}-mode`);
+
+            }
+
+        }());
+
+    </script>
+</head>
+
+<body>
+    <header>
+        <a href="/client.html" class="home-link">Home</a>
+        <span id="mode-name">loading</span> mode
+    </header>
+    <section id="edit-mode" class="mode">
+        <header>
+            <h2>
+                Edit
+                <span class="current-shape-name"></span>:
+                <span class="current-object-name"></span>
+            </h2>
+        </header>
+        <form id="editor" method="POST" action="/edits?styff=1#2">
+
+            <div class="inputs">
+
+            </div>
+            <div class="submission">
+                <input type="hidden" name="@id" />
+                <input type="submit" value="Save" />
+            </div>
+
+        </form>
+
+    </section>
+    <section id="browse-collection-mode" class="mode">
+        <header>
+            <h3><span class="current-owner-name"></span></h3>
+            <h2><span class="current-collection-name"></span></h2>
+        </header>
+        <ul id="items">
+        </ul>
+    </section>
+    <section id="browse-mode" class="mode">
+        <header>
+            <h2><span class="current-class-name"></span></h2>
+        </header>
+        <ul id="items">
+        </ul>
+    </section>
+    <section id="view-mode" class="mode">
+        <header>
+            <h2>
+                <span class="current-object-name"></span>
+                <a href="#" class="edit-link" alt="edit">Edit</a>
+            </h2>
+        </header>
+        <div id="view"></div>
+    </section>
+</body>
+
+</html>

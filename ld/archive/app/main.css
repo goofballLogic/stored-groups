@@ -1,0 +1,86 @@
+* {
+    font-family: Arial;
+}
+
+section {
+    display: none;
+}
+
+.edit-link {
+    visibility: hidden;
+}
+
+.edit-link::before {
+    content: "✎";
+    visibility: visible;
+}
+
+body {
+    margin: 0;
+}
+
+section {
+    margin: 0;
+    padding: 40px;
+}
+
+section {
+    margin: 10px 0;
+}
+
+section>header {
+    margin: -40px -40px 20px -40px;
+}
+
+header {
+
+    padding: 10px;
+    border-bottom: solid 1px black;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin: 0 0 10px 0;
+
+}
+
+body,
+input,
+select,
+textarea {
+    font-size: 1em;
+}
+
+p {
+    margin: 0 0 1em 0;
+}
+
+form {
+    padding: 1em;
+}
+
+.mode {
+    display: none;
+}
+
+.browse-mode #browse-mode {
+    display: block;
+}
+
+.edit-mode #edit-mode {
+    display: block;
+}
+
+.view-mode #view-mode {
+    display: block;
+}
+
+.browse-collection-mode #browse-collection-mode {
+    display: block;
+}
+
+input:invalid {
+    color: red;
+}

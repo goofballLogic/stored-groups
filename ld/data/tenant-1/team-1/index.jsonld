@@ -1,6 +1,6 @@
 {
     "@context": [
-        "http://localhost:8080/data/context/index.jsonld",
+        "http://localhost:8080/data/context.jsonld",
         {
             "@base": "tenant-1/teams/",
             "members": {
@@ -20,15 +20,13 @@
             }
         }
     ],
-    {
-            "@id": "team-1",
-            "@type": "ots:Team",
-            "name": "The eggheads",
-            "scoresheet": "team-1/scoresheets/1",
-            "members": "team-1/members",
-            "scoresheets": "team-1/scoresheets",
-            "scores": "team-1/scores",
-            "goals": "team-1/goals",
-            "periods": "team-1/periods"
-    }
+    "@id": "team-1",
+    "@type": "ots:Team",
+    "name": "The eggheads",
+    "scoresheet": "team-1/scoresheets/1",
+    "members": "team-1/members",
+    "scoresheets": "team-1/scoresheets",
+    "scores": "team-1/scores",
+    "goals": "team-1/goals",
+    "periods": "team-1/periods"
 }
