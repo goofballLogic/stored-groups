@@ -29,15 +29,21 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
 
     const shapes = await tenant.loadShapes();
     console.log("Shapes:", shapes);
-    const index = shapes.index(taxonomy["@vocab"]);
+    const index = shapes.index();
     console.log("Shapes index:", index);
 
     if(!context.data) {
 
-        const teams = await tenant.listDataSets(Team);
-        console.log("Teams:", teams);
-        const team = teams[0];
-        console.log("Links:", team.links());
+        // const teams = await tenant.listDataSets(Team);
+        // console.log("Teams:", teams);
+        // const team = teams[0];
+        // console.log("Links:", team.links());
+        const dataSets = await tenant.listDataSets();
+        console.log("DataSets", dataSets);
+        const dataSet = dataSets[0];
+        console.log("types", dataSet.types);
+        const props = dataSet.properties(index);
+        console.log("props", props);
 
     } else {
 

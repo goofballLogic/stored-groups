@@ -24,12 +24,18 @@ export default class Tenant {
     async listDataSets(objectClass) {
         const json = await this[storageAgent].browseRoot();
         const expanded = await jsonld.expand(json);
-        const objectClassType = objectClass.typeName();
-        return expanded
+        const objectClassType = objectClass && objectClass.typeName();
+        const dataSets = expanded
             .map(x => LD(x, this[context]["@context"]))
-            .map(query => new DataSet({ query, storageAgent: this[storageAgent] }))
-            .filter(dataSet => dataSet.type.includes(objectClassType))
-            .map(dataSet => new objectClass({ dataSet }));
+            .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
+
+        if(objectClassType) {
+            return dataSets
+                .filter(dataSet => dataSet.type.includes(objectClassType))
+                .map(dataSet => new objectClass({ dataSet }));
+        } else {
+            return dataSets;
+        }
     }
 
     async loadShapes() {
