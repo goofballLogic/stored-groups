@@ -24,11 +24,11 @@ export default class Tenant {
     async listDataSets(objectClass) {
         const json = await this[storageAgent].browseRoot();
         const expanded = await jsonld.expand(json);
-        const objectClassType = objectClass && objectClass.typeName();
         const dataSets = expanded
             .map(x => LD(x, this[context]["@context"]))
             .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
 
+        const objectClassType = objectClass && objectClass.typeName();
         if(objectClassType) {
             return dataSets
                 .filter(dataSet => dataSet.type.includes(objectClassType))
@@ -38,12 +38,24 @@ export default class Tenant {
         }
     }
 
+    async fetchData(relativeId) {
+        const json = await this[storageAgent].browseRelative(relativeId);
+        const expanded = await jsonld.expand(json);
+        return expanded
+            .map(x => LD(x, this[context]["@context"]))
+            .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
+    }
+
     async loadShapes() {
         const json = await this[storageAgent].loadShapes();
         const expanded = await jsonld.expand(json);
         const query = LD(expanded, this[context]["@context"]);
         const dataSet = new DataSet({ query, storageAgent: this[storageAgent] });
         return new Shapes({ dataSet });
+    }
+
+    relativeId(fullyQualifiedId) {
+        return this[storageAgent].relativeId(fullyQualifiedId);
     }
 
 }

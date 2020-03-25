@@ -2,8 +2,8 @@ import Tenant from "./lib/model/Tenant.js";
 
 import StorageAgent from "./DevStorageAgent.js";
 import parseContext from "./context.js";
-import Team from "./model/Team.js";
-import taxonomy from "./taxonomy.js";
+import buildViewModels from "./lib/view-models.js";
+import render from "./lib/render/render.js";
 
 const promiseLoading = new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve));
 
@@ -29,26 +29,18 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
 
     const shapes = await tenant.loadShapes();
     console.log("Shapes:", shapes);
-    const index = shapes.index();
-    console.log("Shapes index:", index);
+    const shapeIndex = shapes.index();
+    console.log("Shapes index:", shapeIndex);
 
-    if(!context.data) {
+    const dataSets = context.data
+        ? await tenant.fetchData(context.data)
+        : await tenant.listDataSets();
+    console.log("DataSets", dataSets);
 
-        // const teams = await tenant.listDataSets(Team);
-        // console.log("Teams:", teams);
-        // const team = teams[0];
-        // console.log("Links:", team.links());
-        const dataSets = await tenant.listDataSets();
-        console.log("DataSets", dataSets);
-        const dataSet = dataSets[0];
-        console.log("types", dataSet.types);
-        const props = dataSet.properties(index);
-        console.log("props", props);
+    const viewModels = buildViewModels(dataSets, tenant, shapeIndex, context);
+    console.log("View models", viewModels);
 
-    } else {
-
-        throw new Error("Not implemented - data home");
-
-    }
+    render(document.body, viewModels);
 
 }());
+

@@ -7,6 +7,10 @@ export default class DataSet {
         this.types = this.ld.query("> @type");
     }
 
+    id() {
+        return this.ld.query("> @id");
+    }
+
     ids() {
         return this.ld.queryAll("@id");
     }

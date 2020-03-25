@@ -50,4 +50,16 @@ export default class DevStorageAgent {
     async browseRoot() {
         return await this.loadJSON(`/${this[tenantId]}/index.jsonld`);
     }
+
+    async browseRelative(relativeId) {
+        return await this.loadJSON(`/${this[tenantId]}${relativeId}/index.jsonld`);
+    }
+
+    relativeId(fullyQualifiedId) {
+        const parsed = new URL(fullyQualifiedId);
+        const tenantPrefix = `/ots/${this[tenantId]}`;
+        return parsed.pathname.startsWith(tenantPrefix)
+            ? parsed.pathname.substring(tenantPrefix.length)
+            : fullyQualifiedId;
+    }
 }
