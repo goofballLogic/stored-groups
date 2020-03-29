@@ -5,7 +5,8 @@
             "@base": "tenant-1/teams/"
         }
     ],
-    "@graph": [
+    "@type": "Collection",
+    "items": [
         {
             "@id": "team-1",
             "@type": "ots:Team",

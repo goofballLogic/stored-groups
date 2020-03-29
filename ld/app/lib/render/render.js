@@ -32,13 +32,14 @@ export function renderError(container, err) {
 }
 
 function renderList(className, xs, parse) {
-    console.log(className, xs);
     return ul(className, ...(xs.map(x => li(null, parse ? parse(x) : x))));
 }
 
 function render(viewModel) {
     const { props = [] } = viewModel;
-    return props.map(renderProp).join("\n");
+    return div("item",
+        props.map(renderProp).join("\n")
+    );
 }
 
 function renderProp(viewModel) {
@@ -50,7 +51,7 @@ function renderProp(viewModel) {
 }
 
 const renderUnrecognised = viewModel =>
-    "Unrecognised <pre>" + JSON.stringify(viewModel, null, 3) + "</pre>";
+    console.warn(`Unrecognised/empty`, viewModel) || "";
 
 const renderViewModels = viewModel =>
     "viewModels" in viewModel
@@ -61,7 +62,7 @@ const renderIds = viewModel =>
     "ids" in viewModel
         ? div("property", viewModel.multiValue
             ? renderList(null, viewModel.ids, id => renderLink(id, viewModel.label))
-            : renderLink(viewModel.ids, viewModel.Label)
+            : renderLink(viewModel.ids, viewModel.label)
         )
         : null;
 
@@ -77,6 +78,7 @@ const renderValue = viewModel =>
 
 function renderLink(idViewModel, label) {
     const url = new URL(location.href);
-    url.searchParams.set("data", idViewModel.encodedRelativeId);
+    if(idViewModel.encodedRelativeId)
+        url.searchParams.set("data", idViewModel.encodedRelativeId);
     return a("object", url.toString(), label);
 }

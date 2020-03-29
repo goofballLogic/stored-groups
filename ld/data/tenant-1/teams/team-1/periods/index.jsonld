@@ -8,6 +8,6 @@
     "@type": [ "Collection" ],
     "collection-type": [ { "@id": "ots:Period" } ],
     "items": [
-        { "@id": "period-1", "@type": "ots:Period" }
+        { "@id": "period-1", "@type": "ots:Period", "name": "Sprint 12" }
     ]
 }

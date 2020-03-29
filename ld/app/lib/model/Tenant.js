@@ -40,13 +40,16 @@ export default class Tenant {
 
     async fetchData(relativeId) {
         let expanded;
+        let json;
         try {
-            const json = await this[storageAgent].browseRelative(relativeId);
-            console.log("JSON", JSON.stringify(json));
-            expanded = await jsonld.expand(json);
-            console.log("Expanded", expanded);
+            json = await this[storageAgent].browseRelative(relativeId);
         } catch (err) {
             throw new Error(`Failed to retrieve data\n\n${err.stack}`);
+        }
+        try {
+            expanded = await jsonld.expand(json);
+        } catch (err) {
+            throw new Error(`Invalid data format\n\n${err.stack}`);
         }
         return expanded
             .map(x => LD(x, this[context]["@context"]))

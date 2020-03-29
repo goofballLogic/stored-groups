@@ -8,7 +8,7 @@
     "@type": [ "Collection" ],
     "collection-type": [ { "@id": "ots:Goal" } ],
     "items": [
-        { "@id": "goal-2", "@type": "ots:Goal" },
-        { "@id": "goal-1", "@type": "ots:Goal" }
+        { "@id": "goal-2", "@type": "ots:Goal", "name": "Catch all the bugs" },
+        { "@id": "goal-1", "@type": "ots:Goal", "name": "Don't break the build" }
     ]
 }
