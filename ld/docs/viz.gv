@@ -18,7 +18,7 @@ digraph G {
         choose_dataset [ fillcolor=green ]
         view_object [ fillcolor=green ]
         navigate_to_object [ fillcolor=green ]
-        navigate_to_collection [ fillcolor=yellow ]
+        navigate_to_collection [ fillcolor=green ]
         view_collection [ fillcolor=green ]
         create_object [ fillcolor=yellow ]
         edit_object [ fillcolor=yellow ]
