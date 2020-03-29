@@ -5,16 +5,10 @@
             "@base": "tenant-1/teams/team-1/goals/"
         }
     ],
-    "@graph": [
-        {
-            "@type": "ots:Goal",
-            "@id": "goal-1",
-            "name": "Don't break the build"
-        },
-        {
-            "@type": "ots:Goal",
-            "@id": "goal-2",
-            "name": "Catch all the bugs"
-        }
+    "@type": [ "Collection" ],
+    "collection-type": [ { "@id": "ots:Goal" } ],
+    "items": [
+        { "@id": "goal-2", "@type": "ots:Goal" },
+        { "@id": "goal-1", "@type": "ots:Goal" }
     ]
 }

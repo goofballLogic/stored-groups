@@ -1,5 +1,6 @@
 import { required } from "../validation.js";
-import ShapeProperty from "./ShapeProperty.js";
+import { propertiesForShape } from "../shapes.js";
+
 
 export default class DataSet {
     constructor(args) {
@@ -19,10 +20,8 @@ export default class DataSet {
         if(!shapeIndex) return;
         if(!this.types) return;
         const matchedType = this.types.find(t => t in shapeIndex);
-        if(!matchedType) return;
+        if(!matchedType) return [];
         const shape = shapeIndex[matchedType];
-        return shape.queryAll("sh:property")
-            .map(p => new ShapeProperty(p))
-            .filter(p => p.path);
+        return propertiesForShape(shape);
     }
 }

@@ -29,7 +29,7 @@ export default class Tenant {
             .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
 
         const objectClassType = objectClass && objectClass.typeName();
-        if(objectClassType) {
+        if (objectClassType) {
             return dataSets
                 .filter(dataSet => dataSet.type.includes(objectClassType))
                 .map(dataSet => new objectClass({ dataSet }));
@@ -39,8 +39,15 @@ export default class Tenant {
     }
 
     async fetchData(relativeId) {
-        const json = await this[storageAgent].browseRelative(relativeId);
-        const expanded = await jsonld.expand(json);
+        let expanded;
+        try {
+            const json = await this[storageAgent].browseRelative(relativeId);
+            console.log("JSON", JSON.stringify(json));
+            expanded = await jsonld.expand(json);
+            console.log("Expanded", expanded);
+        } catch (err) {
+            throw new Error(`Failed to retrieve data\n\n${err.stack}`);
+        }
         return expanded
             .map(x => LD(x, this[context]["@context"]))
             .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
@@ -55,7 +62,7 @@ export default class Tenant {
     }
 
     relativeId(fullyQualifiedId) {
-        return this[storageAgent].relativeId(fullyQualifiedId);
+        return fullyQualifiedId && this[storageAgent].relativeId(fullyQualifiedId);
     }
 
 }

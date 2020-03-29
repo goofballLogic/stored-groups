@@ -1,0 +1,11 @@
+{
+    "@context": [
+        "http://localhost:8080/data/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/goals/"
+        }
+    ],
+    "@type": "ots:Goal",
+    "@id": "goal-2",
+    "name": "Catch all the bugs"
+}

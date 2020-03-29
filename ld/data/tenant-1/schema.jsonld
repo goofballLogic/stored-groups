@@ -3,6 +3,24 @@
     "@graph": [
         {
             "@type": "sh:NodeShape",
+            "sh:targetClass": "ots:Collection",
+            "sh:property": [
+                {
+                    "sh:path": "ots:items",
+                    "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:labelTemplate": "Item"
+                },
+                {
+                    "sh:path": "ots:collection-type",
+                    "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 1,
+                    "sh:labelTemplate": "Item types"
+                }
+            ]
+        },
+        {
+            "@type": "sh:NodeShape",
             "sh:targetClass": "ots:Team",
             "sh:property": [
                 {
@@ -68,7 +86,8 @@
                     "sh:dataType": "xsd:string",
                     "sh:pattern": ".{2,50}",
                     "sh:minCount": 1,
-                    "sh:maxCount": 1
+                    "sh:maxCount": 1,
+                    "sh:labelTemplate": "Name"
                 }
             ]
         },

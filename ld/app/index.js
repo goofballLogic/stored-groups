@@ -3,11 +3,11 @@ import Tenant from "./lib/model/Tenant.js";
 import StorageAgent from "./DevStorageAgent.js";
 import parseContext from "./context.js";
 import buildViewModels from "./lib/view-models.js";
-import render from "./lib/render/render.js";
+import render, { renderError } from "./lib/render/render.js";
 
 const promiseLoading = new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve));
 
-(async function() {
+(async function () {
 
     const url = new URL(location.href);
 
@@ -32,15 +32,26 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
     const shapeIndex = shapes.index();
     console.log("Shapes index:", shapeIndex);
 
-    const dataSets = context.data
-        ? await tenant.fetchData(context.data)
-        : await tenant.listDataSets();
-    console.log("DataSets", dataSets);
+    try {
+        const dataSets = context.data
+            ? await tenant.fetchData(context.data)
+            : await tenant.listDataSets();
 
-    const viewModels = buildViewModels(dataSets, tenant, shapeIndex, context);
-    console.log("View models", viewModels);
+        const viewModels = buildViewModels(dataSets, tenant, shapeIndex, context);
+        console.log("View models", viewModels);
 
-    render(document.body, viewModels);
+        render(document.body, viewModels);
+
+    }
+    catch (err) {
+
+        renderError(document.body, err);
+        console.error(err);
+
+    }
+
+
+
 
 }());
 

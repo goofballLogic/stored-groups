@@ -56,6 +56,7 @@ export default class DevStorageAgent {
     }
 
     relativeId(fullyQualifiedId) {
+        if(!fullyQualifiedId) return fullyQualifiedId;
         const parsed = new URL(fullyQualifiedId);
         const tenantPrefix = `/ots/${this[tenantId]}`;
         return parsed.pathname.startsWith(tenantPrefix)
