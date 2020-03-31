@@ -6,16 +6,20 @@ function maybeExpand(labelTemplate, query) {
 
 export default function buildViewModels(dataSets, tenant, shapeIndex, context) {
     return dataSets.map(dataSet => {
+        console.log(dataSet);
         const id = dataSet.id();
         const relativeId = id && tenant.relativeId(id);
+        const relativeEditTarget = dataSet.editsUrl;
         return ({
             id,
             relativeId,
+            relativeEditTarget,
             encodedRelativeId: id && context.encode(relativeId),
+            editMode: "edit",
             types: dataSet.types,
             props: dataSet.properties(shapeIndex).map(prop => {
                 const multiValue = prop.maxCount !== 1;
-                const digest = { prop, multiValue };
+                const digest = { prop, multiValue, editable: true };
                 const queries = dataSet.ld.queryAll(`> ${prop.path}`);
                 if (!queries.length )
                     return digest;
@@ -38,6 +42,7 @@ export default function buildViewModels(dataSets, tenant, shapeIndex, context) {
                             digest.ids = ids[0];
                         else
                             digest.ids = ids;
+                        digest.editable = !multiValue && prop.path !== "@id";
                         break;
                     case "http://www.w3.org/ns/shacl#BlankNode":
                         const nestedDataSets = queries.map(query => new DataSet({ query }));

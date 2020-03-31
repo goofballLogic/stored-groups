@@ -14,7 +14,9 @@ const encode = x => {
 
 }
 
-const searchParam = (url, key) => decode(url.searchParams.get(key));
+const searchParam = (url, key, isEncoded = true) => isEncoded
+    ? decode(url.searchParams.get(key))
+    : url.searchParams.get(key);
 
 const required = (x, description) => {
     if(!x) throw new Error(`${description} was not specified`);
@@ -26,6 +28,7 @@ export default function(url) {
         decode,
         encode,
         tenant: required(searchParam(url, "tenant"), "tenant"),
-        data: searchParam(url, "data")
+        data: searchParam(url, "data"),
+        mode: searchParam(url, "mode", false)
     };
 }

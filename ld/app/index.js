@@ -40,18 +40,15 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
         const viewModels = buildViewModels(dataSets, tenant, shapeIndex, context);
         console.log("View models", viewModels);
 
-        render(document.body, viewModels);
+        render(document.body, viewModels, context);
 
     }
     catch (err) {
 
-        renderError(document.body, err);
+        renderError(document.body, err, context);
         console.error(err);
 
     }
-
-
-
 
 }());
 

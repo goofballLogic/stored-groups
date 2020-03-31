@@ -26,9 +26,15 @@ export default class Tenant {
         const expanded = await jsonld.expand(json);
         const dataSets = expanded
             .map(x => LD(x, this[context]["@context"]))
-            .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
+            .map(query => new DataSet({
+                query,
+                storageAgent: this[storageAgent],
+                editsUrl: this[storageAgent].editsURLForRoot()
+            }));
 
         const objectClassType = objectClass && objectClass.typeName();
+
+        // todo: remove this object class stuff
         if (objectClassType) {
             return dataSets
                 .filter(dataSet => dataSet.type.includes(objectClassType))
@@ -53,14 +59,22 @@ export default class Tenant {
         }
         return expanded
             .map(x => LD(x, this[context]["@context"]))
-            .map(query => new DataSet({ query, storageAgent: this[storageAgent] }));
+            .map(query => new DataSet({
+                query,
+                storageAgent: this[storageAgent],
+                editsUrl: this[storageAgent].editsURLForRelative(relativeId)
+            }));
     }
 
     async loadShapes() {
         const json = await this[storageAgent].loadShapes();
         const expanded = await jsonld.expand(json);
         const query = LD(expanded, this[context]["@context"]);
-        const dataSet = new DataSet({ query, storageAgent: this[storageAgent] });
+        const dataSet = new DataSet({
+            query,
+            storageAgent: this[storageAgent],
+            readonly: true
+        });
         return new Shapes({ dataSet });
     }
 

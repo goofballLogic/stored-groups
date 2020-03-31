@@ -55,6 +55,12 @@ export default class DevStorageAgent {
         return await this.loadJSON(`/${this[tenantId]}${relativeId}/index.jsonld`);
     }
 
+    editsURLForRelative(relativeId) {
+        const url = new URL(this[baseURL]);
+        url.pathname += `${relativeId}/edits`;
+        return url.toString();
+    }
+
     relativeId(fullyQualifiedId) {
         if(!fullyQualifiedId) return fullyQualifiedId;
         const parsed = new URL(fullyQualifiedId);

@@ -2,6 +2,7 @@ import { required } from "../validation.js";
 
 export const data = Symbol("data");
 
+// TODO: eliminate this
 export default class Entity {
     constructor({ dataSet }) {
         this[data] = required(dataSet, "dataSet", "The dataset containing data for this entity");

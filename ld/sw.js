@@ -14,7 +14,7 @@ jsonld.documentLoader = async (url) => {
 
 const version = "0.4.0";
 const log = (...args) => console.log("[ServiceWorker]", version, ...args);
-const context_path = "/context/index.jsonld";
+const context_path = "/data/tenant-1/context.jsonld";
 const edits_db = "edits";
 
 self.addEventListener("install", event => {
@@ -109,7 +109,7 @@ async function readThrough(req) {
             const clone = resp.clone();
             await cache.put(req, resp);
             log("cached", req.url);
-            return clone;
+            return await decorateJsonResponse(req, clone);
 
         } else {
 
@@ -123,7 +123,10 @@ async function readThrough(req) {
 
 async function decorateJsonResponse(req, res) {
     const url = new URL(req.url);
-    if (/^\/teams\/.*\.jsonld/.test(url.pathname)) {
+
+console.log(url);
+    if (/\/teams\/.*\.jsonld$/.test(url.pathname)) {
+console.log(2);
         try {
             return await decorateTeamsResponse(req, res);
         } catch(err) {
@@ -145,6 +148,7 @@ async function decorateTeamsResponse(req, res) {
     const baseHeaders = working.headers;
     const baseData = await working.json();
     const expanded = await jsonld.expand(baseData);
+    console.log(expanded);
     const db = await openCacheDatabase(edits_db);
     const keys = await readObjectStore(db, edits_db, store => store.getAllKeys());
     while(keys.length > 0) {
