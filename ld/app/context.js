@@ -23,12 +23,16 @@ const required = (x, description) => {
     return x;
 }
 
+const maybeSave = value =>
+    value ? new Date(Number(value)) : null;
+
 export default function(url) {
     return {
         decode,
         encode,
         tenant: required(searchParam(url, "tenant"), "tenant"),
         data: searchParam(url, "data"),
-        mode: searchParam(url, "mode", false)
+        mode: searchParam(url, "mode", false),
+        save: maybeSave(searchParam(url, "save", false))
     };
 }

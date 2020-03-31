@@ -18,6 +18,14 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
     // wait for the document to load
     await promiseLoading;
 
+    const main = document.querySelector("main");
+
+    if(context.save) {
+        const notification = document.createElement("DIV");
+        notification.textContent = "Saved: " + context.save.toLocaleString();
+        main.parentElement.insertBefore(notification, main);
+    }
+
     // patch the document loader for json ld
     storageAgent.patchDocumentLoader(window.jsonld);
 
@@ -40,12 +48,12 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
         const viewModels = buildViewModels(dataSets, tenant, shapeIndex, context);
         console.log("View models", viewModels);
 
-        render(document.body, viewModels, context);
+        render(main, viewModels, context);
 
     }
     catch (err) {
 
-        renderError(document.body, err, context);
+        renderError(main, err, context);
         console.error(err);
 
     }

@@ -1,9 +1,12 @@
-const window = {};
-const x = importScripts("./lib/jsonld.min.js");
+let window = {};
+importScripts("./lib/jsonld.min.js");
 const jsonld = window.jsonld;
 delete window;
 
 jsonld.documentLoader = async (url) => {
+    if(url.startsWith("http://dev.openteamspace.com/vocab/context.jsonld")) {
+        url = "/data/context.jsonld";
+    }
     const res = await readThrough(new Request(url));
     return {
         contextUrl: null,
@@ -14,7 +17,7 @@ jsonld.documentLoader = async (url) => {
 
 const version = "0.4.0";
 const log = (...args) => console.log("[ServiceWorker]", version, ...args);
-const context_path = "/data/tenant-1/context.jsonld";
+const context_path = "/data/context.jsonld";
 const edits_db = "edits";
 
 self.addEventListener("install", event => {
@@ -124,9 +127,7 @@ async function readThrough(req) {
 async function decorateJsonResponse(req, res) {
     const url = new URL(req.url);
 
-console.log(url);
     if (/\/teams\/.*\.jsonld$/.test(url.pathname)) {
-console.log(2);
         try {
             return await decorateTeamsResponse(req, res);
         } catch(err) {
@@ -148,7 +149,6 @@ async function decorateTeamsResponse(req, res) {
     const baseHeaders = working.headers;
     const baseData = await working.json();
     const expanded = await jsonld.expand(baseData);
-    console.log(expanded);
     const db = await openCacheDatabase(edits_db);
     const keys = await readObjectStore(db, edits_db, store => store.getAllKeys());
     while(keys.length > 0) {
