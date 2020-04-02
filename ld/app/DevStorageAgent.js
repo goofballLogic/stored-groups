@@ -61,6 +61,12 @@ export default class DevStorageAgent {
         return url.toString();
     }
 
+    editsURLForRoot() {
+        const url = new URL(this[baseURL]);
+        url.pathname += "/edits";
+        return url.toString();
+    }
+
     relativeId(fullyQualifiedId) {
         if(!fullyQualifiedId) return fullyQualifiedId;
         const parsed = new URL(fullyQualifiedId);

@@ -1,7 +1,10 @@
 * {
     font-family: Arial;
+    font-size: 14pt;
+    line-height: 1.5;
 }
-div.item {
+div.item,
+form.item {
     margin: 30px;
     padding: 30px;
     background: linear-gradient(45deg, #F7F7FF, #FFF7F7, #F7FFF7);
@@ -10,7 +13,8 @@ div.item {
     max-width: 800px;
 }
 
-div.item div.item {
+div.item div.item,
+form.item div.item {
     margin: 0;
     padding: 0;
     background: none;

@@ -5,7 +5,7 @@ delete window;
 
 jsonld.documentLoader = async (url) => {
     if(url.startsWith("http://dev.openteamspace.com/vocab/context.jsonld")) {
-        url = "/data/context.jsonld";
+        url = context_path;
     }
     const res = await readThrough(new Request(url));
     return {
@@ -71,7 +71,6 @@ async function handleEdits(event) {
             return await handleEditsFormData(event);
         default:
             throw new Error("Unhandled content type for edits: " + ct);
-            break;
     }
 
 }
@@ -94,11 +93,20 @@ async function handleEditsFormData(event) {
 
 const CACHE = "json_cache";
 
+async function readThroughEditsOnlyCache(req) {
+
+    const resp = await fetch(req);
+    return await decorateJsonResponse(req, resp);
+
+}
+
 async function readThrough(req) {
+
+    return await readThroughEditsOnlyCache(req);
 
     const cache = await caches.open(CACHE);
     const matched = await cache.match(req);
-    if (matched) {
+    if (false && matched) {
 
         return await decorateJsonResponse(req, matched.clone());
 
@@ -106,7 +114,7 @@ async function readThrough(req) {
 
         log("from server", req.url);
         const resp = await fetch(req);
-        if(resp.ok) {
+        if(resp.url.endsWith(context_path) || resp.ok) {
 
             log("caching", req.url);
             const clone = resp.clone();
@@ -126,24 +134,41 @@ async function readThrough(req) {
 
 async function decorateJsonResponse(req, res) {
     const url = new URL(req.url);
-
-    if (/\/teams\/.*\.jsonld$/.test(url.pathname)) {
-        try {
-            return await decorateTeamsResponse(req, res);
-        } catch(err) {
-            console.error(err);
+    if (/\/data\/.*\.jsonld$/.test(url.pathname)) {
+        if(url.pathname.endsWith("context.jsonld")) {
             return res;
+        } else {
+            try {
+                return await decorateDataResponse(req, res);
+            } catch(err) {
+                console.error(err);
+                return res;
+            }
         }
     } else {
         return res;
     }
 }
 
-function findObjectById(doc, key) {
-    return doc.find(x => x["@id"] === key);
+function findObjectsById(doc, key, nested) {
+
+    const ret = [];
+    if(!doc) return ret;
+    if(Array.isArray(doc)) {
+        doc.forEach(item => ret.push(...findObjectsById(item, key, nested)));
+    } else if(typeof doc === "object") {
+        if(doc["@id"] === key)
+            ret.push({ doc, nested });
+        else {
+            Object.values(doc).forEach(nested => {
+                ret.push(...findObjectsById(nested, key, true));
+            });
+        }
+    }
+    return ret;
 }
 
-async function decorateTeamsResponse(req, res) {
+async function decorateDataResponse(req, res) {
 
     const working = res.clone()
     const baseHeaders = working.headers;
@@ -153,13 +178,20 @@ async function decorateTeamsResponse(req, res) {
     const keys = await readObjectStore(db, edits_db, store => store.getAllKeys());
     while(keys.length > 0) {
         const key = keys.shift();
-        const object = findObjectById(expanded, key);
-        if(object) {
+        const objects = findObjectsById(expanded, key);
+        if (objects.length) {
             const edit = await readObjectStore(db, edits_db, store => store.get(key));
             if(edit && edit.data) {
-                for(const prop of edit.data) {
-                    object[prop[0]] = prop[1];
-                }
+
+                objects.forEach(object => {
+                    if(edit && edit.data) {
+                        for(const prop of edit.data) {
+                            const [ propKey, propValue ] = prop;
+                            if((!prop.nested) || propKey in object)
+                                object.doc[propKey] = propValue;
+                        }
+                    }
+                });
             }
         }
     }

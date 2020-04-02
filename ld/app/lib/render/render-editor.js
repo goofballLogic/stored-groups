@@ -46,9 +46,12 @@ const renderValues = viewModel =>
 
 const renderIds = viewModel =>
     "ids" in viewModel
-        ? div("property", viewModel.multiValue
-            ? "Don't know how to render multi id editor"
-            : "Don't know how to render id editor yet"
+        ? div("property",
+            viewModel.label,
+            viewModel.ids.displayValue || viewModel.ids.id,
+            viewModel.multiValue
+                ? "Don't know how to render multi id editor"
+                : renderChooseLink(viewModel)
         )
         : null;
 
@@ -56,4 +59,13 @@ function inputRendererFor(viewModel) {
     const renderer = inputRenderers[viewModel.prop.dataType];
     if(!renderer) return "No input found for " + JSON.stringify(viewModel);
     return renderer(viewModel);
+}
+
+function renderChooseLink(chooseViewModel) {
+    const url = new URL(location.href);
+    if (chooseViewModel.encodedChooseId) {
+        url.searchParams.set("data", chooseViewModel.encodedChooseId);
+        url.searchParams.set("mode", chooseViewModel.chooseMode);
+        return a("choose", url.toString(), "select");
+    }
 }

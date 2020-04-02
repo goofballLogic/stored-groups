@@ -1,21 +1,25 @@
 import { required } from "../validation.js";
 import { propertiesForShape } from "../shapes.js";
 
-const readOnly = Symbol("readonly");
+const readonly = Symbol("readonly");
 
 export default class DataSet {
     constructor(args) {
         this.ld = required(args.query, "query", "Query document for the dataset's data");
         this.types = this.ld.query("> @type");
         if(args.readonly) {
-            this[readOnly] = true;
+            this[readonly] = true;
         } else {
             this.editsUrl = required(args.editsUrl, "editsUrl", "URL to POST edits for this dataset");
         }
     }
 
     get readonly() {
-        return this[readOnly];
+        return this[readonly];
+    }
+
+    buildSubset({ query }) {
+        return new DataSet({ query, readonly: true });
     }
 
     id() {

@@ -6,15 +6,20 @@
             "sh:targetClass": "ots:Collection",
             "sh:property": [
                 {
-                    "sh:path": "ots:items",
-                    "sh:nodeKind": "sh:BlankNode",
-                    "sh:minCount": 0,
-                    "sh:labelTemplate": "Item"
+                    "sh:path": "ots:name",
+                    "ots:immutable": true,
+                    "sh:labelTemplate": "List: "
                 },
                 {
                     "sh:path": "ots:collection-type",
                     "sh:nodeKind": "sh:IRI",
                     "sh:minCount": 1
+                },
+                {
+                    "sh:path": "ots:items",
+                    "sh:nodeKind": "sh:BlankNode",
+                    "sh:minCount": 0,
+                    "sh:labelTemplate": "Items"
                 }
             ]
         },
@@ -43,43 +48,39 @@
                     "sh:nodeKind": "sh:IRI",
                     "sh:minCount": 0,
                     "sh:maxCount": 1,
-                    "sh:class": "ots:Scoresheet",
-                    "sh:labelTemplate": "Current scoresheet"
+                    "sh:labelTemplate": "Current scoresheet",
+                    "chooseFrom": "ots:scoresheets",
+                    "valueTemplate": "{ots:name @value}"
                 },
                 {
                     "sh:path": "ots:members",
                     "sh:nodeKind": "sh:IRI",
-                    "sh:class": "ots:Member",
                     "sh:labelTemplate": "Team members",
-                    "sh:maxCount": 200
+                    "immutable": true
                 },
                 {
                     "sh:path": "ots:scoresheets",
                     "sh:nodeKind": "sh:IRI",
-                    "sh:class": "ots:Scoresheet",
                     "sh:labelTemplate": "Scoresheets",
-                    "sh:maxCount": 200
+                    "immutable": true
                 },
                 {
                     "sh:path": "ots:scores",
                     "sh:nodeKind": "sh:IRI",
-                    "sh:class": "ots:Score",
                     "sh:labelTemplate": "Scores",
-                    "sh:maxCount": 10000
+                    "immutable": true
                 },
                 {
                     "sh:path": "ots:goals",
                     "sh:nodeKind": "sh:IRI",
-                    "sh:class": "ots:Goal",
                     "sh:labelTemplate": "Goals",
-                    "sh:maxCount": 10000
+                    "immutable": true
                 },
                 {
                     "sh:path": "ots:periods",
                     "sh:nodeKind": "sh:IRI",
-                    "sh:class": "ots:Period",
                     "sh:labelTemplate": "Scoring periods",
-                    "sh:maxCount": 10000
+                    "immutable": true
                 }
             ]
         },

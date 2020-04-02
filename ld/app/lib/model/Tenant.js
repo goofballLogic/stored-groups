@@ -73,7 +73,7 @@ export default class Tenant {
         const dataSet = new DataSet({
             query,
             storageAgent: this[storageAgent],
-            readonly: true
+            readonly: true // TODO: is this used anywhere?
         });
         return new Shapes({ dataSet });
     }

@@ -9,5 +9,8 @@ export default class ShapeProperty {
         this.description = ld.query("sh:description @value");
         this.pattern = ld.query("sh:pattern @value");
         this.dataType = ld.query("sh:dataType @id");
+        this.immutable = ld.query("ots:immutable @value");
+        this.chooseFrom = ld.query("ots:chooseFrom @id");
+        this.valueTemplate = ld.query("ots:valueTemplate @value");
     }
 }

@@ -6,6 +6,7 @@
         }
     ],
     "@type": "Collection",
+    "name": "Your teams",
     "items": [
         {
             "@id": "team-1",
