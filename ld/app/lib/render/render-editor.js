@@ -11,7 +11,7 @@ export function render(viewModel, context) {
     return form(
         `item ${context.mode}-mode`,
         editTargetURL(viewModel),
-        renderCancelEditLink(),
+        renderCancelEditLink(viewModel),
         hiddenInput({ prop: { path: "@id" }, value: viewModel.id }),
         props.filter(prop => prop.editable).map(prop => renderProp(prop, context)).join("\n"),
         submit(null, "Save")
@@ -22,8 +22,10 @@ function editTargetURL(viewModel) {
     return viewModel.relativeEditTarget;
 }
 
-function renderCancelEditLink() {
-    return a("back", "javascript: history.back();", "&larr; Go back");
+function renderCancelEditLink(viewModel) {
+    return viewModel.returnURL
+        ? a("back", viewModel.returnURL, "&larr; Go back")
+        : "";
 }
 
 function renderProp(viewModel, context) {
@@ -45,15 +47,34 @@ const renderValues = viewModel =>
         : null;
 
 const renderIds = viewModel =>
-    "ids" in viewModel
-        ? div("property",
+    {
+        if(!("ids" in viewModel)) return null;
+        if (viewModel.multiValue) return div("error", "Don't know how to render multi id editor");
+        const hasSelection = "selection" in viewModel;
+        return div(
+            "property",
             viewModel.label,
             viewModel.ids.displayValue || viewModel.ids.id,
-            viewModel.multiValue
-                ? "Don't know how to render multi id editor"
-                : renderChooseLink(viewModel)
-        )
-        : null;
+            ...(hasSelection ? renderSelectionHiddenFields(viewModel) : []),
+            renderSelectLink(viewModel)
+        );
+    };
+
+function renderSelectionHiddenFields(viewModel) {
+    const renderableFields = viewModel.selection.filter(selectionProp =>
+        selectionProp.prop.path === "@id" || selectionProp.prop.summary
+    );
+    return renderableFields.map(selectionProp =>
+        {
+            console.log(selectionProp);
+            const { path } = selectionProp.prop;
+            if(path === "@id")
+                return hiddenInput(`${viewModel.prop.path} @id`, selectionProp.ids.id);
+            else
+                return hiddenInput(`${viewModel.prop.path} ${path} @value`, selectionProp.value);
+        }
+    );
+}
 
 function inputRendererFor(viewModel) {
     const renderer = inputRenderers[viewModel.prop.dataType];
@@ -61,11 +82,13 @@ function inputRendererFor(viewModel) {
     return renderer(viewModel);
 }
 
-function renderChooseLink(chooseViewModel) {
+function renderSelectLink(chooseViewModel) {
     const url = new URL(location.href);
     if (chooseViewModel.encodedChooseId) {
         url.searchParams.set("data", chooseViewModel.encodedChooseId);
         url.searchParams.set("mode", chooseViewModel.chooseMode);
+        url.searchParams.set("returnURL", chooseViewModel.encodedThisURL);
+        url.searchParams.set("choicePath", chooseViewModel.encodedChoosePath);
         return a("choose", url.toString(), "select");
     }
 }

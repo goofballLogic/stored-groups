@@ -30,6 +30,10 @@ export default class DataSet {
         return this.ld.queryAll("@id");
     }
 
+    compactTypes(context) {
+        console.log(context);
+    }
+
     properties(shapeIndex) {
         if(!shapeIndex) return;
         if(!this.types) return;

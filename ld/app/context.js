@@ -1,18 +1,6 @@
-const decode = x => {
+const decode = x => x && atob(x);
 
-    if (!x) return x;
-    x = decodeURIComponent(x);
-    return atob(x);
-
-}
-
-const encode = x => {
-
-    if (!x) return x;
-    x = btoa(x);
-    return encodeURIComponent(x);
-
-}
+const encode = x => x && btoa(x);
 
 const searchParam = (url, key, isEncoded = true) => isEncoded
     ? decode(url.searchParams.get(key))
@@ -33,6 +21,10 @@ export default function(url) {
         tenant: required(searchParam(url, "tenant"), "tenant"),
         data: searchParam(url, "data"),
         mode: searchParam(url, "mode", false),
-        save: maybeSave(searchParam(url, "save", false))
+        save: maybeSave(searchParam(url, "save", false)),
+        returnURL: searchParam(url, "returnURL"),
+        vocabNamespace: "http://openteamspace.com/vocab#",
+        choice: searchParam(url, "choice"),
+        choicePath: searchParam(url, "choicePath")
     };
 }

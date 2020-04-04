@@ -6,11 +6,17 @@
         }
     ],
     "@type": "Collection",
+    "ots:name": "Scoresheets",
     "items": [
         {
             "@id": "1",
             "@type": "ots:Scoresheet",
             "ots:name": "January 1st, 2019"
+        },
+        {
+            "@id": "2",
+            "@type": "ots:Scoresheet",
+            "ots:name": "January 2nd, 2019"
         }
     ]
 }

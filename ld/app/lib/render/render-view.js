@@ -14,6 +14,7 @@ function renderList(className, xs, parse) {
 }
 
 function renderProp(viewModel) {
+    if(viewModel.hidden) return "";
     return renderValue(viewModel)
         || renderValues(viewModel)
         || renderIds(viewModel)
@@ -47,19 +48,31 @@ const renderValue = viewModel =>
         ? labelledDiv("property", viewModel.label, viewModel.value)
         : null;
 
-function renderLink(idViewModel, label) {
+const whitelisted = [ "tenant", "data" ];
+
+function cleanURL() {
     const url = new URL(location.href);
+    Array.from(url.searchParams.keys())
+        .filter(key => !whitelisted.includes(key))
+        .forEach(key => { url.searchParams.delete(key); });
+    return url;
+}
+
+function renderLink(idViewModel, label) {
     if (idViewModel.encodedRelativeId) {
+        const url = cleanURL();
         url.searchParams.set("data", idViewModel.encodedRelativeId);
         return a("object", url.toString(), label);
     }
 }
 
 function renderEditLink(editViewModel) {
-    const url = new URL(location.href);
+
     if (editViewModel.encodedRelativeId && editViewModel.editMode) {
+        const url = cleanURL();
         url.searchParams.set("data", editViewModel.encodedRelativeId);
         url.searchParams.set("mode", editViewModel.editMode);
+        url.searchParams.set("returnURL", editViewModel.encodedThisURL);
         return a("edit", url.toString(), "Edit");
     }
 }

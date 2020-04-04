@@ -1,6 +1,7 @@
 import { pre } from "./html.js";
 import { render as renderView, render } from "./render-view.js";
 import { render as renderEditor } from "./render-editor.js";
+import { render as renderSelect } from "./render-select.js";
 
 export default function(container, viewModels, context) {
     viewModels = Array.isArray(viewModels) ? viewModels : [viewModels];
@@ -14,6 +15,8 @@ export function renderError(container, err) {
 }
 
 const renderFor = (viewModel, context) =>
-    context.mode === viewModel.editMode
-        ? renderEditor
-        : renderView;
+    context.mode === viewModel.selectMode
+        ? renderSelect
+        : context.mode === viewModel.editMode
+            ? renderEditor
+            : renderView;

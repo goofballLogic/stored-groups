@@ -3,21 +3,52 @@
     font-size: 14pt;
     line-height: 1.5;
 }
-div.item,
-form.item {
-    margin: 30px;
+
+main {
     padding: 30px;
-    background: linear-gradient(45deg, #F7F7FF, #FFF7F7, #F7FFF7);
+}
+
+div.item, form.item {
+    padding: 30px;
+    background: #FFF;
+    border: solid 1px silver;
     border-radius: 10px;
     box-shadow: 10px 10px 5px 0 #EEE;
     max-width: 800px;
 }
 
-div.item div.item,
-form.item div.item {
+div.item div.item, form.item div.item {
     margin: 0;
     padding: 0;
     background: none;
     box-shadow: none;
     border-radius: 0;
+}
+
+.notification {
+    background-color: gold;
+    border-radius: 3px;
+    overflow: hidden;
+    animation: fade 2s ease 5s forwards, shrinkup 0.5s ease-in 7s forwards;
+    padding: 0 10px;
+    height: 40px;
+    line-height: 40px;
+}
+
+@keyframes fade {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes shrinkup {
+    from {
+        max-height: 40px;
+    }
+    to {
+        max-height: 0;
+    }
 }

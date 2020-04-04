@@ -1,51 +1,36 @@
-import Tenant from "./lib/model/Tenant.js";
-
-import StorageAgent from "./DevStorageAgent.js";
-import parseContext from "./context.js";
 import buildViewModels from "./lib/view-models.js";
 import render, { renderError } from "./lib/render/render.js";
+const vocab = "http://dev.openteamspace.com/vocab/";
+import boot from "./boot.js";
 
 const promiseLoading = new Promise(resolve => document.addEventListener("DOMContentLoaded", resolve));
 
 (async function () {
 
-    const url = new URL(location.href);
+    const { context, tenant, shapeIndex } = await boot(promiseLoading, location.href);
+    console.log("Context:", context);
+    console.log("Tenant:", tenant);
 
-    const context = parseContext(url);
-    const storageAgent = new StorageAgent({ url, ...context });
-    const tenant = new Tenant({ storageAgent });
-
-    // wait for the document to load
-    await promiseLoading;
+    console.log("Shapes index:", shapeIndex);
 
     const main = document.querySelector("main");
 
     if(context.save) {
-        const notification = document.createElement("DIV");
+        const notification = document.createElement("ASIDE");
+        notification.classList.add("notification");
+        setTimeout(() => notification.remove(), 10000);
         notification.textContent = "Saved: " + context.save.toLocaleString();
         main.parentElement.insertBefore(notification, main);
     }
-
-    // patch the document loader for json ld
-    storageAgent.patchDocumentLoader(window.jsonld);
-
-    // initialize the tenant
-    await tenant.initialize();
-
-    console.log("Context:", context);
-    console.log("Tenant:", tenant);
-
-    const shapes = await tenant.loadShapes();
-    console.log("Shapes:", shapes);
-    const shapeIndex = shapes.index();
-    console.log("Shapes index:", shapeIndex);
 
     try {
         const dataSets = context.data
             ? await tenant.fetchData(context.data)
             : await tenant.listDataSets();
 
-        const viewModels = buildViewModels(dataSets, tenant, shapeIndex, context);
+        const choiceDataSet = context.choice && ((await tenant.fetchData(context.choice))[0]);
+
+        const viewModels = buildViewModels({ dataSets, choiceDataSet, tenant, shapeIndex, context, vocab });
         console.log("View models", viewModels);
 
         render(main, viewModels, context);
@@ -59,4 +44,3 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
     }
 
 }());
-

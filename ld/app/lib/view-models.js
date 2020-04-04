@@ -1,73 +1,152 @@
-import DataSet from "./model/DataSet.js";
-
 function maybeExpand(labelTemplate, query) {
     return labelTemplate && labelTemplate.replace(/\{([^}]*)\}/, (_, path) => query.query(path));
 }
 
-function findChooseableId(prop, query, tenant, context) {
-    const chooseFrom = prop.chooseFrom;
-    const chooseFromId = query.query(`${chooseFrom} @id`);
-    if(!chooseFromId) return undefined;
-    return context.encode(tenant.relativeId(chooseFromId));
+const blacklist = [ "save" ];
+
+function buildThisURL() {
+    const url = new URL(location.href);
+    blacklist.forEach(key => url.searchParams.delete(key));
+    return url.toString().substring(url.origin.length);
 }
 
-export default function buildViewModels(dataSets, tenant, shapeIndex, context) {
-    return dataSets.map(dataSet => {
+
+function trimSearchParam(pattern, url) {
+    url = new URL(url, location.href);
+    blacklist.forEach(key => url.searchParams.delete(key));
+    Array.from(url.searchParams.keys())
+        .filter(key => pattern.test(key))
+        .forEach(key => url.searchParams.delete(key));
+    return url.toString();
+}
+
+const editMode = "edit";
+const selectMode = "select";
+
+export default function buildViewModels({ dataSets, choiceDataSet, tenant, shapeIndex, context }) {
+
+    const { vocabNamespace, choicePath, returnURL } = context;
+    const selectReturnURL = trimSearchParam(/^choice/, returnURL);
+    const thisURL = buildThisURL();
+    const encodedThisURL = context.encode(thisURL);
+    const encodedChoicePath = context.encode(choicePath);
+
+    const choiceProps = choiceDataSet && choiceDataSet
+        .properties(shapeIndex)
+        .map(prop => prepareProperty(choiceDataSet, prop));
+
+    return dataSets.map(prepareDataSet);
+
+    function prepareDataSet(dataSet) {
         const id = dataSet.id();
+        const encodedId = context.encode(id);
         const relativeId = id && tenant.relativeId(id);
+        const encodedRelativeId = id && context.encode(relativeId);
+
         const relativeEditTarget = dataSet.editsUrl;
+
+        const props = dataSet.properties(shapeIndex).map(prop => prepareProperty(dataSet, prop));
+        const types = dataSet.types.map(t => t.replace(vocabNamespace, ""));
+
         return ({
+            encodedChoicePath,
+            encodedId,
+            encodedRelativeId,
+            editMode,
+            encodedThisURL,
             id,
+            props,
             relativeId,
             relativeEditTarget,
-            encodedRelativeId: id && context.encode(relativeId),
-            editMode: "edit",
-            types: dataSet.types,
-            props: dataSet.properties(shapeIndex).map(prop => {
-                const multiValue = prop.maxCount !== 1;
-                const digest = { prop, multiValue, editable: !prop.immutable };
-                const queries = dataSet.ld.queryAll(`> ${prop.path}`);
-                if (!queries.length )
-                    return digest;
-                digest.label = maybeExpand(prop.labelTemplate, dataSet.ld) || prop.path;
-                switch (prop.nodeKind) {
-                    case null:
-                        if (!multiValue)
-                            digest.value = queries[0].query("> @value");
-                        else
-                            digest.values = queries.map(q => q.query("> @value"));
-                        break;
-                    case "http://www.w3.org/ns/shacl#IRI":
-                        const ids = queries.map(q => {
-                            const id = (typeof q === "string") ? q : q.query("> @id");
-                            const relativeId = tenant.relativeId(id);
-                            const encodedRelativeId = context.encode(relativeId);
-                            const displayValue = maybeExpand(prop.valueTemplate, q);
-                            return { id, relativeId, encodedRelativeId, displayValue };
-                        });
-                        if (multiValue) {
-                            digest.ids = ids;
-                            digest.editable = false;
-                        } else {
-                            digest.ids = ids[0];
-                            if (prop.path === "@id") {
-                                digest.editable = false;
-                            } else {
-                                digest.encodedChooseId = findChooseableId(prop, dataSet.ld, tenant, context);
-                                digest.chooseMode = "select";
-                                digest.editable = !!digest.encodedChooseId;
-                            }
-                        }
-                        break;
-                    case "http://www.w3.org/ns/shacl#BlankNode":
-                        const nestedDataSets = queries.map(query => dataSet.buildSubset({ query }));
-                        digest.viewModels = buildViewModels(nestedDataSets, tenant, shapeIndex, context);
-                        break;
-                    default:
-                        throw new Error("Unhandled nodeKind - " + JSON.stringify(prop));
-                }
-                return digest;
-            })
+            returnURL,
+            selectMode,
+            selectReturnURL,
+            thisURL,
+            types
         });
-    });
+    }
+
+    function prepareProperty(dataSet, prop) {
+
+        const multiValue = prop.maxCount !== 1;
+        const queries = dataSet.ld.queryAll(`> ${prop.path}`);
+        const digest = { prop, multiValue, editable: !prop.immutable };
+        if (!queries.length)
+            return digest;
+        digest.label = maybeExpand(prop.labelTemplate, dataSet.ld) || prop.path;
+        digest.hidden = prop.hidden;
+        switch (prop.nodeKind) {
+            case null:
+                processValues();
+                break;
+            case "http://www.w3.org/ns/shacl#IRI":
+                processIds();
+                break;
+            case "http://www.w3.org/ns/shacl#BlankNode":
+                processNestedDataSets();
+                break;
+            default:
+                throw new Error("Unhandled nodeKind - " + JSON.stringify(prop));
+        }
+        return digest;
+
+        function processNestedDataSets() {
+            const nestedDataSets = queries.map(query => dataSet.buildSubset({ query }));
+            digest.viewModels = nestedDataSets.map(prepareDataSet);
+        }
+
+        function processValues() {
+            if (!multiValue)
+                digest.value = queries[0].query("> @value");
+            else
+                digest.values = queries.map(q => q.query("> @value"));
+        }
+
+        function processIds() {
+            const ids = queries.map(buildIdHash);
+            if (multiValue) {
+                digest.ids = ids;
+                digest.editable = false;
+            }
+            else {
+                digest.ids = ids[0];
+                if (prop.path === "@id") {
+                    digest.editable = false;
+                }
+                else {
+                    digest.encodedChooseId = findChooseableId();
+                    digest.chooseMode = "select";
+                    digest.editable = !!digest.encodedChooseId;
+                    digest.encodedThisURL = context.encode(thisURL);
+                    digest.encodedChoosePath = context.encode(prop.path);
+
+                    if (context.choice && context.choicePath === prop.path) {
+                        const selectionIds = buildIdHash(choiceDataSet.ld);
+                        if(selectionIds.id !== digest.ids.id) {
+                            console.log("Dirty selection", selectionIds, "vs current", digest.ids);
+                            digest.selection = choiceProps;
+                            digest.label = maybeExpand(prop.labelTemplate, choiceDataSet.ld) || prop.path;
+                            digest.ids = selectionIds;
+                        }
+                    }
+                }
+            }
+        }
+
+        function buildIdHash(q) {
+            // TODO: are all these needed?
+            const id = (typeof q === "string") ? q : q.query("> @id");
+            const relativeId = tenant.relativeId(id);
+            const encodedRelativeId = context.encode(relativeId);
+            const displayValue = maybeExpand(prop.valueTemplate, q);
+            return { id, relativeId, encodedRelativeId, displayValue };
+        }
+
+        function findChooseableId() {
+            const chooseFrom = prop.chooseFrom;
+            const chooseFromId = dataSet.ld.query(`${chooseFrom} @id`);
+            if (!chooseFromId) return undefined;
+            return context.encode(tenant.relativeId(chooseFromId));
+        }
+    }
 }
