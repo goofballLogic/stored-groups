@@ -23,6 +23,7 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
         main.parentElement.insertBefore(notification, main);
     }
 
+
     try {
         const dataSets = context.data
             ? await tenant.fetchData(context.data)
@@ -32,7 +33,8 @@ const promiseLoading = new Promise(resolve => document.addEventListener("DOMCont
 
         const viewModels = buildViewModels({ dataSets, choiceDataSet, tenant, shapeIndex, context, vocab });
         console.log("View models", viewModels);
-
+console.log(viewModels);
+        document.querySelector("a.tenant-home").href = viewModels[0]?.tenantRootURL;
         render(main, viewModels, context);
 
     }

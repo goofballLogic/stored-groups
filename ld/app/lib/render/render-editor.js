@@ -1,9 +1,11 @@
-import { a, div, labelledDiv } from "./html.js";
-import { form, hiddenInput, labelledStringInput, submit } from "./html-forms.js";
+import { a, div, labelledDiv, ul, li } from "./html.js";
+import { form, hiddenInput, labelledIntegerInput, labelledStringInput, submit } from "./html-forms.js";
 
 const XSD = name => `http://www.w3.org/2001/XMLSchema#${name}`;
 const inputRenderers = {
-    [XSD("string")]: labelledStringInput
+    null: labelledStringInput,
+    [XSD("string")]: labelledStringInput,
+    [XSD("integer")]: labelledIntegerInput
 }
 
 export function render(viewModel, context) {
@@ -43,7 +45,7 @@ const renderValue = viewModel =>
 
 const renderValues = viewModel =>
     "values" in viewModel
-        ? labelledDiv("property", viewModel.label, renderList(null, viewModel))
+        ? labelledDiv("property", viewModel.label, renderList(null, viewModel.values, value => inputRendererFor({ ...viewModel, value })))
         : null;
 
 const renderIds = viewModel =>
@@ -92,3 +94,22 @@ function renderSelectLink(chooseViewModel) {
         return a("choose", url.toString(), "select");
     }
 }
+
+function renderViewModels(viewModel, context) {
+    if(!("viewModels" in viewModel)) return null;
+    return labelledDiv(
+        "property",
+        viewModel.label,
+        renderList(null, viewModel.viewModels, viewModel => {
+            return viewModel.props.filter(prop => prop.editable).map(prop => renderProp(prop, context)).join("\n")
+            //return render(viewModel, context);
+        })
+    );
+}
+
+function renderList(className, xs, parse) {
+    return ul(className, ...(xs.map(x => li(null, parse ? parse(x) : x))));
+}
+
+const renderUnrecognised = viewModel =>
+    console.warn(`Unrecognised/empty`, viewModel) || "";

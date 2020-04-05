@@ -1,0 +1,11 @@
+{
+    "@context": [
+        "http://dev.openteamspace.com/vocab/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/members/"
+        }
+    ],
+    "@type": "ots:Member",
+    "@id": "sj",
+    "name": "Sarah-Jane"
+}

@@ -12,8 +12,10 @@ export const choiceForm = (className, targetUrl, ...content) =>
         ${content.join(" ")}
     </form>`;
 
-const input = ({ type, name, pattern, value }) =>
-    `<input type="${type}" name="${name}" value="${value}" ${pattern ? `pattern="${pattern}"` : ""} />`;
+const maybeAttr = (attrName, maybeValue) => maybeValue ? `${attrName}="${maybeValue}"`: "";
+
+const input = ({ type, name, pattern, step, value }) =>
+    `<input type="${type}" name="${name}" value="${value}"${maybeAttr("pattern", pattern)}${maybeAttr("step", step)} />`;
 
 const label = (className, labelText, input) =>
     `<label${maybeClass(className)}>
@@ -38,6 +40,17 @@ const stringInput = viewModel =>
         "pattern": viewModel.prop.pattern,
         "value": viewModel.value
     });
+
+const integerInput = viewModel =>
+    input({
+        "type": "number",
+        "step": 1,
+        "pattern": viewModel.prop.pattern,
+        "value": viewModel.value
+    });
+
+export const labelledIntegerInput = viewModel =>
+    label("property", viewModel.label, integerInput(viewModel));
 
 export const labelledStringInput = viewModel =>
     label("property", viewModel.label, stringInput(viewModel));

@@ -119,7 +119,8 @@
                     "sh:path": "ots:created",
                     "sh:dataType": "xsd:dateTime",
                     "sh:minCount": 1,
-                    "sh:maxCount": 1
+                    "sh:maxCount": 1,
+                    "ots:immutable": true
                 },
                 {
                     "sh:path": "ots:points",

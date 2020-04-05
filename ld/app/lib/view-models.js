@@ -2,6 +2,16 @@ function maybeExpand(labelTemplate, query) {
     return labelTemplate && labelTemplate.replace(/\{([^}]*)\}/, (_, path) => query.query(path));
 }
 
+
+function buildTenantRootURL(context) {
+    const tenant = context.tenant;
+    const url = new URL(location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("tenant", context.encode(tenant));
+    return url;
+}
+
 const blacklist = [ "save" ];
 
 function buildThisURL() {
@@ -28,6 +38,7 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
     const { vocabNamespace, choicePath, returnURL } = context;
     const selectReturnURL = trimSearchParam(/^choice/, returnURL);
     const thisURL = buildThisURL();
+    const tenantRootURL = buildTenantRootURL(context);
     const encodedThisURL = context.encode(thisURL);
     const encodedChoicePath = context.encode(choicePath);
 
@@ -61,6 +72,7 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
             returnURL,
             selectMode,
             selectReturnURL,
+            tenantRootURL,
             thisURL,
             types
         });

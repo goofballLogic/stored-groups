@@ -25,6 +25,10 @@ div.item div.item, form.item div.item {
     border-radius: 0;
 }
 
+div.item + div.item {
+    margin-top: 30px;
+}
+
 .notification {
     background-color: gold;
     border-radius: 3px;
