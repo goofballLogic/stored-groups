@@ -113,7 +113,8 @@
                     "sh:minCount": 1,
                     "sh:maxCount": 1,
                     "ots:hidden": true,
-                    "ots:summary": true
+                    "ots:summary": true,
+                    "sh:labelTemplate": "Name"
                 },
                 {
                     "sh:path": "ots:created",
@@ -125,7 +126,8 @@
                 {
                     "sh:path": "ots:points",
                     "sh:dataType": "ots:Scoresheet.Point",
-                    "sh:nodeKind": "sh:BlankNode"
+                    "sh:nodeKind": "sh:BlankNode",
+                    "sh:labelTemplate": "Score menu"
                 }
             ]
         },

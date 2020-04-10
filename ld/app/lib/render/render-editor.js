@@ -8,49 +8,65 @@ const inputRenderers = {
     [XSD("integer")]: labelledIntegerInput
 }
 
+const join = (joinWith, ...args) => args.filter(x => x !== undefined && x !== null).join(joinWith);
+
 export function render(viewModel, context) {
-    const { props = [] } = viewModel;
-    return form(
-        `item ${context.mode}-mode`,
-        editTargetURL(viewModel),
-        renderCancelEditLink(viewModel),
-        hiddenInput({ prop: { path: "@id" }, value: viewModel.id }),
-        props.filter(prop => prop.editable).map(prop => renderProp(prop, context)).join("\n"),
-        submit(null, "Save")
-    );
-}
 
-function editTargetURL(viewModel) {
-    return viewModel.relativeEditTarget;
-}
+    function renderForm() {
+        const { props = [] } = viewModel;
+        return form(
+            `item ${context.mode}-mode`,
+            editTargetURL(viewModel),
+            hiddenInput({ name: "@id", value: viewModel.id }),
+            renderCancelEditLink(viewModel),
+            props.filter(prop => prop.editable).map(prop => renderProp("", prop)).join("\n"),
+            submit(null, "Save")
+        );
+    }
 
-function renderCancelEditLink(viewModel) {
-    return viewModel.returnURL
-        ? a("back", viewModel.returnURL, "&larr; Go back")
-        : "";
-}
 
-function renderProp(viewModel, context) {
-    return renderValue(viewModel)
-        || renderValues(viewModel)
-        || renderIds(viewModel)
-        || renderViewModels(viewModel, context)
-        || renderUnrecognised(viewModel);
-}
+    function editTargetURL(viewModel) {
+        return viewModel.relativeEditTarget;
+    }
 
-const renderValue = viewModel =>
-    "value" in viewModel
-        ? inputRendererFor(viewModel)
-        : null;
+    function renderCancelEditLink(viewModel) {
+        return viewModel.returnURL
+            ? a("back", viewModel.returnURL, "&larr; Go back")
+            : "";
+    }
 
-const renderValues = viewModel =>
-    "values" in viewModel
-        ? labelledDiv("property", viewModel.label, renderList(null, viewModel.values, value => inputRendererFor({ ...viewModel, value })))
-        : null;
+    function renderProp(pathContext, viewModel) {
+        return renderValue(pathContext, viewModel)
+            || renderValues(pathContext, viewModel)
+            || renderIds(pathContext, viewModel)
+            || renderViewModels(pathContext, viewModel)
+            || renderUnrecognised(pathContext, viewModel);
+    }
 
-const renderIds = viewModel =>
-    {
-        if(!("ids" in viewModel)) return null;
+    const renderValue = (pathContext, viewModel) =>
+        "value" in viewModel
+            ? inputRendererFor(pathContext, viewModel)
+            : null;
+
+    const renderValues = (pathContext, viewModel) =>
+        "values" in viewModel
+            ? labelledDiv(
+                "property",
+                viewModel.label,
+                renderList(
+                    null,
+                    viewModel.values,
+                    (value, i) => inputRendererFor(
+                        pathContext,
+                        { ...viewModel, label: "", value },
+                        i
+                    )
+                )
+            )
+            : null;
+
+    const renderIds = (pathContext, viewModel) => {
+        if (!("ids" in viewModel)) return null;
         if (viewModel.multiValue) return div("error", "Don't know how to render multi id editor");
         const hasSelection = "selection" in viewModel;
         return div(
@@ -58,58 +74,75 @@ const renderIds = viewModel =>
             viewModel.label,
             viewModel.ids.displayValue || viewModel.ids.id,
             ...(hasSelection ? renderSelectionHiddenFields(viewModel) : []),
-            renderSelectLink(viewModel)
+            renderSelectLink(pathContext, viewModel)
         );
     };
 
-function renderSelectionHiddenFields(viewModel) {
-    const renderableFields = viewModel.selection.filter(selectionProp =>
-        selectionProp.prop.path === "@id" || selectionProp.prop.summary
-    );
-    return renderableFields.map(selectionProp =>
-        {
+    function renderSelectionHiddenFields(viewModel) {
+        const renderableFields = viewModel.selection.filter(selectionProp =>
+            selectionProp.prop.path === "@id" || selectionProp.prop.summary
+        );
+        return renderableFields.map(selectionProp => {
             console.log(selectionProp);
             const { path } = selectionProp.prop;
-            if(path === "@id")
-                return hiddenInput(`${viewModel.prop.path} @id`, selectionProp.ids.id);
+            if (path === "@id")
+                return hiddenInput({
+                    name: `${viewModel.prop.path} @id`,
+                    value: selectionProp.ids.id
+                });
             else
-                return hiddenInput(`${viewModel.prop.path} ${path} @value`, selectionProp.value);
+                return hiddenInput({
+                    name: `${viewModel.prop.path} ${path} @value`,
+                    value: selectionProp.value
+                });
         }
-    );
-}
-
-function inputRendererFor(viewModel) {
-    const renderer = inputRenderers[viewModel.prop.dataType];
-    if(!renderer) return "No input found for " + JSON.stringify(viewModel);
-    return renderer(viewModel);
-}
-
-function renderSelectLink(chooseViewModel) {
-    const url = new URL(location.href);
-    if (chooseViewModel.encodedChooseId) {
-        url.searchParams.set("data", chooseViewModel.encodedChooseId);
-        url.searchParams.set("mode", chooseViewModel.chooseMode);
-        url.searchParams.set("returnURL", chooseViewModel.encodedThisURL);
-        url.searchParams.set("choicePath", chooseViewModel.encodedChoosePath);
-        return a("choose", url.toString(), "select");
+        );
     }
-}
 
-function renderViewModels(viewModel, context) {
-    if(!("viewModels" in viewModel)) return null;
-    return labelledDiv(
-        "property",
-        viewModel.label,
-        renderList(null, viewModel.viewModels, viewModel => {
-            return viewModel.props.filter(prop => prop.editable).map(prop => renderProp(prop, context)).join("\n")
-            //return render(viewModel, context);
-        })
-    );
-}
+    function inputRendererFor(contextPath, viewModel, maybeIndex = 0) {
+        const { prop, value, label } = viewModel
+        const { pattern, path, dataType } = prop;
+        const renderer = inputRenderers[dataType];
+        if (!renderer) return "No input found for " + JSON.stringify(viewModel);
 
-function renderList(className, xs, parse) {
-    return ul(className, ...(xs.map(x => li(null, parse ? parse(x) : x))));
-}
+        return renderer({
+            name: join(" ", contextPath, path, maybeIndex, "@value"),
+            value,
+            pattern,
+            label
+        });
+    }
 
-const renderUnrecognised = viewModel =>
-    console.warn(`Unrecognised/empty`, viewModel) || "";
+    function renderSelectLink(pathContext, chooseViewModel) {
+        const url = new URL(location.href);
+        if (chooseViewModel.encodedChooseId) {
+            url.searchParams.set("data", chooseViewModel.encodedChooseId);
+            url.searchParams.set("mode", chooseViewModel.chooseMode);
+            url.searchParams.set("returnURL", chooseViewModel.encodedThisURL);
+            url.searchParams.set("choicePath", join(" ", pathContext, chooseViewModel.choosePath));
+            return a("choose", url.toString(), "select");
+        }
+    }
+
+    function renderViewModels(contextPath, viewModel) {
+        if (!("viewModels" in viewModel)) return null;
+        return labelledDiv(
+            "property",
+            viewModel.label,
+            renderList(null, viewModel.viewModels, ({ props }, i) => props
+                .filter(prop => prop.editable)
+                .map(prop => renderProp(join(" ", contextPath, viewModel.prop.path, i), prop))
+                .join("\n")
+            )
+        );
+    }
+
+    function renderList(className, xs, parse) {
+        return ul(className, ...(xs.map((x, i) => li(null, parse ? parse(x, i) : x))));
+    }
+
+    const renderUnrecognised = viewModel =>
+        console.warn(`Unrecognised/empty`, viewModel) || "";
+
+    return renderForm();
+}

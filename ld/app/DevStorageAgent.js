@@ -6,38 +6,42 @@ const tenantId = Symbol("tenant id");
 const context = Symbol("context document");
 const shapes = Symbol("shapes");
 
-function patchData(container, keyPath, data) {
+function patchData(node, keyPath, data) {
     keyPath = keyPath.split(" ");
     while(keyPath.length > 1) {
         const step = keyPath.shift();
-        if(!container[step]) {
-            container[step] = [];
+        if(!node[step]) {
+            node[step] = [];
         }
-        container = container[step];
-        if(!Array.isArray(container)) throw new Error(`Expected ${step} to be an array in ${JSON.stringify(container)}`);
-        if(container.length < 1) {
-            container.push({});
+        node = node[step];
+        if(!Array.isArray(node)) throw new Error(`Expected ${step} to be an array in ${JSON.stringify(node)}`);
+        if(node.length < 1) {
+            node.push({});
         }
-        container = container[0];
+        node = node[0];
     }
-    container[keyPath[0]] = data;
+    node[keyPath[0]] = data;
 }
 
-function deepUpdate(expanded, key, data) {
-
-    if(!expanded) return;
-    if(Array.isArray(expanded)) {
-        expanded.forEach(item => deepUpdate(item, key, data));
-    } else if (typeof expanded === "object") {
-        if(expanded["@id"] === key) {
+function deepUpdate(node, key, data) {
+    if(!node) return;
+    if(Array.isArray(node)) {
+        node.forEach(x => deepUpdate(x, key, data));
+    } else if (typeof node === "object") {
+        if(node["@id"] === key) {
             console.log("Patching", key);
-            JSON.parse(data).forEach(([patchKey, patchValue]) => patchData(expanded, patchKey, patchValue));
+            data.forEach(([patchKey, patchValue]) => {
+                if(patchKey !== "@id") {
+                    console.log(patchKey, patchValue);
+                    patchData(node, patchKey, patchValue);
+                }
+            });
         } else {
-            Object.values(expanded)
-                .forEach(propValue => deepUpdate(propValue, key, data));
+            Object.values(node).forEach(x => deepUpdate(x, key, data));
         }
     }
 }
+
 export default class DevStorageAgent {
 
     constructor({ url, tenant }) {
@@ -84,13 +88,13 @@ export default class DevStorageAgent {
         const url = new URL(this[baseURL]);
         url.pathname += relativePath;
         const res = await fetch(url);
-        if(!res.ok) throw new Error(`${res.status} ${res.statusText}: ${url}`);
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${url}`);
         const json = await res.json();
-        if(relativePath.endsWith("/context.jsonld")) return json;
+        if (relativePath.endsWith("/context.jsonld")) return json;
         const expanded = await jsonld.expand(json);
         const stored = Object.entries(localStorage);
         stored.forEach(([key, data]) => {
-            deepUpdate(expanded, key, data);
+            deepUpdate(expanded, key, JSON.parse(data));
         });
         return expanded;
     }

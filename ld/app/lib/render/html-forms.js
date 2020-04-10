@@ -23,37 +23,35 @@ const label = (className, labelText, input) =>
         ${input}
     </label>`;
 
-export const hiddenInput = (viewModelOrKey, maybeValue) =>
+export const hiddenInput = ({ name, value }) =>
     input({
         "type": "hidden",
-        ...(
-            (typeof viewModelOrKey === "object")
-                ? { name: viewModelOrKey.prop.path, value: viewModelOrKey.value }
-                : { name: viewModelOrKey, value: maybeValue }
-        )
+        name,
+        value
     });
 
-const stringInput = viewModel =>
+const stringInput = ({ name, pattern, value }) =>
     input({
         "type": "text",
-        "name": `${viewModel.prop.path} @value`,
-        "pattern": viewModel.prop.pattern,
-        "value": viewModel.value
+        name,
+        pattern,
+        value
     });
 
-const integerInput = viewModel =>
+const integerInput = ({ name, pattern, value }) =>
     input({
         "type": "number",
         "step": 1,
-        "pattern": viewModel.prop.pattern,
-        "value": viewModel.value
+        name,
+        pattern,
+        value
     });
 
-export const labelledIntegerInput = viewModel =>
-    label("property", viewModel.label, integerInput(viewModel));
+export const labelledIntegerInput = ({ label: labelText, name, pattern, value }) =>
+    label("property", labelText, integerInput({ name, pattern, value }));
 
-export const labelledStringInput = viewModel =>
-    label("property", viewModel.label, stringInput(viewModel));
+export const labelledStringInput = ({ label: labelText, name, pattern, value }) =>
+    label("property", labelText, stringInput({ name, pattern, value }));
 
 export const submit = (className, ...content) =>
     `<button${maybeClass(className)}>${content.join(" ")}</button>`;

@@ -8,6 +8,9 @@ main {
     padding: 30px;
 }
 
+a.back {
+    display: block;
+}
 div.item, form.item {
     padding: 30px;
     background: #FFF;

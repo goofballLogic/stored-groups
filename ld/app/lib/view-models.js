@@ -130,7 +130,7 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
                     digest.chooseMode = "select";
                     digest.editable = !!digest.encodedChooseId;
                     digest.encodedThisURL = context.encode(thisURL);
-                    digest.encodedChoosePath = context.encode(prop.path);
+                    digest.choosePath = prop.path;
 
                     if (context.choice && context.choicePath === prop.path) {
                         const selectionIds = buildIdHash(choiceDataSet.ld);
