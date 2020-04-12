@@ -1,10 +1,18 @@
+
 const decode = x => x && atob(x);
 
 const encode = x => x && btoa(x);
 
-const searchParam = (url, key, isEncoded = true) => isEncoded
-    ? decode(url.searchParams.get(key))
-    : url.searchParams.get(key);
+const searchParam = (url, key, isEncoded = true) => {
+    try {
+    return isEncoded
+        ? decode(url.searchParams.get(key))
+        : url.searchParams.get(key);
+    } catch(err) {
+        console.error(key, isEncoded);
+        throw err;
+    }
+};
 
 const required = (x, description) => {
     if(!x) throw new Error(`${description} was not specified`);
@@ -25,6 +33,6 @@ export default function(url) {
         returnURL: searchParam(url, "returnURL"),
         vocabNamespace: "http://openteamspace.com/vocab#",
         choice: searchParam(url, "choice"),
-        choicePath: searchParam(url, "choicePath")
+        choicePath: searchParam(url, "choicePath", false)
     };
 }

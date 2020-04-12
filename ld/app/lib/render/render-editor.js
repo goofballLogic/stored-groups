@@ -8,7 +8,7 @@ const inputRenderers = {
     [XSD("integer")]: labelledIntegerInput
 }
 
-const join = (joinWith, ...args) => args.filter(x => x !== undefined && x !== null).join(joinWith);
+const join = (joinWith, ...args) => args.filter(x => x).join(joinWith);
 
 export function render(viewModel, context) {
 

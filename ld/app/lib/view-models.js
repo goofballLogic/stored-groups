@@ -40,7 +40,6 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
     const thisURL = buildThisURL();
     const tenantRootURL = buildTenantRootURL(context);
     const encodedThisURL = context.encode(thisURL);
-    const encodedChoicePath = context.encode(choicePath);
 
     const choiceProps = choiceDataSet && choiceDataSet
         .properties(shapeIndex)
@@ -60,7 +59,7 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
         const types = dataSet.types.map(t => t.replace(vocabNamespace, ""));
 
         return ({
-            encodedChoicePath,
+            choicePath,
             encodedId,
             encodedRelativeId,
             editMode,

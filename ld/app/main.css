@@ -3,7 +3,10 @@
     font-size: 14pt;
     line-height: 1.5;
 }
-
+pre {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8pt;
+}
 main {
     padding: 30px;
 }

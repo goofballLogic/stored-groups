@@ -10,7 +10,7 @@ export function render(viewModel) {
 
 function hiddenReturnURLFields(url) {
     return Array.from((new URL(url, location.href)).searchParams)
-        .map(pair => hiddenInput(...pair))
+        .map(([name, value]) => hiddenInput({ name, value }))
         .join("\n");
 }
 
@@ -20,7 +20,7 @@ function renderCollectionSelect(viewModel) {
         `item select-mode`,
         viewModel.selectReturnURL,
         hiddenReturnURLFields(viewModel.selectReturnURL),
-        hiddenInput("choicePath", viewModel.encodedChoicePath),
+        hiddenInput({ name: "choicePath", value: viewModel.choicePath }),
         props.map(prop => renderProp(prop)).join("\n"),
         submit(null, "Submit")
     );

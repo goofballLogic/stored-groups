@@ -45,4 +45,9 @@ console.log(viewModels);
 
     }
 
+    const pre = document.createElement("pre");
+    pre.textContent = Array.from((new URL(location.href)).searchParams).map(x => `${x[0]} : ${x[1]}`).join("\n");
+    document.body.appendChild(pre);
+
+
 }());
