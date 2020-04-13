@@ -8,10 +8,11 @@
     "ld-query": "^2.0.0"
   },
   "devDependencies": {
-    "jsdom": "^15.1.1"
+    "jsdom": "^15.1.1",
+    "mocha": "^7.1.1"
   },
   "scripts": {
-    "test": ""
+    "test": "mocha --require @babel/register"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/goofballLogic/stored-groups/issues"
   },
-  "homepage": "https://github.com/goofballLogic/stored-groups#readme"
+  "homepage": "https://github.com/goofballLogic/stored-groups#readme",
+  "dependencies": {
+    "nvm": "0.0.4"
+  }
 }

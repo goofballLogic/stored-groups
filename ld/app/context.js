@@ -22,11 +22,21 @@ const required = (x, description) => {
 const maybeSave = value =>
     value ? new Date(Number(value)) : null;
 
+function buildTenantHomeURL() {
+    const url = new URL(location.href);
+    Array
+        .from((new URL(location.href).searchParams).keys())
+        .filter(x => x !== "tenant")
+        .forEach(key => { url.searchParams.delete(key); });
+    return url.toString();
+}
+
 export default function(url) {
     return {
         decode,
         encode,
         tenant: required(searchParam(url, "tenant"), "tenant"),
+        tenantHomeURL: buildTenantHomeURL(),
         data: searchParam(url, "data"),
         mode: searchParam(url, "mode", false),
         save: maybeSave(searchParam(url, "save", false)),
