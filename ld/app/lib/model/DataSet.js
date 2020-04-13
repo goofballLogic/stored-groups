@@ -35,6 +35,7 @@ export default class DataSet {
     }
 
     properties(shapeIndex) {
+        console.log(this.ld.json());
         if(!shapeIndex) return;
         if(!this.types) return;
         const matchedType = this.types.find(t => t in shapeIndex);

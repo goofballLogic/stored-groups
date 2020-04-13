@@ -45,7 +45,7 @@
                 },
                 {
                     "sh:path": "ots:scoresheet",
-                    "sh:nodeKind": "sh:IRI",
+                    "sh:class": "ots:Scoresheet",
                     "sh:minCount": 0,
                     "sh:maxCount": 1,
                     "sh:labelTemplate": "Current scoresheet",
@@ -153,7 +153,9 @@
                     "sh:class": "ots:Goal",
                     "sh:minCount": 1,
                     "sh:maxCount": 1,
-                    "sh:description": "The goal we are trying to achieve"
+                    "sh:labelTemplate": "Goal (name tbd)",
+                    "sh:description": "The goal we are trying to achieve",
+                    "chooseFrom": "ots:goals"
                 },
                 {
                     "sh:path": "ots:measure",

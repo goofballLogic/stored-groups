@@ -34,7 +34,7 @@ const editMode = "edit";
 const selectMode = "select";
 
 export default function buildViewModels({ dataSets, choiceDataSet, tenant, shapeIndex, context }) {
-
+console.log(shapeIndex);
     const { vocabNamespace, choicePath, returnURL } = context;
     const selectReturnURL = trimSearchParam(/^choice/, returnURL);
     const thisURL = buildThisURL();
@@ -86,18 +86,22 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
             return digest;
         digest.label = maybeExpand(prop.labelTemplate, dataSet.ld) || prop.path;
         digest.hidden = prop.hidden;
-        switch (prop.nodeKind) {
-            case null:
-                processValues();
-                break;
-            case "http://www.w3.org/ns/shacl#IRI":
-                processIds();
-                break;
-            case "http://www.w3.org/ns/shacl#BlankNode":
-                processNestedDataSets();
-                break;
-            default:
-                throw new Error("Unhandled nodeKind - " + JSON.stringify(prop));
+        if(prop.class) {
+            processClassed();
+        } else {
+            switch (prop.nodeKind) {
+                case null:
+                    processValues();
+                    break;
+                case "http://www.w3.org/ns/shacl#IRI":
+                    processIds();
+                    break;
+                case "http://www.w3.org/ns/shacl#BlankNode":
+                    processNestedDataSets();
+                    break;
+                default:
+                    throw new Error("Unhandled nodeKind - " + JSON.stringify(prop));
+            }
         }
         return digest;
 
@@ -113,35 +117,30 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
                 digest.values = queries.map(q => q.query("> @value"));
         }
 
+        function processClassed() {
+            digest.encodedChooseId = findChooseableId();
+            digest.chooseMode = "select";
+            digest.editable = !!digest.encodedChooseId;
+            digest.encodedThisURL = context.encode(thisURL);
+            digest.choosePath = prop.path;
+            const ids = queries.map(buildIdHash);
+            digest.ids = multiValue ? ids : ids[0];
+
+            if (context.choice && context.choicePath === prop.path) {
+                const selectionIds = buildIdHash(choiceDataSet.ld);
+                if(selectionIds.id !== digest.ids.id) {
+                    console.log("Dirty selection", selectionIds, "vs current", digest.ids);
+                    digest.selection = choiceProps;
+                    digest.label = maybeExpand(prop.labelTemplate, choiceDataSet.ld) || prop.path;
+                    digest.ids = selectionIds;
+                }
+            }
+        }
+
         function processIds() {
             const ids = queries.map(buildIdHash);
-            if (multiValue) {
-                digest.ids = ids;
-                digest.editable = false;
-            }
-            else {
-                digest.ids = ids[0];
-                if (prop.path === "@id") {
-                    digest.editable = false;
-                }
-                else {
-                    digest.encodedChooseId = findChooseableId();
-                    digest.chooseMode = "select";
-                    digest.editable = !!digest.encodedChooseId;
-                    digest.encodedThisURL = context.encode(thisURL);
-                    digest.choosePath = prop.path;
-
-                    if (context.choice && context.choicePath === prop.path) {
-                        const selectionIds = buildIdHash(choiceDataSet.ld);
-                        if(selectionIds.id !== digest.ids.id) {
-                            console.log("Dirty selection", selectionIds, "vs current", digest.ids);
-                            digest.selection = choiceProps;
-                            digest.label = maybeExpand(prop.labelTemplate, choiceDataSet.ld) || prop.path;
-                            digest.ids = selectionIds;
-                        }
-                    }
-                }
-            }
+            digest.ids = multiValue ? ids : ids[0];
+            digest.editable = false;
         }
 
         function buildIdHash(q) {

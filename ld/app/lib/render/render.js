@@ -11,7 +11,7 @@ export default function(container, viewModels, context) {
 }
 
 export function renderError(container, err) {
-    container.innerHTML = pre("error", err.stack);
+    container.innerHTML = pre("error", err.stack.replace(/</g, "&lt;"));
 }
 
 const renderFor = (viewModel, context) =>

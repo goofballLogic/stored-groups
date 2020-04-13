@@ -46,7 +46,9 @@ console.log(viewModels);
     }
 
     const pre = document.createElement("pre");
-    pre.textContent = Array.from((new URL(location.href)).searchParams).map(x => `${x[0]} : ${x[1]}`).join("\n");
+    pre.textContent = Array.from((new URL(location.href)).searchParams)
+        .concat({0: "context", 1: JSON.stringify(context, null, 1)})
+        .map(x => `${x[0]} : ${x[1]}`).join("\n");
     document.body.appendChild(pre);
 
 
