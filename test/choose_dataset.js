@@ -1,5 +1,6 @@
 import jsdom from "jsdom";
 import run from "../ld/app/app.js";
+import assert from "assert";
 
 describe("In order to choose a dataset", () => {
 
@@ -7,15 +8,19 @@ describe("In order to choose a dataset", () => {
 
         const context = {};
         let doc = new jsdom.JSDOM();
+        let lastCaught;
+
         beforeEach(async () => {
 
-            await run();
+            try {
+                await run();
+            } catch(err) {
+                lastCaught = err;
+            }
 
         });
 
-        it("Should have thrown an error", () => {
-
-        });
+        it("Should have thrown an error", () => assert.ok(lastCaught));
         
     });
 
