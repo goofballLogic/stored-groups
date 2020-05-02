@@ -8,8 +8,7 @@
     "ld-query": "^2.0.0"
   },
   "devDependencies": {
-    "jsdom": "^15.2.1",
-    "mocha": "^7.1.1"
+    "cypress": "^4.5.0"
   },
   "scripts": {
     "test": "mocha"

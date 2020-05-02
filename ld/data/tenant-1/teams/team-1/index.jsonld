@@ -7,7 +7,7 @@
     ],
     "@id": "team-1",
     "@type": "ots:Team",
-    "name": "The eggheads",
+    "name": "The Eggheads",
     "scoresheet": {
         "@id": "team-1/scoresheets/1",
         "name": "January 1st, 2019"

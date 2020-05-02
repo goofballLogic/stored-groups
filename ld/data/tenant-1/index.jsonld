@@ -11,7 +11,7 @@
         {
             "@id": "team-1",
             "@type": "ots:Team",
-            "name": "The eggheads"
+            "name": "The Eggheads"
         }
     ]
 }
