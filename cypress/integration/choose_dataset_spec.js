@@ -47,6 +47,19 @@ describe("Given the app is configured to use the local-dev provider", () => {
 
             });
 
+            describe("And I follow the Home link", () => {
+
+                beforeEach(() => cy.contains("a", "Home").click());
+
+                it("Then I should be back at the choosing page", () => {
+
+                    cy.contains("Your teams");
+                    cy.contains("The Eggheads");
+
+                });
+                
+            });
+
         });
 
     });
