@@ -17,29 +17,31 @@ describe("View an object", () => {
 
             it("Then it should display a self-link to the object", () => {
 
-                cy.contains("a", "The Eggheads");
+                cy.contains("div.property a", "The Eggheads");
                 
             });
 
             it("Then it should simple property values", () => {
 
-                cy.contains(".property-value", "The Eggheads");
+                cy.contains(".property .label", "Name")
+                    .parent()
+                    .contains(".property-value", "The Eggheads");
 
             });
 
             it("Then it should link to objects within the object (e.g. team -> current scoresheet)", () => {
 
-                cy.contains("a", "Current scoresheet");
+                cy.contains(".property > a.object", "Current scoresheet");
 
             });
 
             it("Then it should link to collections within the object (e.g. team -> team members)", () => {
 
-                cy.contains("a", "Team members");
-                cy.contains("a", "Scoresheets");
-                cy.contains("a", "Scores");
-                cy.contains("a", "Goals");
-                cy.contains("a", "Scoring periods");
+                cy.contains(".property > a.object", "Team members");
+                cy.contains(".property > a.object", "Scoresheets");
+                cy.contains(".property > a.object", "Scores");
+                cy.contains(".property > a.object", "Goals");
+                cy.contains(".property > a.object", "Scoring periods");
 
             });
 

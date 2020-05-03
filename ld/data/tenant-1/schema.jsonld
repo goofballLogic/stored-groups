@@ -55,30 +55,40 @@
                 {
                     "sh:path": "ots:members",
                     "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:maxCount": 1,
                     "sh:labelTemplate": "Team members",
                     "immutable": true
                 },
                 {
                     "sh:path": "ots:scoresheets",
                     "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:maxCount": 1,
                     "sh:labelTemplate": "Scoresheets",
                     "immutable": true
                 },
                 {
                     "sh:path": "ots:scores",
                     "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:maxCount": 1,
                     "sh:labelTemplate": "Scores",
                     "immutable": true
                 },
                 {
                     "sh:path": "ots:goals",
                     "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:maxCount": 1,
                     "sh:labelTemplate": "Goals",
                     "immutable": true
                 },
                 {
                     "sh:path": "ots:periods",
                     "sh:nodeKind": "sh:IRI",
+                    "sh:minCount": 0,
+                    "sh:maxCount": 1,
                     "sh:labelTemplate": "Scoring periods",
                     "immutable": true
                 }

@@ -25,7 +25,6 @@ describe("Choosing a data set", () => {
 
                     cy.location().then(location => {
                         
-                        console.log("LOCATION", location);
                         cy.contains("a", "The Eggheads")
                             .should("have.attr", "href", location.href);
 

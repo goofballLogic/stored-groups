@@ -12,8 +12,11 @@ const log = console.log.bind(console);
     log("Shapes index:", shapeIndex);
 
     const main = document.querySelector("main");
-    document.querySelector("a.tenant-home").href = context.tenantHomeURL;
-
+    const header = document.querySelector("header");
+    const headerContent = document.querySelector("header template").content.cloneNode(true);
+    headerContent.querySelector("a.tenant-home").href = context.tenantHomeURL;
+    header.appendChild(headerContent);
+    
     run({ log, context, main, tenant, shapeIndex });
 
     const pre = document.createElement("pre");

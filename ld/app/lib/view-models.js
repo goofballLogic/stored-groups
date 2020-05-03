@@ -20,7 +20,6 @@ function buildThisURL() {
     return url.toString().substring(url.origin.length);
 }
 
-
 function trimSearchParam(pattern, url) {
     url = new URL(url, location.href);
     blacklist.forEach(key => url.searchParams.delete(key));
@@ -34,7 +33,6 @@ const editMode = "edit";
 const selectMode = "select";
 
 export default function buildViewModels({ dataSets, choiceDataSet, tenant, shapeIndex, context }) {
-console.log(shapeIndex);
     const { vocabNamespace, choicePath, returnURL } = context;
     const selectReturnURL = trimSearchParam(/^choice/, returnURL);
     const thisURL = buildThisURL();
