@@ -9,10 +9,11 @@
   },
   "devDependencies": {
     "cypress": "^4.5.0",
-    "cypress-cucumber-preprocessor": "^2.3.1"
+    "cypress-cucumber-preprocessor": "^2.3.1",
+    "http-server": "^0.12.3"
   },
   "scripts": {
-    "test": "npx cypress run"
+    "test": "http-server -c0 ld & npx cypress run"
   },
   "repository": {
     "type": "git",
