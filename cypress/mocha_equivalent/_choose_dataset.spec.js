@@ -4,7 +4,11 @@ describe("Choosing a data set", () => {
 
     describe("Given the app is configured to use the local-dev provider", () => {
 
-        let provider = providers["local-dev"];
+        let provider = {
+            "tenant": "tenant-1",
+            "href": "http://localhost:8080/client.html",
+            "team name": "The Eggheads"
+        };
 
         describe("When I navigate to the root of the app", () => {
 
