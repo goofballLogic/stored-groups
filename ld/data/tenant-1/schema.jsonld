@@ -163,7 +163,7 @@
                     "sh:class": "ots:Goal",
                     "sh:minCount": 1,
                     "sh:maxCount": 1,
-                    "sh:labelTemplate": "Goal (name tbd)",
+                    "sh:labelTemplate": "{ots:name @value}",
                     "sh:description": "The goal we are trying to achieve",
                     "chooseFrom": "ots:goals"
                 },
@@ -242,6 +242,7 @@
                     "sh:path": "ots:name",
                     "sh:dataType": "xsd:string",
                     "sh:pattern": ".{2,50}",
+                    "ots:summary": true,
                     "sh:minCount": 1,
                     "sh:maxCount": 1
                 }

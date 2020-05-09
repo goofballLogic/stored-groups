@@ -33,7 +33,7 @@ const renderViewModels = (viewModel, context) =>
 const renderIds = viewModel =>
     "ids" in viewModel
         ? div("property", viewModel.multiValue
-            ? renderList(null, viewModel.ids, id => renderLink(id, viewModel.label))
+            ? [ renderList(null, viewModel.ids, id => renderLink(id, viewModel.label)) ]
             : renderLink(viewModel.ids, viewModel.label)
         )
         : null;
@@ -62,6 +62,10 @@ function renderLink(idViewModel, label) {
     if (idViewModel.encodedRelativeId) {
         const url = cleanURL();
         url.searchParams.set("data", idViewModel.encodedRelativeId);
+        // return [
+        //     label,
+        //     idViewModel.displayValue || idViewModel.id
+        // ];
         return a("object", url.toString(), label);
     }
 }
