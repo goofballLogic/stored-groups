@@ -1,1 +1,1 @@
-![Node.js CI](https://github.com/goofballLogic/stored-groups/workflows/Node.js%20CI/badge.svg)
+[![Node.js CI](https://github.com/goofballLogic/stored-groups/workflows/Node.js%20CI/badge.svg)](https://github.com/goofballLogic/stored-groups/workflows/Node.js%20CI)
