@@ -1,0 +1,32 @@
+{
+    "@context": [
+        "http://dev.openteamspace.com/vocab/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/scoresheets/"
+        }
+    ],
+    "@id": "1",
+    "@type": "ots:Scoresheet",
+    "name": "January 1st, 2019",
+    "created": "2019-01-01T00:00:00Z",
+    "points": [
+        {
+            "@type": "ots:Scoresheet.Point",
+            "range": [
+                -3,
+                5
+            ],
+            "goal": "../goals/goal-1",
+            "measure": "Was the build broken by new code added this sprint?"
+        },
+        {
+            "@type": "ots:Scoresheet.Point",
+            "range": [
+                -2,
+                0
+            ],
+            "measure": "Were bugs found in production (only ones introduced during the last release)?",
+            "goal": "../goals/goal-2"
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "@context": [
+        "http://dev.openteamspace.com/vocab/context.jsonld",
+        {
+            "@base": "tenant-1/teams/team-1/goals/"
+        }
+    ],
+    "@type": [ "Collection" ],
+    "collection-type": [ { "@id": "ots:Goal" } ],
+    "items": [
+        { "@id": "goal-2", "@type": "ots:Goal", "name": "Catch all the bugs" },
+        { "@id": "goal-1", "@type": "ots:Goal", "name": "Don't break the build" }
+    ]
+}

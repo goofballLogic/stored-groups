@@ -3,28 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
-  "dependencies": {
-    "babel-cli": "^6.26.0",
-    "del": "^3.0.0",
-    "idb-keyval": "file:../idb-keyval",
-    "jsonld": "^1.5.0"
+  "peerDependencies": {
+    "jsonld": "^1.5.0",
+    "ld-query": "^2.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.5",
-    "babel-loader": "^8.0.6",
-    "intl-messageformat": "^4.1.2",
-    "jsdom": "^15.1.1",
-    "json-loader": "^0.5.7",
-    "webpack": "^4.33.0",
-    "webpack-cli": "^3.1.2"
+    "cypress": "^4.5.0",
+    "cypress-cucumber-preprocessor": "^2.3.1"
   },
   "scripts": {
-    "watch-test-static": "fswatch ./src --one-per-batch --recursive | xargs -n 1 sh -c 'date +%H:%M:%S;node test/test-static;echo\n\n\n'",
-    "test": "echo $'\n\n\n\n\n' && clear && node test/test-static",
-    "watch-pack": "./node_modules/.bin/webpack-cli --watch --config webpack.test.config.js",
-    "pack": "./node_modules/.bin/webpack-cli --config webpack.test.config.js",
-    "test-flat-file-data": "echo $'\n\n\n\n\n' && node test/test-flat-file-data",
-    "watch-test-flat-file-data": "fswatch ./src --one-per-batch --recursive | xargs -n 1 sh -c 'npm run test-flat-file-data;echo\n\n\n'"
+    "test": "npx cypress run"
   },
   "repository": {
     "type": "git",
@@ -35,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/goofballLogic/stored-groups/issues"
   },
-  "homepage": "https://github.com/goofballLogic/stored-groups#readme"
+  "homepage": "https://github.com/goofballLogic/stored-groups#readme",
+  "dependencies": {
+    "nvm": "0.0.4"
+  },
+  "type": "module"
 }
