@@ -8,12 +8,10 @@ export const listOfDataSetsIsDisplayed = (listName, expected) => {
         .parent()
         .contains(".property .label", "Items")
         .parent()
-        .then(itemsPropertyValue =>
-            expected && expected.hashes().forEach(item => {
-                cy.get(itemsPropertyValue)
-                    .contains(".property .label", "Name")
-                    .parent()
-                    .contains(".property-value", item.name)
-            })
+        .find(".property-value ul")
+        .then(list => 
+            expected && expected.hashes().forEach(item => 
+                cy.get(list).contains("li .property a", item.name)                
+            )
         );
 };

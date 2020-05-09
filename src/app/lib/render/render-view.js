@@ -1,10 +1,10 @@
 import { a, div, labelledDiv, li, ul } from "./html.js";
 
-export function render(viewModel) {
+export function render(viewModel, isNested = false) {
     const { props = [] } = viewModel;
     return div(
-        `item view-mode`,
-        renderEditLink(viewModel),
+        "item view-mode",
+        isNested ? null : renderEditLink(viewModel),
         props.map(prop => renderProp(prop)).join("\n")
     );
 }
@@ -25,9 +25,9 @@ function renderProp(viewModel) {
 const renderUnrecognised = viewModel =>
     console.warn(`Unrecognised/empty`, viewModel) || "";
 
-const renderViewModels = (viewModel, context) =>
+const renderViewModels = (viewModel) =>
     "viewModels" in viewModel
-        ? labelledDiv("property", viewModel.label, renderList(null, viewModel.viewModels, viewModel => render(viewModel, context)))
+        ? labelledDiv("property", viewModel.label, renderList(null, viewModel.viewModels, viewModel => render(viewModel, true)))
         : null;
 
 const renderIds = viewModel =>
@@ -62,10 +62,6 @@ function renderLink(idViewModel, label) {
     if (idViewModel.encodedRelativeId) {
         const url = cleanURL();
         url.searchParams.set("data", idViewModel.encodedRelativeId);
-        // return [
-        //     label,
-        //     idViewModel.displayValue || idViewModel.id
-        // ];
         return a("object", url.toString(), label);
     }
 }

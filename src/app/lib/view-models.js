@@ -2,7 +2,6 @@ function maybeExpand(labelTemplate, query) {
     return labelTemplate && labelTemplate.replace(/\{([^}]*)\}/, (_, path) => query.query(path));
 }
 
-
 function buildTenantRootURL(context) {
     const tenant = context.tenant;
     const url = new URL(location.href);
