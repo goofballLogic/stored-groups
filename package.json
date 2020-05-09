@@ -13,7 +13,7 @@
     "http-server": "^0.12.3"
   },
   "scripts": {
-    "test": "http-server -c0 ld & npx cypress run"
+    "test": "http-server -c0 src & npx cypress run"
   },
   "repository": {
     "type": "git",
