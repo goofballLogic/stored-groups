@@ -1,4 +1,4 @@
-import { a, div, labelledDiv, li, ul } from "./html.js";
+import { a, div, labelledDiv, li, span, ol } from "./html.js";
 
 export function render(viewModel, isNested = false) {
     const { props = [] } = viewModel;
@@ -10,11 +10,11 @@ export function render(viewModel, isNested = false) {
 }
 
 function renderList(className, xs, parse) {
-    return ul(className, ...(xs.map(x => li(null, parse ? parse(x) : x))));
+    return ol(className, ...(xs.map(x => li(null, parse ? parse(x) : x))));
 }
 
 function renderProp(viewModel) {
-    if(viewModel.hidden) return "";
+    if (viewModel.hidden) return "";
     return renderValue(viewModel)
         || renderValues(viewModel)
         || renderIds(viewModel)
@@ -27,28 +27,34 @@ const renderUnrecognised = viewModel =>
 
 const renderViewModels = (viewModel) =>
     "viewModels" in viewModel
-        ? labelledDiv("property", viewModel.label, renderList(null, viewModel.viewModels, viewModel => render(viewModel, true)))
+        ? labelledDiv("property", viewModel.label,
+            renderList("object-values", viewModel.viewModels, viewModel => render(viewModel, true))
+        )
         : null;
 
 const renderIds = viewModel =>
     "ids" in viewModel
         ? div("property", viewModel.multiValue
-            ? [ renderList(null, viewModel.ids, id => renderLink(id, viewModel.label)) ]
+            ? [renderList(null, viewModel.ids, id => renderLink(id, viewModel.label))]
             : renderLink(viewModel.ids, viewModel.label)
         )
         : null;
 
 const renderValues = viewModel =>
     "values" in viewModel
-        ? labelledDiv("property", viewModel.label, renderList(null, viewModel.values))
+        ? labelledDiv("property", viewModel.label,
+            renderList(`${viewModel.datatype}-values`, viewModel.values)
+        )
         : null;
 
 const renderValue = viewModel =>
     "value" in viewModel
-        ? labelledDiv("property", viewModel.label, viewModel.value)
+        ? labelledDiv("property", viewModel.label,
+            span(`${viewModel.datatype}-value`, viewModel.value)
+        )
         : null;
 
-const whitelisted = [ "tenant", "data" ];
+const whitelisted = ["tenant", "data"];
 
 function cleanURL() {
     const url = new URL(location.href);

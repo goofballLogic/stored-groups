@@ -51,8 +51,7 @@
                     "sh:minCount": 0,
                     "sh:maxCount": 1,
                     "sh:labelTemplate": "Current scoresheet",
-                    "chooseFrom": "ots:scoresheets",
-                    "valueTemplate": "{ots:name @value}"
+                    "chooseFrom": "ots:scoresheets"                    
                 },
                 {
                     "sh:path": "ots:members",
@@ -118,7 +117,7 @@
                     "sh:path": "@id",
                     "sh:maxCount": 1,
                     "sh:nodeKind": "sh:IRI",
-                    "sh:labelTemplate": "{ots:name @value}"
+                    "sh:labelTemplate": "Score sheet: {ots:name @value}"
                 },
                 {
                     "sh:path": "ots:name",
@@ -133,7 +132,8 @@
                     "sh:dataType": "xsd:dateTime",
                     "sh:minCount": 1,
                     "sh:maxCount": 1,
-                    "ots:immutable": true
+                    "ots:immutable": true,
+                    "sh:labelTemplate": "Created"
                 },
                 {
                     "sh:path": "ots:points",
@@ -157,7 +157,8 @@
                     "sh:path": "ots:range",
                     "sh:dataType": "xsd:integer",
                     "sh:minCount": 2,
-                    "sh:maxCount": 2
+                    "sh:maxCount": 2,
+                    "sh:labelTemplate": "Range"
                 },
                 {
                     "sh:path": "ots:goal",
@@ -218,7 +219,7 @@
                     "sh:dataType": "xsd:integer",
                     "sh:minCount": 1,
                     "sh:maxCount": 1,
-                    "sh:labelTempalte": "Score"
+                    "sh:labelTemplate": "Score"
                 },
                 {
                     "sh:path": "ots:description",

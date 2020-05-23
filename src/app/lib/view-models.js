@@ -11,7 +11,7 @@ function buildTenantRootURL(context) {
     return url;
 }
 
-const blacklist = [ "save" ];
+const blacklist = ["save"];
 
 function buildThisURL() {
     const url = new URL(location.href);
@@ -83,7 +83,9 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
             return digest;
         digest.label = maybeExpand(prop.labelTemplate, dataSet.ld) || prop.path;
         digest.hidden = prop.hidden;
-        if(prop.class) {
+        console.log(prop);
+        digest.datatype = (prop.dataType || "string").split("#").slice(-1)[0];
+        if (prop.class) {
             processClassed();
         } else {
             switch (prop.nodeKind) {
@@ -125,7 +127,7 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
 
             if (context.choice && context.choicePath === prop.path) {
                 const selectionIds = buildIdHash(choiceDataSet.ld);
-                if(selectionIds.id !== digest.ids.id) {
+                if (selectionIds.id !== digest.ids.id) {
                     console.log("Dirty selection", selectionIds, "vs current", digest.ids);
                     digest.selection = choiceProps;
                     digest.label = maybeExpand(prop.labelTemplate, choiceDataSet.ld) || prop.path;
