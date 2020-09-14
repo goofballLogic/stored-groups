@@ -52,7 +52,8 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
 
         const relativeEditTarget = dataSet.editsUrl;
 
-        const props = dataSet.properties(shapeIndex).map(prop => prepareProperty(dataSet, prop));
+        console.log(dataSet.properties(shapeIndex));
+        const props = dataSet.properties(shapeIndex).map(prop => prepareAndLogProperty(dataSet, prop));
         const types = dataSet.types.map(t => t.replace(vocabNamespace, ""));
 
         return ({
@@ -74,6 +75,12 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
         });
     }
 
+    function prepareAndLogProperty(dataSet, prop) {
+        const result = prepareProperty(dataSet, prop);
+        console.log(prop, result);
+        return result;
+    }
+
     function prepareProperty(dataSet, prop) {
 
         const multiValue = prop.maxCount !== 1;
@@ -83,7 +90,6 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
             return digest;
         digest.label = maybeExpand(prop.labelTemplate, dataSet.ld) || prop.path;
         digest.hidden = prop.hidden;
-        console.log(prop);
         digest.datatype = (prop.dataType || "string").split("#").slice(-1)[0];
         if (prop.class) {
             processClassed();
@@ -138,6 +144,7 @@ export default function buildViewModels({ dataSets, choiceDataSet, tenant, shape
 
         function processIds() {
             const ids = queries.map(buildIdHash);
+            console.log("Processed ids", ids);
             digest.ids = multiValue ? ids : ids[0];
             digest.editable = false;
         }

@@ -19,7 +19,7 @@
                 },
                 {
                     "sh:path": "ots:items",
-                    "sh:nodeKind": "sh:BlankNode",                    
+                    "sh:nodeKind": "sh:BlankNode",
                     "sh:labelTemplate": "Items"
                 }
             ]
@@ -43,7 +43,7 @@
                     "sh:maxCount": 1,
                     "sh:labelTemplate": "Name",
                     "sh:description": "The name of your team",
-                    "ots:hidden": true                    
+                    "ots:hidden": true
                 },
                 {
                     "sh:path": "ots:scoresheet",
@@ -51,7 +51,7 @@
                     "sh:minCount": 0,
                     "sh:maxCount": 1,
                     "sh:labelTemplate": "Current scoresheet",
-                    "chooseFrom": "ots:scoresheets"                    
+                    "chooseFrom": "ots:scoresheets"
                 },
                 {
                     "sh:path": "ots:members",
@@ -149,16 +149,10 @@
             "sh:property": [
                 {
                     "sh:path": "@id",
+                    "sh:minCount": 1,
                     "sh:maxCount": 1,
                     "sh:nodeKind": "sh:IRI",
-                    "sh:labelTemplate": "{ots:name @value}"
-                },
-                {
-                    "sh:path": "ots:range",
-                    "sh:dataType": "xsd:integer",
-                    "sh:minCount": 2,
-                    "sh:maxCount": 2,
-                    "sh:labelTemplate": "Range"
+                    "sh:labelTemplate": "{ots:goal @value}"
                 },
                 {
                     "sh:path": "ots:goal",
@@ -166,16 +160,23 @@
                     "sh:class": "ots:Goal",
                     "sh:minCount": 1,
                     "sh:maxCount": 1,
-                    "sh:labelTemplate": "{ots:name @value}",
                     "sh:description": "The goal we are trying to achieve",
+                    "sh:labelTemplate": "{ots:name @value}",
                     "chooseFrom": "ots:goals"
                 },
                 {
                     "sh:path": "ots:measure",
                     "sh:dataType": "xsd:string",
-                    "sh:labelTemplate": "Measurement",
+                    "sh:labelTemplate": "Test",
                     "sh:description": "What will be measured to determine points",
                     "sh:maxCount": 1
+                },
+                {
+                    "sh:path": "ots:range",
+                    "sh:dataType": "xsd:integer",
+                    "sh:minCount": 2,
+                    "sh:maxCount": 2,
+                    "sh:labelTemplate": "Range"
                 }
             ]
         },
