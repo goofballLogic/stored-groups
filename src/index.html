@@ -1,0 +1,32 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+    <script type="module">
+        import { load } from "./gapi.js";
+        let clientLoaded = false;
+        let docLoaded = false;
+        window.addEventListener("DOMContentLoaded", () => {
+            docLoaded = true;
+            next();
+        });
+        window.handleClientLoad = () => {
+            clientLoaded = true;
+            next();
+        };
+        function next() {
+            if (docLoaded && clientLoaded) {
+                load(window.gapi, { signInButton: document.querySelector("#gapi-signin") });
+            }
+        }
+    </script>
+</head>
+
+<body>
+    Hello
+    <button type="button" id="gapi-signin">Google Sign-in</button>
+</body>
+
+</html>
