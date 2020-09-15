@@ -11,7 +11,7 @@ export function subscribe(topic, callback) {
 }
 
 export function publish(topic, payload) {
-    console.log(topic, payload);
+    console.log("Publishing message", topic, payload);
     const subscriptions = sinks[topic] && sinks[topic].subscriptions;
     if (!subscriptions) return;
     const callbacks = Object.values(subscriptions);
@@ -22,3 +22,5 @@ export function publish(topic, payload) {
     });
     return callbacks.length;
 }
+
+window.bus_publish = publish;

@@ -24,7 +24,7 @@ export function load(gapi, { signInButton, signOutButton }) {
     }
 
     function handleGAPIInitSuccess() {
-        // enable login
+        // enable login/out
         signInButton.addEventListener("click", handleSignInButtonClick);
         signOutButton.addEventListener("click", handleSignOutButtonClick);
 
@@ -37,6 +37,7 @@ export function load(gapi, { signInButton, signOutButton }) {
     function observeSignedIn(isSignedIn) {
         const payload = {
             provider: "GAPI",
+            gapi,
             isSignedIn
         };
         signInButton.disabled = isSignedIn;
@@ -47,12 +48,13 @@ export function load(gapi, { signInButton, signOutButton }) {
                 id: profile.getId(),
                 name: profile.getName()
             };
+            payload.key = "gapi-" + payload.user.id;
         } else { }
         publish(config.bus.SIGNED_IN, payload);
     }
 
     function handleSignInButtonClick() {
-        gapi.auth2.getAuthInstance().signIn();
+        gapi.auth2.getAuthInstance().signIn({ prompt: "consent" });
     }
 
     function handleSignOutButtonClick() {

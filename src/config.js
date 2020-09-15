@@ -8,7 +8,10 @@ export default {
         API_KEY: "AIzaSyA8EVrtUXJWsKRY9dKrk7xL0oAps2qk7LE"
     },
     bus: {
+        ERROR: "error",
         SIGNED_IN: "signed-in",
-        ERROR: "error"
+        STORAGE: {
+            LIST_FOLDERS: "storage.list-folders"
+        }
     }
 };
