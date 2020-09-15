@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <script type="module" src="./components/login-controls.js"></script>
     <script type="module" src="./log.js"></script>
     <script type="module">
         import { load } from "./gapi.js";
@@ -14,25 +15,26 @@
                 return;
             }
             const script = document.querySelector("#gapi-script");
-            if (script.dataset.loaded) continuation();
+            if (script && script.dataset.loaded && window.gapi) continuation();
             else
                 setTimeout(() => waitForGAPI(continuation), 100);
         }
-        window.addEventListener("DOMContentLoaded", waitForGAPI(() =>
+        window.addEventListener("DOMContentLoaded", () => {
 
-            load(window.gapi, {
-                signInButton: document.querySelector("#gapi-signin")
-            })
+            const controls = {
+                signInButton: document.querySelector("#gapi-signin"),
+                signOutButton: document.querySelector("#gapi-signout")
+            };
+            waitForGAPI(() => load(window.gapi, controls));
 
-        ));
+        });
     </script>
     <script id="gapi-script" async defer src="https://apis.google.com/js/api.js" onload="this.dataset.loaded=true"
         onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 </head>
 
 <body>
-    Hello
-    <button type="button" id="gapi-signin">Google Sign-in</button>
+    <login-controls></login-controls>
 </body>
 
 </html>
