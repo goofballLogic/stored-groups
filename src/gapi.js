@@ -48,7 +48,6 @@ export function load(gapi, { signInButton, signOutButton }) {
                 id: profile.getId(),
                 name: profile.getName()
             };
-            payload.key = "gapi-" + payload.user.id;
         } else { }
         publish(config.bus.SIGNED_IN, payload);
     }

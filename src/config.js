@@ -5,13 +5,14 @@ export default {
         ],
         SCOPES: "https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file",
         CLIENT_ID: "60961398610-mgilh4kuns7trtq8vpjm4iob683ls5il.apps.googleusercontent.com",
-        API_KEY: "AIzaSyA8EVrtUXJWsKRY9dKrk7xL0oAps2qk7LE"
+        API_KEY: "AIzaSyA8EVrtUXJWsKRY9dKrk7xL0oAps2qk7LE",
+        ROOT: "OpenTeamSpace for developers"
     },
     bus: {
         ERROR: "error",
         SIGNED_IN: "signed-in",
         STORAGE: {
-            LIST_FOLDERS: "storage.list-folders"
+            LIST_OBJECTS: "storage.list-objects"
         }
     }
 };
