@@ -1,3 +1,4 @@
 {
+    "@context": "https://app.openteamspace.com/dev/context.jsonld",
     "@type": "ots:Index"
 }
