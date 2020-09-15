@@ -2,26 +2,32 @@
 <html>
 
 <head>
-    <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
-        onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+    <script type="module" src="./log.js"></script>
     <script type="module">
         import { load } from "./gapi.js";
-        let clientLoaded = false;
-        let docLoaded = false;
-        window.addEventListener("DOMContentLoaded", () => {
-            docLoaded = true;
-            next();
-        });
-        window.handleClientLoad = () => {
-            clientLoaded = true;
-            next();
-        };
-        function next() {
-            if (docLoaded && clientLoaded) {
-                load(window.gapi, { signInButton: document.querySelector("#gapi-signin") });
+        import { publish } from "./bus.js";
+        import config from "./config.js";
+        let safety = 10;
+        function waitForGAPI(continuation) {
+            if (safety-- < 1) {
+                publish(config.bus.ERROR, "Timeout waiting for GAPI to load");
+                return;
             }
+            const script = document.querySelector("#gapi-script");
+            if (script.dataset.loaded) continuation();
+            else
+                setTimeout(() => waitForGAPI(continuation), 100);
         }
+        window.addEventListener("DOMContentLoaded", waitForGAPI(() =>
+
+            load(window.gapi, {
+                signInButton: document.querySelector("#gapi-signin")
+            })
+
+        ));
     </script>
+    <script id="gapi-script" async defer src="https://apis.google.com/js/api.js" onload="this.dataset.loaded=true"
+        onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 </head>
 
 <body>

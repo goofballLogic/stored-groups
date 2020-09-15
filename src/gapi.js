@@ -1,4 +1,6 @@
 import config from "./config.js";
+import { publish } from "./bus.js";
+
 const { API_KEY, DISCOVERY_DOCS, CLIENT_ID, SCOPES } = config.drive;
 
 export function load(gapi, { signInButton }) {
@@ -18,7 +20,7 @@ export function load(gapi, { signInButton }) {
             });
             onGAPIInitialized();
         } catch (err) {
-            console.error(err);
+            publish(config.bus.ERROR, { err });
         }
     }
 
@@ -28,12 +30,19 @@ export function load(gapi, { signInButton }) {
         observeSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
     }
 
-    function observeSignedIn(x, y, z) {
-        console.log(x, y, z);
-    }
-
-    function onSignInClick() {
-        gapi.auth2.getAuthInstance().signIn();
+    function observeSignedIn(isSignedIn) {
+        const payload = { isSignedIn };
+        if (isSignedIn) {
+            const profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+            payload.user = {
+                id: profile.getId(),
+                name: profile.getName()
+            };
+        }
+        publish(config.bus.SIGNED_IN, payload);
     }
 }
 
+function onSignInClick() {
+    gapi.auth2.getAuthInstance().signIn();
+}
