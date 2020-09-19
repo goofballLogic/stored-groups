@@ -8,9 +8,6 @@ export default {
         API_KEY: "AIzaSyA8EVrtUXJWsKRY9dKrk7xL0oAps2qk7LE",
         ROOT: "OpenTeamSpace for developers"
     },
-    app: {
-        root: "https://app.openteamspace.com/dev/"
-    },
     bus: {
         DEBUG: "debug",
         ERROR: "error",

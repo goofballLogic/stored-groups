@@ -19,8 +19,10 @@ function handleSignedIn(_, { provider, gapi, tenant, isSignedIn }) {
 
 const here = () => Error().stack.split("\n")[2].trim();
 
-function gapiRelativePath(url) {
-    const tenantRoot = `${config.app.root}${gapi_config.tenant.id}/`;
+async function gapiRelativePath(url) {
+    const context = await contextFetcher();
+    const urlRoot = context["@base"];
+    const tenantRoot = `${urlRoot}${gapi_config.tenant.id}/`;
     if (!url.startsWith(tenantRoot))
         throw new Error(`Path must start with ${tenantRoot}`);
     return url.substr(tenantRoot.length);
@@ -33,7 +35,8 @@ async function handleSave(topic, payload) {
     try {
         if (!path) throw new Error("No path specified");
         publish(config.bus.DEBUG, `Handling ${topic} ${path} from ${here()}`);
-        const localPath = gapiRelativePath(path);
+        const localPath = await gapiRelativePath(path);
+        console.log("Save", content, "to", localPath);
     } catch (err) {
         if (callback)
             callback(err);
