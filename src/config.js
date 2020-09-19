@@ -8,10 +8,17 @@ export default {
         API_KEY: "AIzaSyA8EVrtUXJWsKRY9dKrk7xL0oAps2qk7LE",
         ROOT: "OpenTeamSpace for developers"
     },
+    app: {
+        root: "https://app.openteamspace.com/dev/"
+    },
     bus: {
+        DEBUG: "debug",
         ERROR: "error",
         SIGNED_IN: "signed-in",
+
         STORAGE: {
+            GET_ROOT: "storage.root",
+            SAVE: "storage.save-resource",
             LIST_OBJECTS: "storage.list-objects"
         }
     }

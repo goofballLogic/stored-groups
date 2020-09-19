@@ -7,6 +7,7 @@ export function subscribe(topic, callback) {
     const subscriptions = sinks[topic].subscriptions;
     const id = uuid();
     subscriptions[id] = callback;
+    console.log({ subscribed: callback }, topic);
     return id;
 }
 

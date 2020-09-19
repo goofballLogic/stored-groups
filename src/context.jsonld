@@ -1,5 +1,6 @@
 {
     "@context": {
-        "ots": "https://app.openteamspace.com/vocab#"
+        "ots": "https://app.openteamspace.com/vocab#",
+        "@base": "https://app.openteamspace.com/dev/"
     }
 }

@@ -1,5 +1,5 @@
-import config from "./config.js";
-import { publish } from "./bus.js";
+import config from "../config.js";
+import { publish } from "../bus.js";
 
 const { API_KEY, DISCOVERY_DOCS, CLIENT_ID, SCOPES } = config.drive;
 
@@ -43,12 +43,18 @@ export function load(gapi, { signInButton, signOutButton }) {
         signInButton.disabled = isSignedIn;
         signOutButton.disabled = !isSignedIn;
         if (isSignedIn) {
+
             const profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
-            payload.user = {
-                id: profile.getId(),
-                name: profile.getName()
-            };
-        } else { }
+            const userId = profile.getId();
+            const name = profile.getName();
+            payload.user = { id: userId, name };
+            payload.tenant = { id: userId };
+
+        } else {
+
+            throw new Error("Signout not handled");
+
+        }
         publish(config.bus.SIGNED_IN, payload);
     }
 

@@ -9,21 +9,25 @@
     </style>
     <script type="module" src="./components/login-controls.js"></script>
     <script type="module" src="./log.js"></script>
-    <script type="module" src="./gapi-files.js"></script>
+    <script type="module" src="./gapi/getters.js"></script>
+    <script type="module" src="./gapi/setters.js"></script>
     <script type="module">
-        import { load } from "./gapi.js";
+        import { load } from "./gapi/gapi.js";
         import { publish } from "./bus.js";
         import config from "./config.js";
-        let safety = 10;
+        let safety = 40;
         function waitForGAPI(continuation) {
             if (safety-- < 1) {
                 publish(config.bus.ERROR, "Timeout waiting for GAPI to load");
                 return;
             }
             const script = document.querySelector("#gapi-script");
-            if (script && script.dataset.loaded && window.gapi) continuation();
-            else
+            if (script && script.dataset.loaded && window.gapi)
+                continuation();
+            else {
+                console.log("Waiting for GAPI", safety);
                 setTimeout(() => waitForGAPI(continuation), 100);
+            }
         }
         window.addEventListener("DOMContentLoaded", () => {
 

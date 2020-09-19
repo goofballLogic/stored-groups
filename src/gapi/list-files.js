@@ -1,5 +1,7 @@
-import { publish, subscribe } from "./bus.js";
-import config from "./config.js";
+import { publish, subscribe } from "../bus.js";
+import config from "../config.js";
+
+import "./save-file.js";
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
 subscribe(config.bus.STORAGE.LIST_OBJECTS, handleListObjects);
@@ -13,11 +15,11 @@ function handleSignedIn(_, { provider, gapi, key, isSignedIn }) {
 }
 
 function handleListObjects(_, callback) {
+
     if (!config) return;
     const { gapi } = gapi_config;
     const drive = gapi.client.drive;
     const folderMimeType = "application/vnd.google-apps.folder";
-    const dataMimeType = "application/json";
 
     const q = `trashed=false and mimeType='${folderMimeType}'`;
     drive.files.list({ q }).then(handleFilesListSuccess, handleFailure);
@@ -37,8 +39,8 @@ function handleListObjects(_, callback) {
 
     function handleRootFolderFound({ result: { id } }) {
         if (!id) { handleFailure(new Error(`Failed to find or create root folder: ${config.drive.ROOT}`)) };
+        publish(config.bus.DEBUG, `Root folder id: ${id}`);
         const q = `trashed = false and mimeType != '${folderMimeType}' and name = 'index.json' and '${id}' in parents`;
-        console.log(q);
         drive.files.list({ q }).then(handleFilesListRootIndexSuccess, handleFailure);
     }
 
@@ -54,6 +56,7 @@ function handleListObjects(_, callback) {
     function handleRootFolderIndexFound({ result }) {
         console.log("Index", result);
     }
+
     function handleFailure(err) {
         publish(config.bus.ERROR, err);
     }
