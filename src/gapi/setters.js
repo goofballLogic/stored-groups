@@ -1,10 +1,8 @@
 import { publish, subscribe } from "../bus.js";
 import config from "../config.js";
-import contextFetcher from "../context.js";
+import { gapiRelativePath } from "./path.js";
 
 import saveJSON from "./save-json.js";
-
-contextFetcher().then(console.log.bind(console));
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
 subscribe(config.bus.STORAGE.SAVE, handleSave);
@@ -19,29 +17,20 @@ function handleSignedIn(_, { provider, gapi, tenant, isSignedIn }) {
 
 const here = () => Error().stack.split("\n")[2].trim();
 
-async function gapiRelativePath(url) {
-    const context = await contextFetcher();
-    const urlRoot = context["@base"];
-    const tenantRoot = `${urlRoot}${gapi_config.tenant.id}/`;
-    if (!url.startsWith(tenantRoot))
-        throw new Error(`Path must start with ${tenantRoot}`);
-    return url.substr(tenantRoot.length);
-}
-
 async function handleSave(topic, payload) {
 
+    if (!gapi_config) return;
     if (!payload) return;
-    const { path, content, callback } = payload;
     try {
+        const { path, content, callback } = payload;
         if (!path) throw new Error("No path specified");
         publish(config.bus.DEBUG, `Handling ${topic} ${path} from ${here()}`);
-        const localPath = await gapiRelativePath(path);
+        const localPath = await gapiRelativePath(path, gapi_config.tenant) + ".json";
         console.log("Save", content, "to", localPath);
+        await saveJSON(gapi_config.gapi, localPath, content);
+        callback && callback(null);
     } catch (err) {
-        if (callback)
-            callback(err);
-        else
-            publish(config.bus.ERROR, err);
+        callback ? callback(err) : publish(config.bus.ERROR, err);
     }
 
 }
