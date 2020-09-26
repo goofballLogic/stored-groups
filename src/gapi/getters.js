@@ -14,6 +14,19 @@ function handleSignedIn(_, { provider, gapi, key, isSignedIn }) {
         : { gapi, key };
 }
 
+async function handleListObjects(message, { callback }) {
+    if (!gapi_config) return;
+    publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
+    try {
+        const folder = await findOrCreateRootFolder();
+        const catalog = await findFile(folder, "_index.json", "application/json");
+        const content = await downloadFile(catalog);
+        callback(null, content);
+    } catch (err) {
+        callback(err);
+    }
+}
+
 const query = ({ name, ofType, notOfType, parent }) => [
     `name='${name}'`,
     ofType && `mimeType='${ofType}'`,
@@ -30,18 +43,24 @@ async function findRootFolder() {
     return listResponse.result.files.find(({ name }) => name === config.drive.ROOT);
 }
 
+async function downloadFile({ id: fileId }) {
+    const drive = gapi_config.gapi.client.drive;
+    const response = await drive.files.get({ fileId, alt: "media" });
+    if (response.status === 200)
+        return response.result;
+    throw new Error(`Did not retrieve file ${response.status}`);
+}
+
 async function findFile(folder, name, mimeType) {
     const drive = gapi_config.gapi.client.drive;
     const q = query({ name, ofType: mimeType, parent: folder.id });
-    const fields = "files(id, name, modifiedTime)";
+    const fields = "files(id, name, modifiedTime, webContentLink)";
     const listResponse = await drive.files.list({ q, fields });
     const found = listResponse.result.files.filter(({ name }) => name === name);
-    console.log(found);
     if (found.length === 1) return found[0];
     if (found.length === 0) return null;
     const sorted = found.sort((a, b) => a.modifiedTime > b.modifiedTime);
     const file = sorted[0];
-    console.log("Deleting", file);
     await drive.files.delete({ fileId: file.id });
     return findFile(folder, name, mimeType);
 }
@@ -76,32 +95,4 @@ export async function identifyFile(name, mimeType) {
 export async function findOrCreateRootFolder() {
     if (!gapi) throw new Error("GAPI not initialized");
     return (await findRootFolder()) || (await createRootFolder());
-}
-
-function handleGetRoot(topic, { callback }) {
-
-    if (!config) return;
-    const { gapi } = gapi_config;
-    const drive = gapi.client.drive;
-
-    publish(config.bus.DEBUG, `Handling ${topic} from ${this}`);
-
-    (async function () {
-        try {
-            const rootFolder = await findOrCreateRootFolder();
-            if (!rootFolder) throw new Error("Failed to find or create root folder");
-            handleRootFolderFound(rootFolder);
-        } catch (err) {
-            callback ? callback(err) : publish(config.bus.ERROR, err);
-        }
-    }());
-
-    async function handleRootFolderFound({ id }) {
-
-        publish(config.bus.DEBUG, `Root folder id: ${id}`);
-        const q = query({ name: "index.json", notOfType: folderMimeType, parent: id });
-        const ret = await drive.files.list({ q });
-        throw new Error("Not implemented");
-    }
-
 }
