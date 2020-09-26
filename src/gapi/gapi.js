@@ -49,7 +49,8 @@ export function load(gapi, { signInButton, signOutButton }) {
             const name = profile.getName();
             payload.user = { id: userId, name };
             payload.tenant = { id: userId };
-
+            window.basePath = `https://app.openteamspace.com/dev/${payload.tenant.id}/`;
+            publish(config.bus.DEBUG, "Added window.basePath");
         } else {
 
             throw new Error("Signout not handled");

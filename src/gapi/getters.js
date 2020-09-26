@@ -2,7 +2,7 @@ import { publish, subscribe } from "../bus.js";
 import config from "../config.js";
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
-subscribe(config.bus.STORAGE.GET_ROOT, handleGetRoot);
+subscribe(config.bus.STORAGE.LIST_OBJECTS, handleListObjects);
 
 const folderMimeType = "application/vnd.google-apps.folder";
 
