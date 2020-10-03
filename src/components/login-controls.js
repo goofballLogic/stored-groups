@@ -5,7 +5,7 @@ function createButton(id, text) {
     return button;
 }
 
-class Logins extends HTMLElement {
+class LoginsControls extends HTMLElement {
 
     addGoogleSignInButton() {
         var button = createButton("gapi-signin", "Google sign-in");
@@ -24,4 +24,4 @@ class Logins extends HTMLElement {
         this.addGoogleSignOutButton();
     }
 }
-window.customElements.define("login-controls", Logins);
+window.customElements.define("login-controls", LoginsControls);

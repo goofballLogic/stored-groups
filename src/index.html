@@ -7,7 +7,9 @@
             display: none;
         }
     </style>
+    <script src="./lib/jsonld/3.1.1/jsonld.js"></script>
     <script type="module" src="./components/login-controls.js"></script>
+    <script type="module" src="./components/catalog-controls.js"></script>
     <script type="module" src="./log.js"></script>
     <script type="module" src="./gapi/getters.js"></script>
     <script type="module" src="./gapi/setters.js"></script>
@@ -41,10 +43,12 @@
     </script>
     <script id="gapi-script" async defer src="https://apis.google.com/js/api.js" onload="this.dataset.loaded=true"
         onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+
 </head>
 
 <body>
     <login-controls></login-controls>
+    <catalog-controls></catalog-controls>
 </body>
 
 </html>

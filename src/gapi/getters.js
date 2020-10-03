@@ -1,5 +1,6 @@
 import { publish, subscribe } from "../bus.js";
 import config from "../config.js";
+import { tenantUrlRoot } from "../path.js";
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
 subscribe(config.bus.STORAGE.LIST_OBJECTS, handleListObjects);
@@ -8,10 +9,10 @@ const folderMimeType = "application/vnd.google-apps.folder";
 
 let gapi_config = null;
 
-function handleSignedIn(_, { provider, gapi, key, isSignedIn }) {
+function handleSignedIn(_, { provider, gapi, tenant, isSignedIn }) {
     gapi_config = (provider !== "GAPI" || (!isSignedIn))
         ? null
-        : { gapi, key };
+        : { gapi, tenant };
 }
 
 async function handleListObjects(message, { callback }) {
@@ -21,7 +22,16 @@ async function handleListObjects(message, { callback }) {
         const folder = await findOrCreateRootFolder();
         const catalog = await findFile(folder, "_index.json", "application/json");
         const content = await downloadFile(catalog);
-        callback(null, content);
+        const idroot = await tenantUrlRoot(gapi_config.tenant);
+        console.log(idroot);
+        const flat = await jsonld.flatten(content, {
+            "@context": {
+                "@vocab": "https://app.openteamspace.com/vocab#",
+                "@base": idroot
+            }
+        });
+        const items = flat["@graph"];
+        callback(null, { items });
     } catch (err) {
         callback(err);
     }

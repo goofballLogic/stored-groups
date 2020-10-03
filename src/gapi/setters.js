@@ -1,6 +1,6 @@
 import { publish, subscribe } from "../bus.js";
 import config from "../config.js";
-import { gapiRelativePath } from "./path.js";
+import { tenantRelativePath } from "../path.js";
 
 import saveJSON from "./save-json.js";
 
@@ -21,11 +21,11 @@ async function handleSave(topic, payload) {
 
     if (!gapi_config) return;
     if (!payload) return;
+    const { path, content, callback } = payload;
     try {
-        const { path, content, callback } = payload;
         if (!path) throw new Error("No path specified");
         publish(config.bus.DEBUG, `Handling ${topic} ${path} from ${here()}`);
-        const localPath = await gapiRelativePath(path, gapi_config.tenant) + ".json";
+        const localPath = await tenantRelativePath(path, gapi_config.tenant) + ".json";
         console.log("Save", content, "to", localPath);
         await saveJSON(gapi_config.gapi, localPath, content);
         callback && callback(null);
