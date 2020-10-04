@@ -10,45 +10,17 @@
     <script src="./lib/jsonld/3.1.1/jsonld.js"></script>
     <script type="module" src="./components/login-controls.js"></script>
     <script type="module" src="./components/catalog-controls.js"></script>
-    <script type="module" src="./log.js"></script>
-    <script type="module" src="./gapi/getters.js"></script>
-    <script type="module" src="./gapi/setters.js"></script>
-    <script type="module">
-        import { load } from "./gapi/gapi.js";
-        import { publish } from "./bus.js";
-        import config from "./config.js";
-        let safety = 40;
-        function waitForGAPI(continuation) {
-            if (safety-- < 1) {
-                publish(config.bus.ERROR, "Timeout waiting for GAPI to load");
-                return;
-            }
-            const script = document.querySelector("#gapi-script");
-            if (script && script.dataset.loaded && window.gapi)
-                continuation();
-            else {
-                console.log("Waiting for GAPI", safety);
-                setTimeout(() => waitForGAPI(continuation), 100);
-            }
-        }
-        window.addEventListener("DOMContentLoaded", () => {
-
-            const controls = {
-                signInButton: document.querySelector("#gapi-signin"),
-                signOutButton: document.querySelector("#gapi-signout")
-            };
-            waitForGAPI(() => load(window.gapi, controls));
-
-        });
-    </script>
+    <script type="module" src="./app.js"></script>
     <script id="gapi-script" async defer src="https://apis.google.com/js/api.js" onload="this.dataset.loaded=true"
         onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 
 </head>
 
 <body>
+
     <login-controls></login-controls>
-    <catalog-controls></catalog-controls>
+    <catalog-controls disabled></catalog-controls>
+
 </body>
 
 </html>

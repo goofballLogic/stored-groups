@@ -1,4 +1,6 @@
 import Catalog from "../catalog/Catalog.js";
+import catalogLinkTemplate from "./catalog-link-template.js";
+import itemLinkTemplate from "./item-link-template.js";
 
 class CatalogControls extends HTMLElement {
     #output
@@ -12,38 +14,41 @@ class CatalogControls extends HTMLElement {
         const catalog = new Catalog();
         try {
             const items = await catalog.items();
-            const ul = document.createElement("UL");
+            const nav = document.createElement("NAV");
             for (var item of items) {
-                console.log(item);
-                const li = document.createElement("LI");
-                li.textContent = `${item["name"]} (${item["@id"]}) is a ${item["@type"]}`;
-                ul.appendChild(li);
+                if (item instanceof Catalog)
+                    nav.innerHTML += catalogLinkTemplate(item);
+                else
+                    nav.innerHTML += itemLinkTemplate(item);
             }
             this.#output.innerHTML = "";
-            this.#output.appendChild(ul);
+            this.#output.appendChild(nav);
+
         } catch (err) {
+            console.error(err);
             this.#output.textContent = err.toString();
         }
     }
 
+    static get observedAttributes() {
+        return ["disabled"];
+    }
+
+    attributeChangedCallback() {
+        this.render();
+    }
+
     render() {
-        const article = document.createElement("ARTICLE");
-        this.appendChild(article);
-
-        const h3 = document.createElement("H3");
-        h3.innerText = "Catalog";
-        article.appendChild(h3);
-
-        const button = document.createElement("BUTTON");
-        button.innerText = "Load";
-        button.addEventListener("click", () => this.refresh());
-        article.appendChild(button);
-
-        const output = this.#output = document.createElement("PRE");
-        output.textContent = "loading...";
-        article.appendChild(output);
-
+        const article = this.#output = this.#output || document.createElement("ARTICLE");
+        if (!this.hasAttribute("disabled")) {
+            if (!article.parentElement)
+                this.appendChild(article);
+            article.textContent = "loading...";
+            this.refresh();
+        } else {
+            if (article.parentElement)
+                article.parentElement.removeChild(article);
+        }
     }
 }
-
 window.customElements.define("catalog-controls", CatalogControls);
