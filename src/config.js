@@ -13,6 +13,11 @@ export default {
         ERROR: "error",
         SIGNED_IN: "signed-in",
 
+        GAPI: {
+            REQUEST_SIGN_IN: "gapi.request-sign-in",
+            REQUEST_SIGN_OUT: "gapi.request-sign-out"
+        },
+
         STORAGE: {
             GET_ROOT: "storage.root",
             SAVE: "storage.save-resource",

@@ -15,23 +15,38 @@ function handleSignedIn(_, { provider, gapi, tenant, isSignedIn }) {
         : { gapi, tenant };
 }
 
-async function handleListObjects(message, { callback }) {
+function catalogForPath(path) {
+    let ret = "_index.json";
+    if (path) {
+        ret = `${(path.endsWith("/") ? path : `${path}/`)}${ret}`;
+        ret = ret.startsWith("/") ? ret.substr(1) : ret;
+    }
+    return ret;
+}
+
+async function handleListObjects(message, { path, callback }) {
     if (!gapi_config) return;
     publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
     try {
-        const folder = await findOrCreateRootFolder();
-        const catalog = await findFile(folder, "_index.json", "application/json");
-        const content = await downloadFile(catalog);
+        const catalogFileName = catalogForPath(path);
+        const content = await downloadJSONFromRoot(catalogFileName);
         const idroot = await tenantUrlRoot(gapi_config.tenant);
         console.log(idroot);
-        const flat = await jsonld.flatten(content, {
-            "@context": {
-                "@vocab": "https://app.openteamspace.com/vocab#",
-                "@base": idroot
-            }
-        });
-        const items = flat["@graph"];
-        callback(null, { items });
+        try {
+            const flat = await jsonld.flatten(content, {
+                "@context": {
+                    "@vocab": "https://app.openteamspace.com/vocab#",
+                    "@base": idroot
+                }
+            });
+            const items = flat["@graph"];
+            callback(null, { items });
+        }
+        catch (lderror) {
+            console.error(lderror.stack);
+            console.error("LD error", lderror);
+            throw lderror;
+        }
     } catch (err) {
         callback(err);
     }
@@ -46,6 +61,18 @@ const query = ({ name, ofType, notOfType, parent }) => [
 ].filter(x => x).join(" and ");
 
 const rootFolderQuery = query({ name: config.drive.ROOT, ofType: folderMimeType });
+
+window.downloadJSONFromRoot = downloadJSONFromRoot;
+
+async function downloadJSONFromRoot(fileName) {
+    const folder = await findOrCreateRootFolder();
+    console.log(fileName);
+    const catalog = await findFile(folder, fileName, "application/json");
+    console.log(1);
+    const content = await downloadFile(catalog);
+    console.log(2);
+    return content;
+}
 
 async function findRootFolder() {
     const drive = gapi_config.gapi.client.drive;

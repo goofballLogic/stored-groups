@@ -1,9 +1,14 @@
 import config from "../config.js";
-import { publish } from "../bus.js";
+import "./getters.js";
+import "./setters.js";
+import { subscribe, publish } from "../bus.js";
 
 const { API_KEY, DISCOVERY_DOCS, CLIENT_ID, SCOPES } = config.drive;
 
-export function load(gapi, { signInButton, signOutButton }) {
+export function load(gapi) {
+
+    subscribe(config.bus.GAPI.REQUEST_SIGN_IN, handleGAPISignInRequest);
+    subscribe(config.bus.GAPI.REQUEST_SIGN_OUT, handleGAPISignOutRequest);
 
     // 1. Load the JavaScript client library.
     gapi.load('client:auth2', handleGAPIAuth2ClientLoaded);
@@ -24,10 +29,6 @@ export function load(gapi, { signInButton, signOutButton }) {
     }
 
     function handleGAPIInitSuccess() {
-        // enable login/out
-        signInButton.addEventListener("click", handleSignInButtonClick);
-        signOutButton.addEventListener("click", handleSignOutButtonClick);
-
         // 3. Initialize and make the API request.
         const authInstance = gapi.auth2.getAuthInstance();
         authInstance.isSignedIn.listen(observeSignedIn);
@@ -40,8 +41,6 @@ export function load(gapi, { signInButton, signOutButton }) {
             gapi,
             isSignedIn
         };
-        signInButton.disabled = isSignedIn;
-        signOutButton.disabled = !isSignedIn;
         if (isSignedIn) {
 
             const profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
@@ -52,19 +51,15 @@ export function load(gapi, { signInButton, signOutButton }) {
             window.basePath = `https://app.openteamspace.com/dev/${payload.tenant.id}/`;
             publish(config.bus.DEBUG, "Added window.basePath");
 
-        } else {
-
-            //throw new Error("Signout not handled");
-
         }
         publish(config.bus.SIGNED_IN, payload);
     }
 
-    function handleSignInButtonClick() {
+    function handleGAPISignInRequest() {
         gapi.auth2.getAuthInstance().signIn({ prompt: "consent" });
     }
 
-    function handleSignOutButtonClick() {
+    function handleGAPISignOutRequest() {
         gapi.auth2.getAuthInstance().signOut();
     }
 }

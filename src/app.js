@@ -1,51 +1,23 @@
-import { subscribe } from "./bus.js";
 import config from "./config.js";
+import { publish } from "./bus.js";
+// global logging support
 import "./log.js";
-import "./gapi/getters.js";
-import "./gapi/setters.js";
+// GAPI support
 import { load } from "./gapi/gapi.js";
-
-subscribe(config.bus.SIGNED_IN, handleSignInChange);
-
-function handleSignInChange(_, payload) {
-
-    if (payload && payload.isSignedIn)
-        spinUp();
-    else
-        spinDown();
-}
-
-function spinUp() {
-    console.log("Hello world");
-    document.querySelector("catalog-controls").removeAttribute("disabled");
-}
-
-function spinDown() {
-    console.log("Goodbye");
-    document.querySelector("catalog-controls").setAttribute("disabled", true);
-}
-
+/* window-based GAPI stuff */
 let safety = 40;
-function waitForGAPI(continuation) {
+function waitForGAPI() {
     if (safety-- < 1) {
         publish(config.bus.ERROR, "Timeout waiting for GAPI to load");
         return;
     }
     const script = document.querySelector("#gapi-script");
     if (script && script.dataset.loaded && window.gapi)
-        continuation();
+        load(window.gapi);
     else {
         console.log("Waiting for GAPI", safety);
-        setTimeout(() => waitForGAPI(continuation), 100);
+        setTimeout(waitForGAPI, 100);
     }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-
-    const controls = {
-        signInButton: document.querySelector("#gapi-signin"),
-        signOutButton: document.querySelector("#gapi-signout")
-    };
-    waitForGAPI(() => load(window.gapi, controls));
-
-});
+window.addEventListener("DOMContentLoaded", waitForGAPI);

@@ -11,7 +11,10 @@ class CatalogControls extends HTMLElement {
     }
 
     async refresh() {
-        const catalog = new Catalog();
+        const searchParams = new URLSearchParams(location.search);
+        const relativePath = searchParams.get("relativePath");
+        const spec = { relativePath };
+        const catalog = new Catalog({ spec });
         try {
             const items = await catalog.items();
             const nav = document.createElement("NAV");

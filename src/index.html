@@ -2,15 +2,9 @@
 <html>
 
 <head>
-    <style>
-        login-controls button:disabled {
-            display: none;
-        }
-    </style>
     <script src="./lib/jsonld/3.1.1/jsonld.js"></script>
-    <script type="module" src="./components/login-controls.js"></script>
-    <script type="module" src="./components/catalog-controls.js"></script>
     <script type="module" src="./app.js"></script>
+    <script type="module" src="./components/app-element.js"></script>
     <script id="gapi-script" async defer src="https://apis.google.com/js/api.js" onload="this.dataset.loaded=true"
         onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 
@@ -18,8 +12,7 @@
 
 <body>
 
-    <login-controls></login-controls>
-    <catalog-controls disabled></catalog-controls>
+    <app-element></app-element>
 
 </body>
 
