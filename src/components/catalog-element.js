@@ -1,8 +1,9 @@
 import Catalog from "../catalog/Catalog.js";
 import catalogLinkTemplate from "./catalog-link-template.js";
 import itemLinkTemplate from "./item-link-template.js";
+import { defineElement } from "./register.js"
 
-class CatalogControls extends HTMLElement {
+class CatalogElement extends HTMLElement {
     #output
 
     constructor() {
@@ -15,6 +16,7 @@ class CatalogControls extends HTMLElement {
         const relativePath = searchParams.get("relativePath");
         const spec = { relativePath };
         const catalog = new Catalog({ spec });
+        const article = this.#output;
         try {
             const items = await catalog.items();
             const nav = document.createElement("NAV");
@@ -24,34 +26,26 @@ class CatalogControls extends HTMLElement {
                 else
                     nav.innerHTML += itemLinkTemplate(item);
             }
-            this.#output.innerHTML = "";
-            this.#output.appendChild(nav);
+            article.innerHTML = "";
+            article.classList.remove("loading");
+            article.appendChild(nav);
 
         } catch (err) {
+            article.classList.remove("loading");
             console.error(err);
-            this.#output.textContent = err.toString();
+            article.textContent = err.toString();
         }
-    }
-
-    static get observedAttributes() {
-        return ["disabled"];
-    }
-
-    attributeChangedCallback() {
-        this.render();
     }
 
     render() {
         const article = this.#output = this.#output || document.createElement("ARTICLE");
-        if (!this.hasAttribute("disabled")) {
-            if (!article.parentElement)
-                this.appendChild(article);
-            article.textContent = "loading...";
-            this.refresh();
-        } else {
-            if (article.parentElement)
-                article.parentElement.removeChild(article);
+        if (article.parentElement !== this) {
+            this.appendChild(article);
         }
+        article.classList.add("loading");
+        article.innerHTML = "";
+        this.refresh();
     }
 }
-window.customElements.define("catalog-controls", CatalogControls);
+
+defineElement("catalog-element", CatalogElement);

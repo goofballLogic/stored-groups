@@ -4,6 +4,7 @@ import { tenantUrlRoot } from "../path.js";
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
 subscribe(config.bus.STORAGE.LIST_OBJECTS, handleListObjects);
+subscribe(config.bus.STORAGE.FETCH_OBJECT, handleFetchObject);
 
 const folderMimeType = "application/vnd.google-apps.folder";
 
@@ -22,6 +23,12 @@ function catalogForPath(path) {
         ret = ret.startsWith("/") ? ret.substr(1) : ret;
     }
     return ret;
+}
+
+async function handleFetchObject(message, { path, callback }) {
+    if (!gapi_config) return;
+    publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
+
 }
 
 async function handleListObjects(message, { path, callback }) {
@@ -66,12 +73,8 @@ window.downloadJSONFromRoot = downloadJSONFromRoot;
 
 async function downloadJSONFromRoot(fileName) {
     const folder = await findOrCreateRootFolder();
-    console.log(fileName);
     const catalog = await findFile(folder, fileName, "application/json");
-    console.log(1);
-    const content = await downloadFile(catalog);
-    console.log(2);
-    return content;
+    return await downloadFile(catalog);
 }
 
 async function findRootFolder() {

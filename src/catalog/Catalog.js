@@ -1,8 +1,8 @@
 import config from "../config.js";
-import { publish, subscribe } from "../bus.js";
-import promiseWithTimeout from "../promiseWithTimeout.js";
+import { publish } from "../bus.js";
 import Item from "./Item.js";
 import EntityBase from "./EntityBase.js";
+import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
 
 function asDomainObject(item) {
     if (!item) throw new Error("Item undefined");
@@ -19,26 +19,29 @@ function asDomainObject(item) {
 }
 
 class Catalog extends EntityBase {
-    #promisedList
 
-    constructor(options) {
-        super(options);
-        const suppressLoad = options && options.suppressLoad;
-        if (!suppressLoad) this.refresh();
-    }
-
-    refresh() {
-        this.#promisedList = promiseWithTimeout("a list of objects from storage", (resolve, reject) =>
-            publish(config.bus.STORAGE.LIST_OBJECTS, {
-                path: this.extract("relativePath"),
-                callback: (err, payload) => err ? reject(err) : resolve(payload.items)
+    // replaces the cache of promised items with a new promise of items
+    async refresh() {
+        await fetchAndCache(
+            "a list of objects from storage",
+            this.relativePath,
+            callback => publish(config.bus.STORAGE.LIST_OBJECTS, {
+                path: this.relativePath,
+                callback
             })
         );
     }
 
+    // fetches data items, if necessary initiating a refresh
+    async dataItems() {
+        const promised = await getCachedOrFetch(this.relativePath, async () => await this.refresh());
+        console.log(promised);
+        return await promised;
+    }
+
+    // fetches items and returns domain objects
     async items() {
-        if (!this.#promisedList) this.refresh();
-        const dataItems = await this.#promisedList;
+        const dataItems = await this.dataItems();
         return dataItems.map(asDomainObject);
     }
 }

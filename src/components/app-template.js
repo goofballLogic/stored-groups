@@ -1,12 +1,16 @@
-const signedIn = () => `
+const signedIn = (urlState) => urlState.isCatalog ? `
 
-    <catalog-controls></catalog-controls>
+    <catalog-element></catalog-element>
+
+    ` : `
+
+    <item-element></item-element>
 
 `;
 
-export default signInState => `
+export default (signInState, urlState) => `
 
     <login-controls></login-controls>
-    ${signInState && signInState.isSignedIn ? signedIn() : "<!--not signed in-->"}
+    ${signInState && signInState.isSignedIn ? signedIn(urlState) : "<!--not signed in-->"}
 
 `;

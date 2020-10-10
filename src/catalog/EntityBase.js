@@ -18,6 +18,6 @@ export default class EntityBase {
     }
 
     get relativePath() {
-        return this.extract("relativePath");
+        return this.extract("relativePath") || "";
     }
 }
