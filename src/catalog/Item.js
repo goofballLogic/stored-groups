@@ -5,6 +5,8 @@ import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
 
 export default class Item extends EntityBase {
 
+    #data;
+
     // replaces the cache of promised document with a new promise of document
     async refresh() {
         await fetchAndCache(
@@ -18,12 +20,11 @@ export default class Item extends EntityBase {
     }
 
     async load() {
-        const promised = getCachedOrFetch(this.relativePath, async () => await this.refresh());
-        await promised;
+        var result = await getCachedOrFetch(this.relativePath, async () => await this.refresh());
+        this.#data = result?.data || {}
     }
 
     toString() {
-        console.log(this);
-        return JSON.stringify(this);
+        return JSON.stringify(this.#data);
     }
 }

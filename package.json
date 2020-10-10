@@ -21,8 +21,8 @@
     "url": "https://github.com/goofballLogic/stored-groups/issues"
   },
   "homepage": "https://github.com/goofballLogic/stored-groups#readme",
+  "type": "module",
   "dependencies": {
-    "nvm": "0.0.4"
-  },
-  "type": "module"
+    "ld-query": "^2.6.1"
+  }
 }

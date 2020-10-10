@@ -35,8 +35,8 @@ class Catalog extends EntityBase {
     // fetches data items, if necessary initiating a refresh
     async dataItems() {
         const promised = await getCachedOrFetch(this.relativePath, async () => await this.refresh());
-        console.log(promised);
-        return await promised;
+        const result = await promised;
+        return (result?.items) || [];
     }
 
     // fetches items and returns domain objects

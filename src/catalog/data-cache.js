@@ -18,7 +18,7 @@ export async function fetchAndCache(description, key, fetcher) {
                 if (cache[key] === promisedFetch)
                     delete cache[key]
             } else {
-                resolve(payload.items);
+                resolve(payload);
             }
 
         })
