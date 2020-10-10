@@ -12,6 +12,7 @@ export function subscribe(topic, callback) {
 }
 
 export function publish(topic, payload) {
+    if (!topic) throw new Error("Topic not specified");
     console.log("Publishing message", topic, payload);
     const subscriptions = sinks[topic] && sinks[topic].subscriptions;
     if (!subscriptions) return;

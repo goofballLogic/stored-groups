@@ -1,4 +1,4 @@
-const signedIn = (urlState) => urlState.isCatalog ? `
+const signedIn = (urlState) => console.log(urlState) || urlState.isCatalog ? `
 
     <catalog-element></catalog-element>
 
@@ -10,6 +10,7 @@ const signedIn = (urlState) => urlState.isCatalog ? `
 
 export default (signInState, urlState) => `
 
+    <a href="${location.href.substring(0, location.href.indexOf("?"))}" class="catalog">Home</a>
     <login-controls></login-controls>
     ${signInState && signInState.isSignedIn ? signedIn(urlState) : "<!--not signed in-->"}
 

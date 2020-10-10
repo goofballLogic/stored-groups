@@ -1,4 +1,7 @@
-a.catalog,
-a.item {
+a.catalog {
     display: block;
+}
+
+a.catalog::before {
+    content: "📁";
 }

@@ -25,10 +25,23 @@ function catalogForPath(path) {
     return ret;
 }
 
+function itemForPath(path) {
+    if (!path) throw new Error("Invalid item name");
+    return path + ".json";
+}
+
 async function handleFetchObject(message, { path, callback }) {
     if (!gapi_config) return;
     publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
-
+    try {
+        const itemFileName = itemForPath(path);
+        const content = await downloadJSONFromRoot(itemFileName);
+        const data = await jsonld.expand(content);
+        callback(null, { data });
+    } catch (err) {
+        console.warn(err);
+        callback(err);
+    }
 }
 
 async function handleListObjects(message, { path, callback }) {
@@ -38,23 +51,16 @@ async function handleListObjects(message, { path, callback }) {
         const catalogFileName = catalogForPath(path);
         const content = await downloadJSONFromRoot(catalogFileName);
         const idroot = await tenantUrlRoot(gapi_config.tenant);
-        console.log(idroot);
-        try {
-            const flat = await jsonld.flatten(content, {
-                "@context": {
-                    "@vocab": "https://app.openteamspace.com/vocab#",
-                    "@base": idroot
-                }
-            });
-            const items = flat["@graph"];
-            callback(null, { items });
-        }
-        catch (lderror) {
-            console.error(lderror.stack);
-            console.error("LD error", lderror);
-            throw lderror;
-        }
+        const flat = await jsonld.flatten(content, {
+            "@context": {
+                "@vocab": "https://app.openteamspace.com/vocab#",
+                "@base": idroot
+            }
+        });
+        const items = flat["@graph"];
+        callback(null, { items });
     } catch (err) {
+        console.warn(err);
         callback(err);
     }
 }
@@ -73,8 +79,12 @@ window.downloadJSONFromRoot = downloadJSONFromRoot;
 
 async function downloadJSONFromRoot(fileName) {
     const folder = await findOrCreateRootFolder();
-    const catalog = await findFile(folder, fileName, "application/json");
-    return await downloadFile(catalog);
+    const item = await findFile(folder, fileName, "application/json");
+    if (!item) {
+        console.warn("Item not found", fileName);
+        return null;
+    }
+    return await downloadFile(item);
 }
 
 async function findRootFolder() {

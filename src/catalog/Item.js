@@ -10,7 +10,7 @@ export default class Item extends EntityBase {
         await fetchAndCache(
             "a document from storage",
             this.relativePath,
-            callback => console.log(3) || publish(
+            callback => publish(
                 config.bus.STORAGE.FETCH_OBJECT,
                 { path: this.relativePath, callback }
             )
@@ -23,6 +23,7 @@ export default class Item extends EntityBase {
     }
 
     toString() {
-        return cache[this.relativePath]
+        console.log(this);
+        return JSON.stringify(this);
     }
 }

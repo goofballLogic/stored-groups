@@ -21,7 +21,8 @@ export default {
         STORAGE: {
             GET_ROOT: "storage.root",
             SAVE: "storage.save-resource",
-            LIST_OBJECTS: "storage.list-objects"
+            LIST_OBJECTS: "storage.list-objects",
+            FETCH_OBJECT: "storage.fetch-object"
         }
     }
 };

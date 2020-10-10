@@ -9,6 +9,7 @@ import config from "../config.js";
 let urlState = { isCatalog: false };
 
 function observeUrl() {
+    console.log("observe Url", urlState);
     const searchParams = new URLSearchParams(location.search);
     urlState.isCatalog = searchParams.get("type") === "catalog" || !searchParams.get("relativePath");
 }
@@ -45,6 +46,7 @@ class AppElement extends HTMLElement {
         if (e.target && e.target.tagName === "A" && handledNavClasses.some(c => e.target.classList.contains(c))) {
             e.preventDefault();
             history.pushState(null, null, e.target.href);
+            observeUrl();
             this.render();
         } else {
             e.preventDefault();
