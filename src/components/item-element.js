@@ -12,8 +12,7 @@ class ItemElement extends HTMLElement {
     async refresh() {
         const searchParams = new URLSearchParams(location.search);
         const relativePath = searchParams.get("relativePath");
-        const spec = { relativePath };
-        const item = new Item({ spec });
+        const item = new Item({ relativePath });
         const article = this.#output;
         try {
             article.innerHTML = "";

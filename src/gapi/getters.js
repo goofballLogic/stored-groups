@@ -3,8 +3,8 @@ import config from "../config.js";
 import { tenantUrlRoot } from "../path.js";
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
-subscribe(config.bus.STORAGE.LIST_OBJECTS, handleListObjects);
-subscribe(config.bus.STORAGE.FETCH_OBJECT, handleFetchObject);
+subscribe(config.bus.STORAGE.LIST_OBJECTS, handleStorageListOrFetch);
+subscribe(config.bus.STORAGE.FETCH_OBJECT, handleStorageListOrFetch);
 
 const folderMimeType = "application/vnd.google-apps.folder";
 
@@ -14,6 +14,31 @@ function handleSignedIn(_, { provider, gapi, tenant, isSignedIn }) {
     gapi_config = (provider !== "GAPI" || (!isSignedIn))
         ? null
         : { gapi, tenant };
+}
+
+async function handleStorageListOrFetch(topic, { path, callback }) {
+    if (!gapi_config) return;
+    publish(config.bus.DEBUG, `Handling ${topic} for GAPI`);
+    try {
+        const fileName = fileNameForPath(topic, path);
+        const doc = await fileAsQuery(fileName);
+        const idbase = await tenantUrlRoot(gapi_config.tenant);
+        callback(null, { doc, idbase });
+    } catch (err) {
+        console.warn(err);
+        callback(err);
+    }
+}
+
+function fileNameForPath(topic, path) {
+    switch (topic) {
+        case config.bus.STORAGE.LIST_OBJECTS:
+            return catalogForPath(path);
+        case config.bus.STORAGE.FETCH_OBJECT:
+            return itemForPath(path);
+        default:
+            throw new Error("Unhandled: " + topic);
+    }
 }
 
 function catalogForPath(path) {
@@ -30,46 +55,6 @@ function itemForPath(path) {
     return path + ".json";
 }
 
-const sharedContext = {
-    "@context": {
-        "@vocab": "https://app.openteamspace.com/vocab#",
-        "ots": "https://app.openteamspace.com/vocab#"
-    }
-};
-
-async function handleFetchObject(message, { path, callback }) {
-    if (!gapi_config) return;
-    publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
-    try {
-        const itemFileName = itemForPath(path);
-        const content = await downloadJSONFromRoot(itemFileName);
-        const data = await jsonld.expand(content);
-        const query = LD(data, sharedContext["@context"]);
-        callback(null, { query });
-    } catch (err) {
-        console.warn(err);
-        callback(err);
-    }
-}
-
-async function handleListObjects(message, { path, callback }) {
-    if (!gapi_config) return;
-    publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
-    try {
-        const catalogFileName = catalogForPath(path);
-        const content = await downloadJSONFromRoot(catalogFileName);
-        const idroot = await tenantUrlRoot(gapi_config.tenant);
-        const context = JSON.parse(JSON.stringify(sharedContext));
-        context["@context"]["@base"] = idroot;
-        const flat = await jsonld.flatten(content, context);
-        const items = flat["@graph"];
-        callback(null, { items });
-    } catch (err) {
-        console.warn(err);
-        callback(err);
-    }
-}
-
 const query = ({ name, ofType, notOfType, parent }) => [
     `name='${name}'`,
     ofType && `mimeType='${ofType}'`,
@@ -80,7 +65,21 @@ const query = ({ name, ofType, notOfType, parent }) => [
 
 const rootFolderQuery = query({ name: config.drive.ROOT, ofType: folderMimeType });
 
-window.downloadJSONFromRoot = downloadJSONFromRoot;
+async function fileAsQuery(fileName) {
+    const content = await downloadJSONFromRoot(fileName);
+    const expanded = await jsonld.expand(content);
+    const context = await buildContext();
+    return LD(expanded, context);
+}
+
+async function buildContext() {
+    const idbase = await tenantUrlRoot(gapi_config.tenant);
+    return {
+        "@vocab": "https://app.openteamspace.com/vocab#",
+        "ots": "https://app.openteamspace.com/vocab#",
+        "@base": idbase
+    };
+}
 
 async function downloadJSONFromRoot(fileName) {
     const folder = await findOrCreateRootFolder();

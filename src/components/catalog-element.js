@@ -13,9 +13,9 @@ class CatalogElement extends HTMLElement {
 
     async refresh() {
         const searchParams = new URLSearchParams(location.search);
-        const relativePath = searchParams.get("relativePath");
-        const spec = { relativePath };
-        const catalog = new Catalog({ spec });
+        const relativePath = searchParams.get("relativePath") || "";
+        const catalog = new Catalog({ relativePath });
+        catalog.load();
         const article = this.#output;
         try {
             const items = await catalog.items();
