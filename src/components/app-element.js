@@ -24,9 +24,11 @@ const handledNavClasses = ["item", "catalog"];
 const linkCatcher = x => x.tagName === "A" && handledNavClasses.some(c => x.classList.contains(c));
 
 function findUp(element, test) {
-    return (element && (test(element)))
-        ? element
-        : findUp(element.parentElement, test);
+    return !element
+        ? false
+        : test(element)
+            ? element
+            : findUp(element.parentElement, test);
 }
 
 class AppElement extends HTMLElement {
