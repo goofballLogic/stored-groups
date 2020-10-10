@@ -19,16 +19,20 @@ class CatalogElement extends HTMLElement {
         const article = this.#output;
         try {
             const items = await catalog.items();
-            const nav = document.createElement("NAV");
+            const catalogNav = document.createElement("NAV");
+            const itemNav = document.createElement("NAV");
+            catalogNav.classList.add("catalog");
+            itemNav.classList.add("item");
             for (var item of items) {
                 if (item instanceof Catalog)
-                    nav.innerHTML += catalogLinkTemplate(item);
+                    catalogNav.innerHTML += catalogLinkTemplate(item);
                 else
-                    nav.innerHTML += itemLinkTemplate(item);
+                    itemNav.innerHTML += itemLinkTemplate(item);
             }
             article.innerHTML = "";
             article.classList.remove("loading");
-            article.appendChild(nav);
+            article.appendChild(catalogNav);
+            article.appendChild(itemNav);
 
         } catch (err) {
             article.classList.remove("loading");

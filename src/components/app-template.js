@@ -1,4 +1,4 @@
-const signedIn = (urlState) => console.log(urlState) || urlState.isCatalog ? `
+const signedIn = (urlState) => urlState.isCatalog ? `
 
     <catalog-element></catalog-element>
 

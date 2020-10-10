@@ -5,11 +5,11 @@ import "./item-element.js";
 import { subscribe } from "../bus.js";
 import appTemplate from "./app-template.js";
 import config from "../config.js";
+import { defineElement } from "./register.js";
 
 let urlState = { isCatalog: false };
 
 function observeUrl() {
-    console.log("observe Url", urlState);
     const searchParams = new URLSearchParams(location.search);
     urlState.isCatalog = searchParams.get("type") === "catalog" || !searchParams.get("relativePath");
 }
@@ -21,6 +21,13 @@ function observeUrl() {
 window.addEventListener("popstate", observeUrl);
 
 const handledNavClasses = ["item", "catalog"];
+const linkCatcher = x => x.tagName === "A" && handledNavClasses.some(c => x.classList.contains(c));
+
+function findUp(element, test) {
+    return (element && (test(element)))
+        ? element
+        : findUp(element.parentElement, test);
+}
 
 class AppElement extends HTMLElement {
 
@@ -39,18 +46,13 @@ class AppElement extends HTMLElement {
         this.render();
     }
 
-
     handleClick(e) {
-        console.log(e.target.tagName);
-        e.preventDefault();
-        if (e.target && e.target.tagName === "A" && handledNavClasses.some(c => e.target.classList.contains(c))) {
+        const foundLink = findUp(e.target, linkCatcher);
+        if (foundLink) {
             e.preventDefault();
-            history.pushState(null, null, e.target.href);
+            history.pushState(null, null, foundLink.href);
             observeUrl();
             this.render();
-        } else {
-            e.preventDefault();
-            debugger;
         }
     }
 
@@ -60,4 +62,4 @@ class AppElement extends HTMLElement {
 
     }
 }
-window.customElements.define("app-element", AppElement);
+defineElement("app-element", AppElement);

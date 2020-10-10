@@ -30,6 +30,13 @@ function itemForPath(path) {
     return path + ".json";
 }
 
+const sharedContext = {
+    "@context": {
+        "@vocab": "https://app.openteamspace.com/vocab#",
+        "ots": "https://app.openteamspace.com/vocab#"
+    }
+};
+
 async function handleFetchObject(message, { path, callback }) {
     if (!gapi_config) return;
     publish(config.bus.DEBUG, `Handling ${message} for GAPI`);
@@ -37,7 +44,8 @@ async function handleFetchObject(message, { path, callback }) {
         const itemFileName = itemForPath(path);
         const content = await downloadJSONFromRoot(itemFileName);
         const data = await jsonld.expand(content);
-        callback(null, { data });
+        const query = LD(data, sharedContext["@context"]);
+        callback(null, { query });
     } catch (err) {
         console.warn(err);
         callback(err);
@@ -51,12 +59,9 @@ async function handleListObjects(message, { path, callback }) {
         const catalogFileName = catalogForPath(path);
         const content = await downloadJSONFromRoot(catalogFileName);
         const idroot = await tenantUrlRoot(gapi_config.tenant);
-        const flat = await jsonld.flatten(content, {
-            "@context": {
-                "@vocab": "https://app.openteamspace.com/vocab#",
-                "@base": idroot
-            }
-        });
+        const context = JSON.parse(JSON.stringify(sharedContext));
+        context["@context"]["@base"] = idroot;
+        const flat = await jsonld.flatten(content, context);
         const items = flat["@graph"];
         callback(null, { items });
     } catch (err) {

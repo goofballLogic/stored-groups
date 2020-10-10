@@ -1,7 +1,36 @@
-a.catalog {
-    display: block;
+nav.catalog,
+nav.item {
+    display: flex;
 }
 
-a.catalog::before {
-    content: "📁";
+nav.catalog a.catalog,
+nav.item a.item {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    padding: 10px;
+    text-align: center;
+    width: 100px;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    border: solid 1px white;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+nav.item .item:hover {
+    border-color: silver;
+}
+
+nav.catalog span,
+nav.item span {
+    display: flex;
+    align-items: center;
+}
+
+nav.catalog img,
+nav.item img {
+    max-height: 75px;
+    max-width: 100px;
 }

@@ -7,13 +7,12 @@ export function subscribe(topic, callback) {
     const subscriptions = sinks[topic].subscriptions;
     const id = uuid();
     subscriptions[id] = callback;
-    console.log({ subscribed: callback }, topic);
     return id;
 }
 
 export function publish(topic, payload) {
     if (!topic) throw new Error("Topic not specified");
-    console.log("Publishing message", topic, payload);
+    console.log("publishing", topic, payload);
     const subscriptions = sinks[topic] && sinks[topic].subscriptions;
     if (!subscriptions) return;
     const callbacks = Object.values(subscriptions);

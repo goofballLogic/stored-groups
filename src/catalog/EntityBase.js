@@ -17,6 +17,10 @@ export default class EntityBase {
         return this.extract("name", "?");
     }
 
+    get icon() {
+        return this.extract("icon", "?");
+    }
+
     get relativePath() {
         return this.extract("relativePath") || "";
     }

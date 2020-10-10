@@ -1,7 +1,0 @@
-a.item {
-    display: block;
-}
-
-a.item::before {
-    content: "📄";
-}

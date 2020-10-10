@@ -26,7 +26,6 @@ async function handleSave(topic, payload) {
         if (!path) throw new Error("No path specified");
         publish(config.bus.DEBUG, `Handling ${topic} ${path} from ${here()}`);
         const localPath = await tenantRelativePath(path, gapi_config.tenant) + ".json";
-        console.log("Save", content, "to", localPath);
         await saveJSON(gapi_config.gapi, localPath, content);
         callback && callback(null);
     } catch (err) {

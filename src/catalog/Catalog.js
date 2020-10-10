@@ -6,8 +6,8 @@ import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
 
 function asDomainObject(item) {
     if (!item) throw new Error("Item undefined");
-    const { "@type": itemType, name, "@id": relativePath } = item;
-    const spec = { name, relativePath };
+    const { "@type": itemType, name, "@id": relativePath, icon } = item;
+    const spec = { name, icon, relativePath };
     switch (itemType) {
         case "Catalog":
             return new Catalog({ suppressLoad: true, spec });
