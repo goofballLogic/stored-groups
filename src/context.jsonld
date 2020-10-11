@@ -3,7 +3,7 @@
         "ots": "https://app.openteamspace.com/vocab#",
         "@vocab": "https://app.openteamspace.com/vocab#",
         "@base": "https://app.openteamspace.com/dev/",
-        "ots:field": {
+        "field": {
             "@type": "@id"
         }
     }

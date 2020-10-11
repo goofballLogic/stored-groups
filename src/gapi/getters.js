@@ -67,7 +67,9 @@ const rootFolderQuery = query({ name: config.drive.ROOT, ofType: folderMimeType 
 
 async function fileAsQuery(fileName) {
     const content = await downloadJSONFromRoot(fileName);
+    console.log(content);
     const expanded = await jsonld.expand(content);
+    console.log(expanded);
     const context = await buildContext();
     return LD(expanded, context);
 }
