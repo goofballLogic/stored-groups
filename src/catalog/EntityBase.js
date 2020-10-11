@@ -73,6 +73,7 @@ export default class EntityBase {
         const typeProps = this.typeProps.map(x => ({
             field: x.query("field @id"),
             label: x.query("label @value"),
+            dataType: x.query("dataType")
         })).map(x => ({
             ...x,
             value: doc.query(`${x.field} @value`)

@@ -1,6 +1,7 @@
 import { publish, subscribe } from "../bus.js";
 import config from "../config.js";
 import { tenantUrlRoot } from "../path.js";
+import fetchContext from "../context.js";
 
 subscribe(config.bus.SIGNED_IN, handleSignedIn);
 subscribe(config.bus.STORAGE.LIST_OBJECTS, handleStorageListOrFetch);
@@ -76,9 +77,9 @@ async function fileAsQuery(fileName) {
 
 async function buildContext() {
     const idbase = await tenantUrlRoot(gapi_config.tenant);
+    const context = await fetchContext();
     return {
-        "@vocab": "https://app.openteamspace.com/vocab#",
-        "ots": "https://app.openteamspace.com/vocab#",
+        ...context,
         "@base": idbase
     };
 }
