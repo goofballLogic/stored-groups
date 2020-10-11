@@ -1,5 +1,6 @@
 import { publish } from "../bus.js";
 import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
+import config from "../config.js";
 
 export default class EntityBase {
 
@@ -26,16 +27,26 @@ export default class EntityBase {
         if (!idbase) throw new Error("Loading failed - no id base");
         this.#state.doc = doc;
         this.#state.idbase = idbase;
+        const docType = this.type;
+        var typeResult = await getCachedOrFetch(`vocab#${docType}`, async () => await this.loadDocType(docType));
+        this.#state.typeDoc = typeResult.doc;
+    }
+
+    async loadDocType(docType) {
+        return await fetchAndCacheForTopic(
+            `type ${docType} from storage`,
+            `vocab#${docType}`,
+            config.bus.STORAGE.FETCH_OBJECT
+        );
     }
 
     // replaces the cache of promised document with a new promise of document
     async refresh() {
-        const { fetchTopic } = this.#state;
         const path = this.relativePath;
-        await fetchAndCache(
+        await fetchAndCacheForTopic(
             `entity ${path} from storage`,
-            this.relativePath,
-            callback => publish(fetchTopic, { path, callback })
+            path,
+            this.#state.fetchTopic
         );
     }
 
@@ -48,7 +59,13 @@ export default class EntityBase {
     }
 
     get type() {
-        return compactType(this.#state.doc);
+        return EntityBase.compactType(this.#state.doc);
+    }
+
+    get typeProps() {
+        const { typeDoc } = this.#state;
+        window.x = typeDoc;
+        return typeDoc.query("prop");
     }
 
     get idbase() {
@@ -69,3 +86,11 @@ export default class EntityBase {
         return relativePath || "";
     }
 }
+async function fetchAndCacheForTopic(description, path, fetchTopic) {
+    await fetchAndCache(
+        description,
+        path,
+        callback => publish(fetchTopic, { path, callback })
+    );
+}
+

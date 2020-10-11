@@ -7,7 +7,8 @@ export default class Item extends EntityBase {
         super({ ...options, fetchTopic: config.bus.STORAGE.FETCH_OBJECT });
     }
 
-    render() {
-        return this.doc?.query("*");
+    get props() {
+        console.log(this.type());
+        return [];
     }
 }

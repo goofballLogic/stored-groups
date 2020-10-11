@@ -1,6 +1,10 @@
 import promiseWithTimeout from "../promiseWithTimeout.js";
+import { subscribe } from "../bus.js";
+import config from "../config.js";
 
-const cache = {};
+subscribe(config.bus.SIGNED_IN, () => cache = {});
+
+let cache = {};
 
 export async function getCachedOrFetch(key, fetcher) {
     if (!(key in cache))

@@ -1,4 +1,5 @@
 import Item from "../catalog/Item.js";
+import itemTemplate from "./item-template.js";
 import { defineElement } from "./register.js"
 
 class ItemElement extends HTMLElement {
@@ -18,13 +19,12 @@ class ItemElement extends HTMLElement {
             article.innerHTML = "";
             article.classList.add("loading");
             await item.load();
-            article.innerHTML = item.toString();
-            article.classList.remove("loading");
-
+            article.innerHTML = itemTemplate(item);
         } catch (err) {
-            article.classList.remove("loading");
             console.error(err);
             article.textContent = err.toString();
+        } finally {
+            article.classList.remove("loading");
         }
     }
 
