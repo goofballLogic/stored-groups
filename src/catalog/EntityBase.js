@@ -69,12 +69,16 @@ export default class EntityBase {
     }
 
     get props() {
+        const { doc } = this.#state;
         const typeProps = this.typeProps.map(x => ({
             field: x.query("field @id"),
-            label: x.query("label @value")
+            label: x.query("label @value"),
+        })).map(x => ({
+            ...x,
+            value: doc.query(`${x.field} @value`)
         }));
         console.log(typeProps);
-        return [];
+        return typeProps;
     }
 
     get idbase() {

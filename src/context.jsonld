@@ -3,6 +3,7 @@
         "ots": "https://app.openteamspace.com/vocab#",
         "@vocab": "https://app.openteamspace.com/vocab#",
         "@base": "https://app.openteamspace.com/dev/",
+        "xs": "http://www.w3.org/2001/XMLSchema#",
         "field": {
             "@type": "@id"
         }
