@@ -2,11 +2,25 @@ import { publish } from "../bus.js";
 import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
 import config from "../config.js";
 
+
+async function readDoc(relativePath, fetcher) {
+    var result = await getCachedOrFetch(relativePath, fetcher);
+    if (!result) throw new Error(`Loading failed for ${relativePath}`);
+    const { doc, idbase } = result;
+    if (!doc) throw new Error(`Loading failed for ${relativePath}- no document`);
+    if (!idbase) throw new Error(`Loading failed for ${relativePath} - no id base`);
+    return result;
+}
+
 export default class EntityBase {
 
     static compactType(ld) {
-        const fqType = (x => x ? x[0] : null)(ld?.query("@type"));
-        return fqType?.substring(fqType.indexOf("#") + 1);
+        const types = this.compactTypes(ld);
+        return types && types[0];
+    }
+
+    static compactTypes(ld) {
+        return ld?.query("@type")?.map(fragment);
     }
 
     #state;
@@ -19,17 +33,16 @@ export default class EntityBase {
             throw new Error("A fetchTopic must be supplied");
     }
 
+
     async load() {
-        var result = await getCachedOrFetch(this.relativePath, async () => await this.refresh());
-        if (!result) throw new Error("Loading failed");
-        const { doc, idbase } = result;
-        if (!doc) throw new Error("Loading failed - no document");
-        if (!idbase) throw new Error("Loading failed - no id base");
+        const { doc, idbase } = await readDoc(this.relativePath, () => this.refresh());
         this.#state.doc = doc;
         this.#state.idbase = idbase;
-        const docType = this.type;
-        var typeResult = await getCachedOrFetch(`vocab#${docType}`, async () => await this.loadDocType(docType));
-        this.#state.typeDoc = typeResult.doc;
+        const docTypes = this.types || [];
+        const typeResults = await Promise.all(docTypes.map(docType =>
+            readDoc(`vocab#${docType}`, () => this.loadDocType(docType))
+        ));
+        this.#state.typeDocs = typeResults.map(x => x.doc);
     }
 
     async loadDocType(docType) {
@@ -62,10 +75,14 @@ export default class EntityBase {
         return EntityBase.compactType(this.#state.doc);
     }
 
+    get types() {
+        return EntityBase.compactTypes(this.#state.doc);
+    }
+
     get typeProps() {
-        const { typeDoc } = this.#state;
-        window.x = typeDoc;
-        return typeDoc.queryAll("prop");
+        return this.#state.typeDocs
+            .map(doc => doc.queryAll("prop"))
+            .reduce((a, b) => [...a, ...b], []);
     }
 
     get props() {
@@ -73,12 +90,11 @@ export default class EntityBase {
         const typeProps = this.typeProps.map(x => ({
             field: x.query("field @id"),
             label: x.query("label @value"),
-            dataType: x.query("dataType")
+            dataType: fragment(x.query("dataType @id"))
         })).map(x => ({
             ...x,
             value: doc.query(`${x.field} @value`)
         }));
-        console.log(typeProps);
         return typeProps;
     }
 
@@ -100,6 +116,11 @@ export default class EntityBase {
         return relativePath || "";
     }
 }
+
+function fragment(fqType) {
+    return fqType?.substring(fqType.indexOf("#") + 1);
+}
+
 async function fetchAndCacheForTopic(description, path, fetchTopic) {
     await fetchAndCache(
         description,

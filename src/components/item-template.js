@@ -1,10 +1,17 @@
 import placeholder from "./item-icon-default.js";
 
-const property = prop => `
+const defaultRenderer = Symbol();
 
-    <div>${prop.label}: ${prop.value || ""}</div>
+const renderers = {
+    "string": prop => `
+        <div>${prop.label}: ${prop.value || ""}</div>
+    `,
+    [defaultRenderer]: prop => `
+        <div>${prop.label}: ${prop.value} (unhandled type ${prop.dataType})</div>
+    `,
+};
 
-`;
+const property = prop => (renderers[prop.dataType] || renderers[defaultRenderer])(prop);
 
 export default item => `
 
