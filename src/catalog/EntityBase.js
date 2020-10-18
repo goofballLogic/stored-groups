@@ -2,16 +2,6 @@ import { publish } from "../bus.js";
 import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
 import config from "../config.js";
 
-
-async function readDoc(relativePath, fetcher) {
-    var result = await getCachedOrFetch(relativePath, fetcher);
-    if (!result) throw new Error(`Loading failed for ${relativePath}`);
-    const { doc, idbase } = result;
-    if (!doc) throw new Error(`Loading failed for ${relativePath}- no document`);
-    if (!idbase) throw new Error(`Loading failed for ${relativePath} - no id base`);
-    return result;
-}
-
 export default class EntityBase {
 
     static compactType(ld) {
@@ -33,24 +23,27 @@ export default class EntityBase {
             throw new Error("A fetchTopic must be supplied");
     }
 
-
     async load() {
         const { doc, idbase } = await readDoc(this.relativePath, () => this.refresh());
         this.#state.doc = doc;
         this.#state.idbase = idbase;
-        const docTypes = this.types || [];
-        const typeResults = await Promise.all(docTypes.map(docType =>
-            readDoc(`vocab#${docType}`, () => this.loadDocType(docType))
-        ));
-        this.#state.typeDocs = typeResults.map(x => x.doc);
+        await this.loadTypeDocs(this.types);
     }
 
-    async loadDocType(docType) {
-        return await fetchAndCacheForTopic(
-            `type ${docType} from storage`,
-            `vocab#${docType}`,
-            config.bus.STORAGE.FETCH_OBJECT
-        );
+    async loadTypeDocs(docTypes) {
+        const typeDocs = this.#state.typeDocs = this.#state.typeDocs || {};
+        if (docTypes && docTypes.length) {
+            await Promise.all(docTypes.map(async docType => {
+                const result = await readDoc(`vocab#${docType}`, () => loadDocType(docType));
+                typeDocs[docType] = result.doc;
+            }));
+            const missingTypes = Object.values(typeDocs)
+                .map(d => d.query("dataType @id"))
+                .filter(dataType => dataType && dataType.startsWith(ots))
+                .map(dataType => fragment(dataType))
+                .filter(dataType => !(dataType in typeDocs));
+            await this.loadTypeDocs(missingTypes);
+        }
     }
 
     // replaces the cache of promised document with a new promise of document
@@ -64,11 +57,11 @@ export default class EntityBase {
     }
 
     get name() {
-        return this.#state.doc?.query("name @value");
+        return this.#state.doc?.query("> name @value");
     }
 
     get icon() {
-        return this.#state.doc?.query("icon @value");
+        return this.#state.doc?.query("> icon @value");
     }
 
     get type() {
@@ -79,23 +72,9 @@ export default class EntityBase {
         return EntityBase.compactTypes(this.#state.doc);
     }
 
-    get typeProps() {
-        return this.#state.typeDocs
-            .map(doc => doc.queryAll("prop"))
-            .reduce((a, b) => [...a, ...b], []);
-    }
-
-    get props() {
-        const { doc } = this.#state;
-        const typeProps = this.typeProps.map(x => ({
-            field: x.query("field @id"),
-            label: x.query("label @value"),
-            dataType: fragment(x.query("dataType @id"))
-        })).map(x => ({
-            ...x,
-            value: doc.query(`${x.field} @value`)
-        }));
-        return typeProps;
+    get viewModel() {
+        const { doc, typeDocs } = this.#state;
+        return buildViewProps(doc, typeDocs);
     }
 
     get idbase() {
@@ -117,6 +96,23 @@ export default class EntityBase {
     }
 }
 
+async function readDoc(relativePath, fetcher) {
+    var result = await getCachedOrFetch(relativePath, fetcher);
+    if (!result) throw new Error(`Loading failed for ${relativePath}`);
+    const { doc, idbase } = result;
+    if (!doc) throw new Error(`Loading failed for ${relativePath}- no document`);
+    if (!idbase) throw new Error(`Loading failed for ${relativePath} - no id base`);
+    return result;
+}
+
+async function loadDocType(docType) {
+    return await fetchAndCacheForTopic(
+        `type ${docType} from storage`,
+        `vocab#${docType}`,
+        config.bus.STORAGE.FETCH_OBJECT
+    );
+}
+
 function fragment(fqType) {
     return fqType?.substring(fqType.indexOf("#") + 1);
 }
@@ -129,3 +125,41 @@ async function fetchAndCacheForTopic(description, path, fetchTopic) {
     );
 }
 
+const unique = stuff => stuff.reduce((ret, x) => ret.includes(x) ? ret : [...ret, x], []);
+
+function buildViewProps(doc, typeDictionary, expectedTypes = []) {
+    return unique([].concat(doc.query("> @type")).concat(expectedTypes).filter(x => x)) // for each type of this item
+        .map(docType => typeDictionary[fragment(docType)]) // look up the type document of each type
+        .map(typeDoc => typeDoc.queryAll("> prop")) // extract the properties from each type document
+        .reduce((a, b) => [...a, ...b], []) // combine lists of properties together
+        .map(prop => extractPropertyMetadata(prop)) // extract the property definitions
+        .map(metadata => extractPropertyValues(metadata, doc, typeDictionary)); // add values
+}
+
+const ots = "https://app.openteamspace.com/vocab#";
+
+function extractPropertyValues(metadata, doc, typeDictionary) {
+
+    const values = metadata.compoundType
+        ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewProps(child, typeDictionary, metadata.dataTypes))
+        : doc.queryAll(`> ${metadata.field} > @value`);
+
+    return ({
+        ...metadata,
+        values
+    });
+}
+
+function extractPropertyMetadata(doc) {
+    const dataTypes = doc.queryAll("> dataType @id");
+    const dataType = dataTypes[0];
+    const dataTypeFragment = fragment(dataType);
+    return ({
+        field: doc.query("> field @id"),
+        label: doc.query("> label @value"),
+        dataType: dataTypeFragment,
+        qualifiedDataType: dataType,
+        dataTypes,
+        compoundType: dataType.startsWith(ots)
+    });
+}
