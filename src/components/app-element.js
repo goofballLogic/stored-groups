@@ -3,9 +3,7 @@ import "./catalog-element.js";
 import "./item-element.js";
 
 import { subscribe } from "../bus.js";
-import appTemplate from "./app-template.js";
 import config from "../config.js";
-import { defineElement } from "./register.js";
 
 let urlState = { isCatalog: false };
 
@@ -20,8 +18,7 @@ function observeUrl() {
 */
 window.addEventListener("popstate", observeUrl);
 
-const handledNavClasses = ["item", "catalog"];
-const linkCatcher = x => x.tagName === "A" && handledNavClasses.some(c => x.classList.contains(c));
+const linkCatcher = element => element.tagName === "A" && element.classList.contains("catalog");
 
 function findUp(element, test) {
     return !element
@@ -31,7 +28,7 @@ function findUp(element, test) {
             : findUp(element.parentElement, test);
 }
 
-class AppElement extends HTMLElement {
+customElements.define("app-element", class extends HTMLElement {
 
     #signInState;
 
@@ -60,8 +57,11 @@ class AppElement extends HTMLElement {
 
     render() {
 
-        this.innerHTML = appTemplate(this.#signInState, urlState);
+        this.innerHTML = "";
+        const appView = document.createElement("app-view");
+        appView.props = { signInState: this.#signInState, urlState };
+        this.appendChild(appView);
 
     }
-}
-defineElement("app-element", AppElement);
+
+});

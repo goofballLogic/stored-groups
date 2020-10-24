@@ -2,6 +2,8 @@ import config from "./config.js";
 import { publish } from "./bus.js";
 // global logging support
 import "./log.js";
+// views
+import "./views/index.js";
 // GAPI support
 import { load } from "./gapi/gapi.js";
 /* window-based GAPI stuff */

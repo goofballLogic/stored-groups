@@ -1,10 +1,8 @@
-nav.catalog,
-nav.item {
+catalog-links nav {
     display: flex;
 }
 
-nav.catalog a.catalog,
-nav.item a.item {
+catalog-links a {
     display: flex;
     flex-direction: column;
     text-decoration: none;
@@ -19,18 +17,16 @@ nav.item a.item {
     overflow: hidden;
 }
 
-nav.item .item:hover {
+catalog-links a:hover {
     border-color: silver;
 }
 
-nav.catalog span,
-nav.item span {
+catalog-links > * {
     display: flex;
     align-items: center;
 }
 
-nav.catalog img,
-nav.item img {
+catalog-links img {
     max-height: 75px;
     max-width: 100px;
 }

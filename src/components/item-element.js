@@ -1,42 +1,29 @@
 import Item from "../catalog/Item.js";
-import itemTemplate from "./item-template.js";
-import { defineElement } from "./register.js"
 
-class ItemElement extends HTMLElement {
-    #output
+customElements.define("item-element", class extends HTMLElement {
 
-    constructor() {
-        super();
+    connectedCallback() {
         this.render();
     }
 
-    async refresh() {
+    async render() {
+        this.classList.add("loading");
+        this.innerHTML = "";
         const searchParams = new URLSearchParams(location.search);
         const relativePath = searchParams.get("relativePath");
         const item = new Item({ relativePath });
-        const article = this.#output;
         try {
-            article.innerHTML = "";
-            article.classList.add("loading");
+            this.innerHTML = "";
+            this.classList.add("loading");
             await item.load();
-            article.innerHTML = itemTemplate(item);
+            const view = document.createElement("item-view");
+            this.appendChild(view);
+            view.props = item;
         } catch (err) {
             console.error(err);
-            article.textContent = err.toString();
+            this.textContent = err.toString();
         } finally {
-            article.classList.remove("loading");
+            this.classList.remove("loading");
         }
     }
-
-    render() {
-        const article = this.#output = this.#output || document.createElement("ARTICLE");
-        if (article.parentElement !== this) {
-            this.appendChild(article);
-        }
-        article.classList.add("loading");
-        article.innerHTML = "";
-        this.refresh();
-    }
-}
-
-defineElement("item-element", ItemElement);
+});

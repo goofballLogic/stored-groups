@@ -1,0 +1,30 @@
+* {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+    font-size: 10pt;
+}
+
+.loading::before {
+    content: "...";
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+app-view>nav {
+    line-height: 2em;
+    border-bottom: solid 0.1px silver;
+    margin-bottom: 1em;
+}

@@ -8,26 +8,6 @@
     <script type="module" src="./components/app-element.js"></script>
     <script id="gapi-script" async defer src="https://apis.google.com/js/api.js" onload="this.dataset.loaded=true"
         onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
-    <style>
-        .loading::before {
-            content: "...";
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 0;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0;
-            }
-        }
-    </style>
 </head>
 
 <body>

@@ -1,55 +1,39 @@
 import Catalog from "../catalog/Catalog.js";
-import catalogLinkTemplate from "./catalog-link-template.js";
-import itemLinkTemplate from "./item-link-template.js";
-import { defineElement } from "./register.js"
 
-class CatalogElement extends HTMLElement {
-    #output
+const buildItemLink = item => `?relativePath=${encodeURIComponent(item.relativePath)}`;
 
-    constructor() {
-        super();
+const buildCatalogLink = catalog => `${buildItemLink(catalog)}&type=catalog`;
+
+customElements.define("catalog-element", class extends HTMLElement {
+
+    connectedCallback() {
         this.render();
     }
 
-    async refresh() {
+    async render() {
+        this.classList.add("loading");
+        this.innerHTML = "";
         const searchParams = new URLSearchParams(location.search);
         const relativePath = searchParams.get("relativePath") || "";
         const catalog = new Catalog({ relativePath });
-        catalog.load();
-        const article = this.#output;
+        await catalog.load();
         try {
             const items = await catalog.items();
-            const catalogNav = document.createElement("NAV");
-            const itemNav = document.createElement("NAV");
-            catalogNav.classList.add("catalog");
-            itemNav.classList.add("item");
-            for (var item of items) {
-                if (item instanceof Catalog)
-                    catalogNav.innerHTML += catalogLinkTemplate(item);
-                else
-                    itemNav.innerHTML += itemLinkTemplate(item);
-            }
-            article.innerHTML = "";
-            article.classList.remove("loading");
-            article.appendChild(catalogNav);
-            article.appendChild(itemNav);
-
+            const childCatalogs = items
+                .filter(item => item instanceof Catalog)
+                .map(item => ({ item, href: buildCatalogLink(item) }));
+            const childItems = items
+                .filter(item => !(item instanceof Catalog))
+                .map(item => ({ item, href: buildItemLink(item) }));
+            const view = document.createElement("catalog-view");
+            view.props = { catalogs: childCatalogs, items: childItems };
+            this.innerHTML = "";
+            this.appendChild(view);
         } catch (err) {
-            article.classList.remove("loading");
             console.error(err);
-            article.textContent = err.toString();
+            this.textContent = err.toString();
+        } finally {
+            this.classList.remove("loading");
         }
     }
-
-    render() {
-        const article = this.#output = this.#output || document.createElement("ARTICLE");
-        if (article.parentElement !== this) {
-            this.appendChild(article);
-        }
-        article.classList.add("loading");
-        article.innerHTML = "";
-        this.refresh();
-    }
-}
-
-defineElement("catalog-element", CatalogElement);
+});
