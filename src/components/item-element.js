@@ -1,4 +1,5 @@
 import Item from "../catalog/Item.js";
+import { pickView } from "../views/view-registry.js";
 
 customElements.define("item-element", class extends HTMLElement {
 
@@ -16,7 +17,8 @@ customElements.define("item-element", class extends HTMLElement {
             this.innerHTML = "";
             this.classList.add("loading");
             await item.load();
-            const view = document.createElement("item-view");
+            const viewName = pickView(item);
+            const view = document.createElement(viewName);
             this.appendChild(view);
             view.props = item;
         } catch (err) {

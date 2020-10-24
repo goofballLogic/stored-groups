@@ -1,9 +1,9 @@
-import { compoundPropView, propViews, defaultPropView, registerView } from "./view-registry.js";
-import placeholder from "./item-icon-default.js";
+import { compoundPropView, propViews, defaultPropView, registerView } from "../view-registry.js";
+import placeholder from "./team-item-icon-default.js";
 
-registerView("item-view", props => props.type === "Item" ? 1 : 0);
+registerView("team-item-view", props => (props.type === "Item" && props.types.includes("Team")) ? 2 : 0);
 
-customElements.define('item-view', class extends HTMLElement {
+customElements.define('team-item-view', class extends HTMLElement {
 
     #props;
 
