@@ -1,0 +1,11 @@
+color-prop {
+    display: flex;
+    align-items: center;
+}
+
+color-prop .swatch {
+    margin: 0 5px;
+    border-radius: 10px;
+    height: 8px;
+    width: 25px;
+}

@@ -1,8 +1,7 @@
-export const defaultPropView = "unhandled-prop-type";
-export const compoundPropView = "compound-prop-view";
-export const propViews = {
-    "string": "string-prop",
-};
+export const INVALID = 0;
+export const FALLBACK = 0.1;
+export const VALID = 1;
+export const PREFERRED = 10;
 
 const viewRegistry = {};
 

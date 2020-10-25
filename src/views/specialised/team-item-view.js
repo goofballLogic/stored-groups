@@ -1,4 +1,5 @@
-import { compoundPropView, propViews, defaultPropView, registerView } from "../view-registry.js";
+import { loadStylesheet } from "../stylesheets.js";
+import { registerView, pickView } from "../view-registry.js";
 import placeholder from "./team-item-icon-default.js";
 
 registerView("team-item-view", props => (props.type === "Item" && props.types.includes("Team")) ? 2 : 0);
@@ -6,6 +7,11 @@ registerView("team-item-view", props => (props.type === "Item" && props.types.in
 customElements.define('team-item-view', class extends HTMLElement {
 
     #props;
+
+    constructor() {
+        super();
+        loadStylesheet("specialised/team-item-view");
+    }
 
     /**
      * @param {object} value
@@ -17,15 +23,21 @@ customElements.define('team-item-view', class extends HTMLElement {
 
     render() {
         this.innerHTML = "";
-        console.log(this.#props.types);
-        this.appendChild(this.renderIcon());
-        this.appendChild(this.renderHeading());
-        this.#props?.viewModel?.forEach(prop => {
-            const tagName = prop.compoundType ? compoundPropView : propViews[prop.dataType] || defaultPropView;
-            const propView = document.createElement(tagName);
-            propView.props = prop;
-            this.appendChild(propView);
-        });
+        try {
+            this.appendChild(this.renderIcon());
+            this.appendChild(this.renderHeading());
+            console.log(this.#props);
+            this.#props?.viewModel
+                ?.filter(prop => prop.compactField !== "name")
+                .forEach(prop => {
+                    const propViewName = pickView(prop);
+                    const propView = document.createElement(propViewName);
+                    propView.props = prop;
+                    this.appendChild(propView);
+                });
+        } catch (err) {
+            this.textContent = err.stack;
+        }
     }
 
     renderIcon() {

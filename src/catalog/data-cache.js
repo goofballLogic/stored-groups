@@ -6,6 +6,10 @@ subscribe(config.bus.SIGNED_IN, () => cache = {});
 
 let cache = {};
 
+export function invalidate(key) {
+    delete cache[key];
+}
+
 export async function getCachedOrFetch(key, fetcher) {
     if (!(key in cache))
         await fetcher();

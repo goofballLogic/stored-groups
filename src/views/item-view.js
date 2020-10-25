@@ -1,4 +1,4 @@
-import { compoundPropView, propViews, defaultPropView, registerView } from "./view-registry.js";
+import { pickView, registerView } from "./view-registry.js";
 import placeholder from "./item-icon-default.js";
 
 registerView("item-view", props => props.type === "Item" ? 1 : 0);

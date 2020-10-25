@@ -1,5 +1,5 @@
 import { publish } from "../bus.js";
-import { fetchAndCache, getCachedOrFetch } from "./data-cache.js";
+import { fetchAndCache, getCachedOrFetch, invalidate } from "./data-cache.js";
 import config from "../config.js";
 
 export default class EntityBase {
@@ -44,6 +44,11 @@ export default class EntityBase {
                 .filter(dataType => !(dataType in typeDocs));
             await this.loadTypeDocs(missingTypes);
         }
+    }
+
+    invalidate() {
+        const path = this.relativePath;
+        invalidate(path);
     }
 
     // replaces the cache of promised document with a new promise of document
@@ -140,6 +145,8 @@ const ots = "https://app.openteamspace.com/vocab#";
 
 function extractPropertyValues(metadata, doc, typeDictionary) {
 
+    console.log(metadata, `> ${metadata.field} > @value`);
+    console.log(doc.json());
     const values = metadata.compoundType
         ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewProps(child, typeDictionary, metadata.dataTypes))
         : doc.queryAll(`> ${metadata.field} > @value`);
@@ -154,8 +161,10 @@ function extractPropertyMetadata(doc) {
     const dataTypes = doc.queryAll("> dataType @id");
     const dataType = dataTypes[0];
     const dataTypeFragment = fragment(dataType);
+    const fieldId = doc.query("> field @id");
     return ({
-        field: doc.query("> field @id"),
+        field: fieldId,
+        compactField: fragment(fieldId),
         label: doc.query("> label @value"),
         dataType: dataTypeFragment,
         qualifiedDataType: dataType,

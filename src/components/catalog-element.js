@@ -13,11 +13,11 @@ customElements.define("catalog-element", class extends HTMLElement {
     async render() {
         this.classList.add("loading");
         this.innerHTML = "";
-        const searchParams = new URLSearchParams(location.search);
-        const relativePath = searchParams.get("relativePath") || "";
-        const catalog = new Catalog({ relativePath });
-        await catalog.load();
         try {
+            const searchParams = new URLSearchParams(location.search);
+            const relativePath = searchParams.get("relativePath") || "";
+            const catalog = new Catalog({ relativePath });
+            await catalog.load();
             const items = await catalog.items();
             const childCatalogs = items
                 .filter(item => item instanceof Catalog)

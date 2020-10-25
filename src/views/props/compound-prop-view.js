@@ -1,4 +1,4 @@
-import { compoundPropView, propViews, defaultPropView } from "./view-registry.js";
+import { pickView } from "../view-registry.js";
 
 customElements.define('compound-prop-view', class extends HTMLElement {
     #props;
@@ -40,8 +40,8 @@ function renderValueProps(props) {
 }
 
 function renderPropView(prop) {
-    const tagName = prop.compoundType ? compoundPropView : propViews[prop.dataType] || defaultPropView;
-    const propView = document.createElement(tagName);
+    const viewName = pickView(prop);
+    const propView = document.createElement(viewName);
     propView.props = prop;
     return propView;
 }
