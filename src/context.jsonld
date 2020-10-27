@@ -12,6 +12,9 @@
         },
         "renderer": {
             "@type": "@id"
+        },
+        "targets": {
+            "@type": "@id"
         }
     }
 }

@@ -27,8 +27,8 @@ customElements.define('team-item-view', class extends HTMLElement {
             this.appendChild(this.renderIcon());
             this.appendChild(this.renderHeading());
             console.log(this.#props);
-            this.#props?.viewModel
-                ?.filter(prop => prop.compactField !== "name")
+            this.#props?.viewModel?.props
+                .filter(prop => prop.compactField !== "name")
                 .forEach(prop => {
                     const propViewName = pickView(prop);
                     const propView = document.createElement(propViewName);

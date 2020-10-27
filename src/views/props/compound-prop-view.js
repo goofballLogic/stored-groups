@@ -21,7 +21,7 @@ customElements.define('compound-prop-view', class extends HTMLElement {
     renderBody() {
         const ul = document.createElement("ul");
         this.#props.values
-            .map(renderValueProps)
+            .map(renderViewModel)
             .forEach(li => ul.appendChild(li));
         return ul;
     }
@@ -33,9 +33,9 @@ customElements.define('compound-prop-view', class extends HTMLElement {
     }
 });
 
-function renderValueProps(props) {
+function renderViewModel(viewModel) {
     const li = document.createElement("li");
-    props.map(renderPropView).forEach(propView => li.appendChild(propView));
+    viewModel.props.map(renderPropView).forEach(propView => li.appendChild(propView));
     return li;
 }
 

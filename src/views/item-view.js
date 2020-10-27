@@ -20,12 +20,13 @@ customElements.define('item-view', class extends HTMLElement {
         console.log(this.#props.types);
         this.appendChild(this.renderIcon());
         this.appendChild(this.renderHeading());
-        this.#props?.viewModel?.forEach(prop => {
-            const tagName = prop.compoundType ? compoundPropView : propViews[prop.dataType] || defaultPropView;
-            const propView = document.createElement(tagName);
-            propView.props = prop;
-            this.appendChild(propView);
-        });
+        this.#props?.viewModel?.props
+            .forEach(prop => {
+                const tagName = prop.compoundType ? compoundPropView : propViews[prop.dataType] || defaultPropView;
+                const propView = document.createElement(tagName);
+                propView.props = prop;
+                this.appendChild(propView);
+            });
     }
 
     renderIcon() {

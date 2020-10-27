@@ -17,7 +17,7 @@ customElements.define('color-prop', class extends HTMLElement {
     }
 
     render() {
-        const { label, values } = this.#props;
-        this.innerHTML = `${label}: <span style="background-color: ${values[0]}" class="swatch" />`;
+        const { label, values, defaultValue } = this.#props;
+        this.innerHTML = `${label}: <span style="background-color: ${values[0] || defaultValue};" class="swatch" />`;
     }
 });

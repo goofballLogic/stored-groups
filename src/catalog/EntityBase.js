@@ -24,6 +24,7 @@ export default class EntityBase {
     }
 
     async load() {
+        if (!this.relativePath) throw new Error("Can't load an entity initialized with a document");
         const { doc, idbase } = await readDoc(this.relativePath, () => this.refresh());
         this.#state.doc = doc;
         this.#state.idbase = idbase;
@@ -79,7 +80,7 @@ export default class EntityBase {
 
     get viewModel() {
         const { doc, typeDocs } = this.#state;
-        return buildViewProps(doc, typeDocs);
+        return buildViewModel(doc, typeDocs);
     }
 
     get idbase() {
@@ -132,7 +133,24 @@ async function fetchAndCacheForTopic(description, path, fetchTopic) {
 
 const unique = stuff => stuff.reduce((ret, x) => ret.includes(x) ? ret : [...ret, x], []);
 
-function buildViewProps(doc, typeDictionary, expectedTypes = []) {
+
+function buildViewModel(doc, typeDocs, expectedTypes = []) {
+    return {
+        nav: buildViewNav(doc, typeDocs),
+        props: buildViewProps(doc, typeDocs, expectedTypes),
+    };
+}
+
+function buildViewNav(doc, typeDictionary) {
+    const links = unique([].concat(doc.query("> @type")).filter(x => x)) // for each type of this item
+        .map(docType => typeDictionary[fragment(docType)]) // look up the type document of each type
+        .map(typeDoc => typeDoc.queryAll("ots:links")).filter(x => x)
+        .reduce((a, b) => [...a, ...b], [])
+        .map(node => ({ prop: node.query("@id"), targetType: node.query("@type") }));
+    console.log(links);
+}
+
+function buildViewProps(doc, typeDictionary, expectedTypes) {
     return unique([].concat(doc.query("> @type")).concat(expectedTypes).filter(x => x)) // for each type of this item
         .map(docType => typeDictionary[fragment(docType)]) // look up the type document of each type
         .map(typeDoc => typeDoc.queryAll("> prop")) // extract the properties from each type document
@@ -144,11 +162,8 @@ function buildViewProps(doc, typeDictionary, expectedTypes = []) {
 const ots = "https://app.openteamspace.com/vocab#";
 
 function extractPropertyValues(metadata, doc, typeDictionary) {
-
-    console.log(metadata, `> ${metadata.field} > @value`);
-    console.log(doc.json());
     const values = metadata.compoundType
-        ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewProps(child, typeDictionary, metadata.dataTypes))
+        ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewModel(child, typeDictionary, metadata.dataTypes))
         : doc.queryAll(`> ${metadata.field} > @value`);
 
     return ({
@@ -169,6 +184,7 @@ function extractPropertyMetadata(doc) {
         dataType: dataTypeFragment,
         qualifiedDataType: dataType,
         dataTypes,
-        compoundType: dataType.startsWith(ots)
+        compoundType: dataType.startsWith(ots),
+        defaultValue: doc.query("> ots:defaultValue @value")
     });
 }
