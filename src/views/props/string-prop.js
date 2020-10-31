@@ -1,5 +1,12 @@
+import { loadStylesheet } from "../../views/stylesheets.js";
+
 customElements.define('string-prop', class extends HTMLElement {
     #props;
+
+    constructor() {
+        super();
+        loadStylesheet("props/string-prop");
+    }
 
     /**
      * @param {object} value
@@ -11,6 +18,6 @@ customElements.define('string-prop', class extends HTMLElement {
 
     render() {
         const { label, values } = this.#props;
-        this.innerHTML = `<div>${label}: ${values ? values.join(", ") : ""}</div>`;
+        this.innerHTML = `${label}: ${values ? values.join(", ") : ""}`;
     }
 });

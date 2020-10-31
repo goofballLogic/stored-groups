@@ -1,6 +1,7 @@
 import { publish } from "../bus.js";
 import { fetchAndCache, getCachedOrFetch, invalidate } from "./data-cache.js";
 import config from "../config.js";
+import { buildItemLink } from "../nav.js";
 
 export default class EntityBase {
 
@@ -24,7 +25,7 @@ export default class EntityBase {
     }
 
     async load() {
-        if (!this.relativePath) throw new Error("Can't load an entity initialized with a document");
+        if (typeof relativePath == undefined) throw new Error("Can't load an entity initialized with a document");
         const { doc, idbase } = await readDoc(this.relativePath, () => this.refresh());
         this.#state.doc = doc;
         this.#state.idbase = idbase;
@@ -35,11 +36,13 @@ export default class EntityBase {
         const typeDocs = this.#state.typeDocs = this.#state.typeDocs || {};
         if (docTypes && docTypes.length) {
             await Promise.all(docTypes.map(async docType => {
-                const result = await readDoc(`vocab#${docType}`, () => loadDocType(docType));
+                const result = await readDoc(`vocab#${docType}`, () => loadDocType(docType), true);
                 typeDocs[docType] = result.doc;
             }));
             const missingTypes = Object.values(typeDocs)
-                .map(d => d.query("dataType @id"))
+                .filter(x => x)
+                .map(d => d.queryAll("dataType @id"))
+                .reduce((a, b) => [...a, ...b], [])
                 .filter(dataType => dataType && dataType.startsWith(ots))
                 .map(dataType => fragment(dataType))
                 .filter(dataType => !(dataType in typeDocs));
@@ -80,7 +83,7 @@ export default class EntityBase {
 
     get viewModel() {
         const { doc, typeDocs } = this.#state;
-        return buildViewModel(doc, typeDocs);
+        return buildViewModel(doc, typeDocs, this.idbase);
     }
 
     get idbase() {
@@ -102,11 +105,11 @@ export default class EntityBase {
     }
 }
 
-async function readDoc(relativePath, fetcher) {
+async function readDoc(relativePath, fetcher, missingDocAllowed = false) {
     var result = await getCachedOrFetch(relativePath, fetcher);
     if (!result) throw new Error(`Loading failed for ${relativePath}`);
     const { doc, idbase } = result;
-    if (!doc) throw new Error(`Loading failed for ${relativePath}- no document`);
+    if (!(doc || missingDocAllowed)) throw new Error(`Loading failed for ${relativePath}- no document`);
     if (!idbase) throw new Error(`Loading failed for ${relativePath} - no id base`);
     return result;
 }
@@ -133,42 +136,43 @@ async function fetchAndCacheForTopic(description, path, fetchTopic) {
 
 const unique = stuff => stuff.reduce((ret, x) => ret.includes(x) ? ret : [...ret, x], []);
 
-
-function buildViewModel(doc, typeDocs, expectedTypes = []) {
+function buildViewModel(doc, typeDocs, idbase, expectedTypes = []) {
     return {
-        nav: buildViewNav(doc, typeDocs),
-        props: buildViewProps(doc, typeDocs, expectedTypes),
+        props: buildViewProps(doc, typeDocs, idbase, expectedTypes),
     };
 }
 
-function buildViewNav(doc, typeDictionary) {
-    const links = unique([].concat(doc.query("> @type")).filter(x => x)) // for each type of this item
-        .map(docType => typeDictionary[fragment(docType)]) // look up the type document of each type
-        .map(typeDoc => typeDoc.queryAll("ots:links")).filter(x => x)
-        .reduce((a, b) => [...a, ...b], [])
-        .map(node => ({ prop: node.query("@id"), targetType: node.query("@type") }));
-    console.log(links);
+function requiredTypeDoc(typeName, typeDictionary) {
+    const key = fragment(typeName);
+    const typeDoc = typeDictionary[key];
+    if (!typeDoc) throw new Error(`Missing type document: ${typeName}`);
+    return typeDoc;
 }
 
-function buildViewProps(doc, typeDictionary, expectedTypes) {
+function buildViewProps(doc, typeDictionary, idbase, expectedTypes) {
     return unique([].concat(doc.query("> @type")).concat(expectedTypes).filter(x => x)) // for each type of this item
-        .map(docType => typeDictionary[fragment(docType)]) // look up the type document of each type
-        .map(typeDoc => typeDoc.queryAll("> prop")) // extract the properties from each type document
+        .map(docType => requiredTypeDoc(docType, typeDictionary)) // look up the type document of each type
+        .map(typeDoc => typeDoc ? typeDoc.queryAll("> prop") : []) // extract the properties from each type document
         .reduce((a, b) => [...a, ...b], []) // combine lists of properties together
         .map(prop => extractPropertyMetadata(prop)) // extract the property definitions
-        .map(metadata => extractPropertyValues(metadata, doc, typeDictionary)); // add values
+        .map(metadata => extractPropertyValues(metadata, doc, idbase, typeDictionary)); // add values
 }
 
 const ots = "https://app.openteamspace.com/vocab#";
 
-function extractPropertyValues(metadata, doc, typeDictionary) {
+function extractPropertyValues(metadata, doc, idbase, typeDictionary) {
     const values = metadata.compoundType
-        ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewModel(child, typeDictionary, metadata.dataTypes))
+        ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewModel(child, typeDictionary, idbase, metadata.dataTypes))
         : doc.queryAll(`> ${metadata.field} > @value`);
-
+    const ids = doc.queryAll(`> ${metadata.field} > @id`);
+    const hrefs = ids
+        .map(x => x.startsWith(idbase) ? x.substring(idbase.length) : x)
+        .map(relativePath => buildItemLink({ relativePath }));
     return ({
         ...metadata,
-        values
+        values,
+        ids,
+        hrefs
     });
 }
 
@@ -185,6 +189,7 @@ function extractPropertyMetadata(doc) {
         qualifiedDataType: dataType,
         dataTypes,
         compoundType: dataType.startsWith(ots),
-        defaultValue: doc.query("> ots:defaultValue @value")
+        defaultValue: doc.query("> ots:defaultValue @value"),
+        remote: doc.query("> ots:remote @value")
     });
 }

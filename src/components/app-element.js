@@ -18,7 +18,7 @@ function observeUrl() {
 */
 window.addEventListener("popstate", observeUrl);
 
-const linkCatcher = element => element.tagName === "A" && element.classList.contains("catalog");
+const linkCatcher = element => element.tagName === "A" && ["internal", "catalog"].some(x => element.classList.contains(x));
 
 function findUp(element, test) {
     return !element

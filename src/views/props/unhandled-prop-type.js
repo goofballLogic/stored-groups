@@ -1,5 +1,15 @@
 customElements.define('unhandled-prop-type', class extends HTMLElement {
-    connectedCallback() {
-        this.innerHTML = "unhadled prop type";
+    #props;
+
+    /**
+     * @param {object} value
+     */
+    set props(value) {
+        this.#props = value;
+        this.render();
+    }
+
+    render() {
+        this.innerHTML = "Unhandled prop type " + JSON.stringify(this.#props);
     }
 });

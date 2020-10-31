@@ -1,8 +1,5 @@
 import Catalog from "../catalog/Catalog.js";
-
-const buildItemLink = item => `?relativePath=${encodeURIComponent(item.relativePath)}`;
-
-const buildCatalogLink = catalog => `${buildItemLink(catalog)}&type=catalog`;
+import { buildItemLink, buildCatalogLink } from "../nav.js";
 
 customElements.define("catalog-element", class extends HTMLElement {
 
