@@ -1,4 +1,4 @@
-customElements.define('linked-object-prop', class extends HTMLElement {
+customElements.define('linked-remote-prop', class extends HTMLElement {
     #props;
 
     /**
@@ -11,6 +11,7 @@ customElements.define('linked-object-prop', class extends HTMLElement {
 
     render() {
         const { label, hrefs } = this.#props;
+        console.log(this.#props);
         if (hrefs.length == 1) {
             this.innerHTML = `<a class="internal" href=${hrefs[0]}>${label}</a>`;
         } else if (hrefs.length == 0) {

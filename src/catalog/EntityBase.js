@@ -83,7 +83,8 @@ export default class EntityBase {
 
     get viewModel() {
         const { doc, typeDocs } = this.#state;
-        return buildViewModel(doc, typeDocs, this.idbase);
+        const ret = buildViewModel(doc, typeDocs, this.idbase);
+        return ret;
     }
 
     get idbase() {
@@ -135,61 +136,92 @@ async function fetchAndCacheForTopic(description, path, fetchTopic) {
 }
 
 const unique = stuff => stuff.reduce((ret, x) => ret.includes(x) ? ret : [...ret, x], []);
-
-function buildViewModel(doc, typeDocs, idbase, expectedTypes = []) {
-    return {
-        props: buildViewProps(doc, typeDocs, idbase, expectedTypes),
-    };
-}
-
-function requiredTypeDoc(typeName, typeDictionary) {
-    const key = fragment(typeName);
-    const typeDoc = typeDictionary[key];
-    if (!typeDoc) throw new Error(`Missing type document: ${typeName}`);
-    return typeDoc;
-}
-
-function buildViewProps(doc, typeDictionary, idbase, expectedTypes) {
-    return unique([].concat(doc.query("> @type")).concat(expectedTypes).filter(x => x)) // for each type of this item
-        .map(docType => requiredTypeDoc(docType, typeDictionary)) // look up the type document of each type
-        .map(typeDoc => typeDoc ? typeDoc.queryAll("> prop") : []) // extract the properties from each type document
-        .reduce((a, b) => [...a, ...b], []) // combine lists of properties together
-        .map(prop => extractPropertyMetadata(prop)) // extract the property definitions
-        .map(metadata => extractPropertyValues(metadata, doc, idbase, typeDictionary)); // add values
-}
-
 const ots = "https://app.openteamspace.com/vocab#";
 
-function extractPropertyValues(metadata, doc, idbase, typeDictionary) {
-    const values = metadata.compoundType
-        ? doc.queryAll(`> ${metadata.field}`).map(child => buildViewModel(child, typeDictionary, idbase, metadata.dataTypes))
-        : doc.queryAll(`> ${metadata.field} > @value`);
-    const ids = doc.queryAll(`> ${metadata.field} > @id`);
-    const hrefs = ids
-        .map(x => x.startsWith(idbase) ? x.substring(idbase.length) : x)
-        .map(relativePath => buildItemLink({ relativePath }));
-    return ({
-        ...metadata,
-        values,
-        ids,
-        hrefs
-    });
-}
+function buildViewModel(doc, typeDictionary, idbase) {
 
-function extractPropertyMetadata(doc) {
-    const dataTypes = doc.queryAll("> dataType @id");
-    const dataType = dataTypes[0];
-    const dataTypeFragment = fragment(dataType);
-    const fieldId = doc.query("> field @id");
-    return ({
-        field: fieldId,
-        compactField: fragment(fieldId),
-        label: doc.query("> label @value"),
-        dataType: dataTypeFragment,
-        qualifiedDataType: dataType,
-        dataTypes,
-        compoundType: dataType.startsWith(ots),
-        defaultValue: doc.query("> ots:defaultValue @value"),
-        remote: doc.query("> ots:remote @value")
-    });
+    return viewModelFor(doc);
+
+    function viewModelFor(node, expectedTypes = []) {
+
+        const props = buildViewProps();
+        const id = node.query("> @id");
+        return { id, props };
+
+        function requiredTypeDoc(typeName) {
+            const key = fragment(typeName);
+            const typeDoc = typeDictionary[key];
+            if (!typeDoc) throw new Error(`Missing type document: ${typeName}`);
+            return typeDoc;
+        }
+
+        function buildViewProps() {
+            return unique([].concat(node.query("> @type")).concat(expectedTypes).filter(x => x)) // for each type of this item
+                .map(docType => requiredTypeDoc(docType)) // look up the type document of each type
+                .map(typeDoc => typeDoc ? typeDoc.queryAll("> prop") : []) // extract the properties from each type document
+                .reduce((a, b) => [...a, ...b], []) // combine lists of properties together
+                .map(prop => extractPropertyMetadata(prop)) // extract the property definitions
+                .map(metadata => extractPropertyValues(metadata)); // add values
+        }
+
+        function extractPropertyValues(metadata) {
+
+            const values = metadata.localRemote
+                ? buildViewModelForLocalRemote(metadata)
+                : metadata.compoundType
+                    ? node.queryAll(`> ${metadata.field}`).map(child => viewModelFor(child, metadata.dataTypes))
+                    : node.queryAll(`> ${metadata.field} > @value`);
+            const ids = node.queryAll(`> ${metadata.field} > @id`);
+            const hrefs = ids
+                .map(x => x.startsWith(idbase) ? x.substring(idbase.length) : x)
+                .map(relativePath => buildItemLink({ relativePath }));
+            return ({
+                ...metadata,
+                values,
+                ids,
+                hrefs
+            });
+        }
+
+        function buildViewModelForLocalRemote(metadata) {
+            const propNode = node.query(`> ${metadata.field}`);
+            const nodeId = propNode.query("@id");
+            const nodeSelector = `#${nodeId}`;
+            const matchingNodes = doc.queryAll(nodeSelector);
+            const viewModels = matchingNodes.map(n => viewModelFor(n, metadata.dataTypes));
+            const propIndex = viewModels
+                .map(x => x.props)
+                .reduce((a, b) => [...a, ...b])
+                .reduce((index, x) => ({
+                    ...index,
+                    [x.field]: [].concat(index[x.field] || [], x)
+                }), {});
+            const props = Object.values(propIndex).map(([a, ...others]) => ({
+                ...a,
+                ids: others.reduce((xs, x) => [...xs, ...x.ids], a.ids),
+                hrefs: others.reduce((xs, x) => [...xs, ...x.hrefs], a.hrefs),
+                values: others.reduce((xs, x) => [...xs, ...x.values], a.values)
+            }));
+            return [{ id: nodeId, props }];
+        }
+
+        function extractPropertyMetadata(prop) {
+            const dataTypes = prop.queryAll("> dataType @id");
+            const dataType = dataTypes[0];
+            const dataTypeFragment = fragment(dataType);
+            const fieldId = prop.query("> field @id");
+            return ({
+                field: fieldId,
+                compactField: fragment(fieldId),
+                label: prop.query("> label @value"),
+                dataType: dataTypeFragment,
+                qualifiedDataType: dataType,
+                dataTypes,
+                compoundType: dataType.startsWith(ots),
+                defaultValue: prop.query("> ots:defaultValue @value"),
+                remote: !!prop.query("> ots:remote @value"),
+                localRemote: !!prop.query("> ots:local-remote @value")
+            });
+        }
+    }
 }
