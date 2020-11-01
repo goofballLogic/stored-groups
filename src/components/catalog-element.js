@@ -25,6 +25,7 @@ customElements.define("catalog-element", class extends HTMLElement {
             const view = document.createElement("catalog-view");
             view.props = { catalogs: childCatalogs, items: childItems };
             this.innerHTML = "";
+            this.appendChild(this.renderRefreshButton(catalog));
             this.appendChild(view);
         } catch (err) {
             console.error(err);
@@ -32,5 +33,16 @@ customElements.define("catalog-element", class extends HTMLElement {
         } finally {
             this.classList.remove("loading");
         }
+    }
+
+    renderRefreshButton(catalog) {
+        const button = document.createElement("BUTTON");
+        button.textContent = "Refresh";
+        button.addEventListener("click", e => {
+            e.preventDefault();
+            catalog.invalidate();
+            this.render();
+        });
+        return button;
     }
 });

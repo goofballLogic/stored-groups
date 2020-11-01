@@ -28,7 +28,6 @@ export class ItemView extends HTMLElement {
     }
 
     renderProp(prop) {
-        console.log(prop);
         const propViewName = pickView(prop);
         const propView = document.createElement(propViewName);
         propView.props = prop;

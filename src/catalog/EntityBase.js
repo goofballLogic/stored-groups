@@ -1,5 +1,5 @@
 import { publish } from "../bus.js";
-import { fetchAndCache, getCachedOrFetch, invalidate } from "./data-cache.js";
+import { fetchAndCache, getCachedOrFetch, invalidate as invalidateCache } from "./data-cache.js";
 import config from "../config.js";
 import { buildItemLink } from "../nav.js";
 
@@ -52,7 +52,7 @@ export default class EntityBase {
 
     invalidate() {
         const path = this.relativePath;
-        invalidate(path);
+        invalidateCache(path);
     }
 
     // replaces the cache of promised document with a new promise of document
@@ -96,12 +96,12 @@ export default class EntityBase {
 
     get relativePath() {
         const { relativePath, doc, idbase } = this.#state;
+        if (relativePath || relativePath === "") return relativePath;
         if (doc) {
-            const docId = doc.query("@id");
+            const docId = doc.query("> @id");
             if (docId.startsWith(idbase))
                 return docId.substring(idbase.length);
         }
-        return relativePath || "";
     }
 }
 

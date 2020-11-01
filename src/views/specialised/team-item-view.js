@@ -15,7 +15,6 @@ customElements.define('team-item-view', class extends ItemView {
 
     renderIcon() {
         const icon = super.renderIcon();
-        console.log(icon);
         icon.src = icon.src || placeholder;
         return icon;
     }

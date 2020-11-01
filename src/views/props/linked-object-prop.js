@@ -13,6 +13,8 @@ customElements.define('linked-object-prop', class extends HTMLElement {
         const { label, hrefs } = this.#props;
         if (hrefs.length == 1) {
             this.innerHTML = `<a class="internal" href=${hrefs[0]}>${label}</a>`;
+        } else if (hrefs.length == 0) {
+            this.innerHTML = `${label}`;
         } else {
             this.innerHTML = `Unhandled: ${label} ${hrefs}`;
         }
